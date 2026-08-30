@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppButton } from '../../src/components/AppButton';
 import { RotationMotif } from '../../src/components/RotationMotif';
 import { colors, fonts, spacing } from '../../src/theme';
@@ -30,6 +31,7 @@ const SLIDES = [
 // en écho au thème de la rotation entre membres.
 export default function WelcomeScreen() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView>(null);
   const [index, setIndex] = useState(0);
   const isLast = index === SLIDES.length - 1;
@@ -53,7 +55,11 @@ export default function WelcomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Pressable style={styles.skip} onPress={goToLogin} hitSlop={12}>
+      <Pressable
+        style={[styles.skip, { top: insets.top + 12 }]}
+        onPress={goToLogin}
+        hitSlop={12}
+      >
         <Text style={styles.skipLabel}>{t('common.skip')}</Text>
       </Pressable>
 
@@ -97,7 +103,6 @@ const styles = StyleSheet.create({
   },
   skip: {
     position: 'absolute',
-    top: 20,
     right: 20,
     zIndex: 1,
   },
