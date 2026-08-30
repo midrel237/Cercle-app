@@ -1,0 +1,29 @@
+{
+  "name": "tontine-app",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.19.4 <21.0.0 || >=22.13.0 <23.0.0 || >=24.3.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "mobile": "npm --workspace apps/mobile run start",
+    "backend": "npm --workspace apps/backend run start:dev",
+    "backend:migrate": "npm --workspace apps/backend run prisma:migrate",
+    "lint": "npm --workspace apps/mobile run lint && npm --workspace apps/backend run lint"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
+  },
+  "allowScripts": {
+    "@prisma/engines@7.10.0": true,
+    "prisma@7.10.0": true,
+    "unrs-resolver@1.12.2": true,
+    "@nestjs/cli@11.0.24": true,
+    "@nestjs/jwt@11.0.2": true,
+    "@nestjs/passport@11.0.5": true
+  }
+}

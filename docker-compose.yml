@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tontine-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tontine
+      POSTGRES_PASSWORD: tontine
+      POSTGRES_DB: tontine_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - tontine_pg_data:/var/lib/postgresql/data
+
+volumes:
+  tontine_pg_data:

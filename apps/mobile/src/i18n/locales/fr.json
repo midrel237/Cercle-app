@@ -1,0 +1,57 @@
+{
+  "common": {
+    "continue": "Continuer",
+    "next": "Suivant",
+    "getStarted": "Commencer",
+    "skip": "Passer",
+    "cancel": "Annuler",
+    "back": "Retour"
+  },
+  "discovery": {
+    "language": {
+      "title": "Bienvenue",
+      "subtitle": "Choisissez votre langue · Choose your language",
+      "fr": "Français",
+      "frHint": "Langue par défaut",
+      "en": "English",
+      "enHint": "Modifiable à tout moment dans les paramètres"
+    },
+    "welcome": {
+      "slide1Title": "Chacun son tour, en toute confiance",
+      "slide1Body": "Cotisez, empruntez et suivez chaque franc avec les membres de votre groupe — où que vous soyez.",
+      "slide2Title": "Chaque franc est tracé",
+      "slide2Body": "Cotisations et remboursements passent par Mobile Money — plus jamais d'espèces égarées entre les mains d'un trésorier.",
+      "slide3Title": "Votre cercle, où que vous soyez",
+      "slide3Body": "Membres au pays ou dans la diaspora, tout le monde cotise et suit le groupe depuis son téléphone."
+    }
+  },
+  "auth": {
+    "loginTitle": "Bon retour",
+    "phoneNumberLabel": "Numéro de téléphone",
+    "pinLabel": "Code PIN",
+    "brandName": "Cercle",
+    "brandTagline": "Vos tontines, sans les cahiers.",
+    "phoneNumberPlaceholder": "6 XX XX XX XX",
+    "diasporaHint": "🌍 Membre de la diaspora ? Sélectionnez l'indicatif de votre pays de résidence.",
+    "noAccountYet": "Pas encore de compte ?",
+    "createAccount": "Créer un compte",
+    "phoneRequiredError": "Merci de renseigner un numéro de téléphone.",
+    "otpSendError": "Impossible d'envoyer le code pour l'instant. Réessayez.",
+    "sendingOtp": "Envoi en cours…",
+    "otp": {
+      "title": "Vérifiez votre numéro",
+      "subtitle": "Un code à 6 chiffres a été envoyé au",
+      "resendIn": "Renvoyer le code dans",
+      "resendAction": "Renvoyer le code",
+      "resendError": "Impossible de renvoyer le code pour l'instant.",
+      "verifyButton": "Vérifier",
+      "verifying": "Vérification…",
+      "verifyError": "Code incorrect. Vérifiez et réessayez."
+    }
+  },
+  "home": {
+    "myGroups": "Mes groupes",
+    "createGroup": "Créer un groupe",
+    "joinGroup": "Rejoindre un groupe"
+  }
+}

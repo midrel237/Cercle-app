@@ -1,0 +1,57 @@
+{
+  "common": {
+    "continue": "Continue",
+    "next": "Next",
+    "getStarted": "Get started",
+    "skip": "Skip",
+    "cancel": "Cancel",
+    "back": "Back"
+  },
+  "discovery": {
+    "language": {
+      "title": "Welcome",
+      "subtitle": "Choisissez votre langue · Choose your language",
+      "fr": "Français",
+      "frHint": "Default language",
+      "en": "English",
+      "enHint": "Switch anytime in settings"
+    },
+    "welcome": {
+      "slide1Title": "Everyone's turn, with full trust",
+      "slide1Body": "Contribute, borrow, and track every franc with your group's members — wherever you are.",
+      "slide2Title": "Every franc is traced",
+      "slide2Body": "Contributions and repayments go through Mobile Money — no more cash going astray in a treasurer's hands.",
+      "slide3Title": "Your circle, wherever you are",
+      "slide3Body": "Members at home or abroad all contribute and follow the group from their phone."
+    }
+  },
+  "auth": {
+    "loginTitle": "Welcome back",
+    "phoneNumberLabel": "Phone number",
+    "pinLabel": "PIN code",
+    "brandName": "Cercle",
+    "brandTagline": "Your tontines, without the notebooks.",
+    "phoneNumberPlaceholder": "6 XX XX XX XX",
+    "diasporaHint": "🌍 Living abroad? Select your country of residence's dial code.",
+    "noAccountYet": "Don't have an account yet?",
+    "createAccount": "Create an account",
+    "phoneRequiredError": "Please enter a phone number.",
+    "otpSendError": "Couldn't send the code right now. Please try again.",
+    "sendingOtp": "Sending…",
+    "otp": {
+      "title": "Verify your number",
+      "subtitle": "A 6-digit code was sent to",
+      "resendIn": "Resend code in",
+      "resendAction": "Resend code",
+      "resendError": "Couldn't resend the code right now.",
+      "verifyButton": "Verify",
+      "verifying": "Verifying…",
+      "verifyError": "Incorrect code. Check and try again."
+    }
+  },
+  "home": {
+    "myGroups": "My groups",
+    "createGroup": "Create a group",
+    "joinGroup": "Join a group"
+  }
+}

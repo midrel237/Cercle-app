@@ -1,0 +1,507 @@
+// Schéma de base de données — Plateforme Tontine (Njangi)
+// PostgreSQL choisi pour ses garanties ACID, nécessaires pour un ledger financier
+// (cf. Cahier des charges §6.1 / §6.2)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum KycStatus {
+  NOT_STARTED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum Language {
+  FR
+  EN
+}
+
+/// Devise pivot du ledger : XAF (FCFA). Les autres valeurs concernent les
+/// membres de la diaspora qui cotisent depuis l'étranger (carte bancaire /
+/// virement) — le montant est alors converti en XAF au moment de la
+/// transaction (cf. LedgerTransaction.amountXaf / fxRate).
+enum Currency {
+  XAF
+  EUR
+  USD
+  GBP
+  CAD
+}
+
+/// Inscription progressive : le compte existe dès la vérification OTP
+/// (téléphone seul), avant même que l'utilisateur n'ait choisi son PIN ou
+/// renseigné son nom complet — d'où fullName/pinHash nullable. Ils sont
+/// complétés respectivement lors du KYC et de la création du PIN
+/// (cf. AuthService.verifyOtp / register / createPin).
+model User {
+  id                  String    @id @default(uuid())
+  phoneNumber         String    @unique
+  fullName            String?
+  pinHash             String?
+  language            Language  @default(FR)
+  kycStatus           KycStatus @default(NOT_STARTED)
+  hasBiometricEnabled Boolean   @default(false)
+  trustScore          Int       @default(50)
+  /// Pays de résidence (code ISO 3166-1 alpha-2, ex. "CM", "FR", "US").
+  /// Renseigné dès l'inscription pour les membres de la diaspora.
+  countryOfResidence  String?
+  /// Devise d'affichage préférée dans l'historique et les relevés
+  /// (le montant réel du ledger reste toujours en XAF, cf. §6.2).
+  preferredCurrency   Currency  @default(XAF)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  kycDocuments   KycDocument[]
+  memberships    GroupMember[]
+  transactions   LedgerTransaction[]
+  loansAsBorrower Loan[]         @relation("BorrowerLoans")
+  loanVotes      LoanVote[]
+  paymentMethods PaymentMethod[]
+  notifications  Notification[]
+  createdGroups  Group[]        @relation("GroupCreator")
+  eventsCreated       GroupEvent[]         @relation("EventCreator")
+  eventsAsBeneficiary GroupEvent[]         @relation("EventBeneficiary")
+  eventContributions  EventContribution[]
+
+  @@map("users")
+}
+
+/// Codes de vérification par SMS (inscription/connexion). Stockés en base
+/// plutôt qu'en mémoire pour survivre à un redémarrage du serveur — un
+/// choix pragmatique pour ce MVP ; une file dédiée (Redis, TTL natif)
+/// serait préférable à plus grande échelle. Le code lui-même n'est jamais
+/// stocké en clair (codeHash), suivant le même principe que les moyens de
+/// paiement (aucune donnée sensible brute en base).
+model OtpCode {
+  id          String    @id @default(uuid())
+  phoneNumber String
+  codeHash    String
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  /// Nombre de tentatives de vérification ratées — protège contre le
+  /// brute-force d'un code à 6 chiffres (verrouillé après OTP_MAX_ATTEMPTS).
+  attempts    Int       @default(0)
+  createdAt   DateTime  @default(now())
+
+  @@index([phoneNumber])
+  @@map("otp_codes")
+}
+
+model KycDocument {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  documentType String // carte_identite, passeport, etc.
+  rectoUrl     String
+  versoUrl     String?
+  selfieUrl    String
+  status       KycStatus @default(PENDING)
+  rejectionReason String?
+  createdAt    DateTime @default(now())
+
+  @@map("kyc_documents")
+}
+
+enum GroupMode {
+  ROTATIVE
+  INTERNAL_LOAN
+  MIXED
+}
+
+enum RotationOrderType {
+  DRAW
+  FIXED
+}
+
+/// Compte de dépôt du groupe (§7 Option A) : reste un compte Mobile Money
+/// détenu par le membre désigné caissier, jamais par la plateforme. Les
+/// cotisations y transitent avant reversement au bénéficiaire par le caissier.
+model Group {
+  id                 String             @id @default(uuid())
+  name               String
+  mode               GroupMode
+  contributionAmount Decimal            @db.Decimal(14, 2)
+  periodicityDays    Int
+  memberCount        Int                @default(1)
+  rotationOrderType  RotationOrderType  @default(DRAW)
+  penaltyRules       String?
+  interestRate       Decimal            @default(0) @db.Decimal(5, 2)
+  /// Autorise les membres de la diaspora à rejoindre et cotiser depuis
+  /// l'étranger (carte bancaire / virement, conversion de devise). Reflète
+  /// l'interrupteur "Ouvert aux membres de la diaspora" de la maquette
+  /// (écran Création de groupe).
+  openToDiaspora     Boolean            @default(false)
+  inviteCode         String             @unique
+  createdById        String
+  createdBy          User               @relation("GroupCreator", fields: [createdById], references: [id])
+  createdAt          DateTime           @default(now())
+
+  // Caissier : membre désigné responsable de la collecte des cotisations
+  // sur son propre compte Mobile Money, et du versement au bénéficiaire.
+  cashierMemberId            String?              @unique
+  cashierMember              GroupMember?         @relation("GroupCashier", fields: [cashierMemberId], references: [id])
+  depositAccountProvider     MobileMoneyProvider?
+  depositAccountPhoneNumber  String?
+  depositAccountRegisteredAt DateTime?
+
+  members      GroupMember[]
+  cycles       Cycle[]
+  transactions LedgerTransaction[]
+  loans        Loan[]
+  events       GroupEvent[]
+
+  @@map("groups")
+}
+
+enum GroupMemberRole {
+  ADMIN
+  CASHIER
+  MEMBER
+}
+
+/// Statut de la demande de sortie volontaire d'un membre en cours de cycle
+/// (distinct d'une exclusion par l'admin, cf. Member Actions / Remove Member).
+enum GroupMemberExitStatus {
+  NONE
+  REQUESTED
+  APPROVED
+  REJECTED
+}
+
+model GroupMember {
+  id               String          @id @default(uuid())
+  groupId          String
+  group            Group           @relation(fields: [groupId], references: [id])
+  userId           String
+  user             User            @relation(fields: [userId], references: [id])
+  role             GroupMemberRole @default(MEMBER)
+  rotationPosition Int?
+  isActive         Boolean         @default(true)
+  joinedAt         DateTime        @default(now())
+
+  /// Sortie volontaire du membre, toujours soumise à validation de l'admin.
+  /// Règle métier (cf. cadrage) :
+  /// - si le tour de rotation du membre n'est pas encore passé : sortie
+  ///   possible sans dette, ses cotisations déjà versées lui sont
+  ///   remboursées (transaction ROTATION_PAYOUT... voir LedgerTransaction).
+  /// - si son tour est déjà passé (il a déjà reçu sa cagnotte) : la sortie
+  ///   est conditionnée au remboursement du solde restant dû au groupe,
+  ///   tracé via `outstandingDebt` et la transaction MEMBER_EXIT_SETTLEMENT.
+  exitStatus       GroupMemberExitStatus @default(NONE)
+  exitRequestedAt  DateTime?
+  exitReason       String?
+  exitDecidedAt    DateTime?
+
+  /// Dette du membre envers le groupe. Alimentée par deux mécanismes :
+  /// (a) un retard de cotisation non régularisé (déduit ensuite du
+  ///     versement de SON PROPRE tour de rotation, cf. Cycle.deductedAmount) ;
+  /// (b) un solde à rembourser s'il quitte le groupe après avoir déjà
+  ///     reçu son tour (cf. exitStatus).
+  outstandingDebt  Decimal         @default(0) @db.Decimal(14, 2)
+
+  // Relation inverse : ce membre est le caissier du groupe (0 ou 1 groupe).
+  cashierOfGroup Group? @relation("GroupCashier")
+
+  @@unique([groupId, userId])
+  @@map("group_members")
+}
+
+enum CycleStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+}
+
+model Cycle {
+  id               String      @id @default(uuid())
+  groupId          String
+  group            Group       @relation(fields: [groupId], references: [id])
+  cycleNumber      Int
+  beneficiaryUserId String
+  dueDate          DateTime
+  status           CycleStatus @default(PENDING)
+
+  /// Montant théorique de la cagnotte (contributionAmount × nombre de
+  /// membres actifs), avant toute déduction.
+  expectedAmount   Decimal?    @db.Decimal(14, 2)
+  /// Somme totale déduite du versement de CE bénéficiaire au titre de sa
+  /// propre dette accumulée (retards de cotisation passés, cf.
+  /// GroupMember.outstandingDebt). Transparence exigée par la traçabilité
+  /// (§6.2 du cahier des charges).
+  deductedAmount   Decimal     @default(0) @db.Decimal(14, 2)
+  /// Montant réellement versé au bénéficiaire = expectedAmount - deductedAmount.
+  paidOutAmount    Decimal?    @db.Decimal(14, 2)
+
+  createdAt        DateTime    @default(now())
+
+  @@unique([groupId, cycleNumber])
+  @@map("cycles")
+}
+
+enum GroupEventType {
+  DEUIL
+  ANNIVERSAIRE
+  NAISSANCE
+  MARIAGE
+  MALADIE
+  AUTRE
+}
+
+enum GroupEventStatus {
+  OPEN
+  CLOSED
+  CANCELLED
+}
+
+/// Cagnotte ponctuelle liée à un évènement de vie d'un membre (deuil,
+/// anniversaire, naissance, etc.) — distincte du cycle rotatif : chaque
+/// membre du groupe cotise librement pour le bénéficiaire de l'évènement.
+/// Suit le même principe Option A : les cotisations transitent vers le
+/// compte de dépôt du caissier, qui reverse au bénéficiaire (§7).
+model GroupEvent {
+  id                String           @id @default(uuid())
+  groupId           String
+  group             Group            @relation(fields: [groupId], references: [id])
+  type              GroupEventType
+  customLabel       String? // libellé libre si type = AUTRE
+  beneficiaryUserId String
+  beneficiary       User             @relation("EventBeneficiary", fields: [beneficiaryUserId], references: [id])
+  description       String?
+  suggestedAmount   Decimal?         @db.Decimal(14, 2)
+  status            GroupEventStatus @default(OPEN)
+  createdById       String
+  createdBy         User             @relation("EventCreator", fields: [createdById], references: [id])
+  createdAt         DateTime         @default(now())
+  closedAt          DateTime?
+
+  contributions EventContribution[]
+
+  @@index([groupId, status])
+  @@map("group_events")
+}
+
+model EventContribution {
+  id            String             @id @default(uuid())
+  eventId       String
+  event         GroupEvent         @relation(fields: [eventId], references: [id])
+  userId        String
+  user          User               @relation(fields: [userId], references: [id])
+  amount        Decimal            @db.Decimal(14, 2)
+  transactionId String?            @unique
+  transaction   LedgerTransaction? @relation(fields: [transactionId], references: [id])
+  createdAt     DateTime           @default(now())
+
+  @@unique([eventId, userId])
+  @@map("event_contributions")
+}
+
+enum TransactionType {
+  CONTRIBUTION
+  ROTATION_PAYOUT
+  LOAN_DISBURSEMENT
+  LOAN_REPAYMENT
+  EVENT_CONTRIBUTION
+  EVENT_PAYOUT
+  FEE
+  /// Déduction appliquée sur le versement de tour d'un membre au titre
+  /// d'un retard de cotisation accumulé (cf. GroupMember.outstandingDebt).
+  ARREARS_DEDUCTION
+  /// Remboursement dû par un membre qui quitte volontairement le groupe
+  /// après avoir déjà reçu son tour de rotation (cf. GroupMember.exitStatus).
+  MEMBER_EXIT_SETTLEMENT
+}
+
+enum TransactionStatus {
+  PENDING
+  PROCESSING
+  CONFIRMED
+  FAILED
+}
+
+enum MobileMoneyProvider {
+  MTN_MOMO
+  ORANGE_MONEY
+}
+
+/// Table de transactions unique et immuable — cœur de la traçabilité totale
+/// du projet (cf. Cahier des charges §6.2 "Principe du ledger central").
+/// Aucune mise à jour destructive : un changement de statut crée une trace,
+/// jamais une suppression.
+model LedgerTransaction {
+  id                 String              @id @default(uuid())
+  groupId            String
+  group              Group               @relation(fields: [groupId], references: [id])
+  userId             String
+  user               User                @relation(fields: [userId], references: [id])
+  type               TransactionType
+  /// Montant dans la devise d'origine de la transaction (cf. `currency`).
+  amount             Decimal             @db.Decimal(14, 2)
+  /// Devise d'origine (XAF pour un paiement Mobile Money local ; EUR/USD/...
+  /// pour une cotisation diaspora par carte ou virement).
+  currency           Currency            @default(XAF)
+  /// Montant converti en XAF — devise pivot du ledger central et des
+  /// groupes (§6.2 du cahier des charges). Égal à `amount` quand
+  /// currency = XAF.
+  amountXaf          Decimal             @db.Decimal(14, 2)
+  /// Taux de change appliqué au moment de la transaction, renseigné
+  /// uniquement quand currency != XAF (traçabilité de la conversion).
+  fxRate             Decimal?            @db.Decimal(12, 6)
+  status             TransactionStatus   @default(PENDING)
+  provider           MobileMoneyProvider?
+  externalReference  String?             @unique
+  relatedLoanId      String?
+  loan               Loan?               @relation(fields: [relatedLoanId], references: [id])
+  createdAt          DateTime            @default(now())
+  confirmedAt        DateTime?
+
+  eventContribution  EventContribution?
+
+  @@index([groupId, createdAt])
+  @@index([userId, createdAt])
+  @@map("ledger_transactions")
+}
+
+enum LoanStatus {
+  REQUESTED
+  VOTING
+  APPROVED
+  REJECTED
+  ACTIVE
+  REPAID
+  DEFAULTED
+}
+
+model Loan {
+  id           String     @id @default(uuid())
+  groupId      String
+  group        Group      @relation(fields: [groupId], references: [id])
+  borrowerId   String
+  borrower     User       @relation("BorrowerLoans", fields: [borrowerId], references: [id])
+  amount       Decimal    @db.Decimal(14, 2)
+  interestRate Decimal    @default(0) @db.Decimal(5, 2)
+  status       LoanStatus @default(REQUESTED)
+  requestedAt  DateTime   @default(now())
+  approvedAt   DateTime?
+  dueDate      DateTime?
+
+  votes            LoanVote[]
+  repaymentSchedule LoanRepaymentSchedule[]
+  transactions     LedgerTransaction[]
+  contract         LoanContract?
+
+  @@map("loans")
+}
+
+model LoanVote {
+  id       String   @id @default(uuid())
+  loanId   String
+  loan     Loan     @relation(fields: [loanId], references: [id])
+  voterId  String
+  voter    User     @relation(fields: [voterId], references: [id])
+  approve  Boolean
+  votedAt  DateTime @default(now())
+
+  @@unique([loanId, voterId])
+  @@map("loan_votes")
+}
+
+enum RepaymentStatus {
+  PENDING
+  PAID
+  LATE
+}
+
+model LoanRepaymentSchedule {
+  id                String          @id @default(uuid())
+  loanId            String
+  loan              Loan            @relation(fields: [loanId], references: [id])
+  installmentNumber Int
+  dueDate           DateTime
+  amount            Decimal         @db.Decimal(14, 2)
+  paidAt            DateTime?
+  status            RepaymentStatus @default(PENDING)
+
+  @@unique([loanId, installmentNumber])
+  @@map("loan_repayment_schedules")
+}
+
+/// Contrat numérique généré pour chaque prêt accordé (§4.1 "Prêts internes")
+model LoanContract {
+  id                String   @id @default(uuid())
+  loanId            String   @unique
+  loan              Loan     @relation(fields: [loanId], references: [id])
+  contractPdfUrl    String?
+  signedByBorrower  Boolean  @default(false)
+  signedAt          DateTime?
+  createdAt         DateTime @default(now())
+
+  @@map("loan_contracts")
+}
+
+/// Nature du moyen de paiement. MOBILE_MONEY reste le mode nominal pour les
+/// membres résidant au Cameroun ; BANK_CARD / BANK_TRANSFER concernent les
+/// membres de la diaspora (groupe avec `openToDiaspora = true`).
+enum PaymentMethodType {
+  MOBILE_MONEY
+  BANK_CARD
+  BANK_TRANSFER
+}
+
+/// Un moyen de paiement lié au profil d'un utilisateur. Selon `type`, seul
+/// le sous-ensemble de champs pertinent est renseigné. Aucune donnée
+/// bancaire brute (PAN complet, IBAN complet, CVV) n'est jamais stockée :
+/// seules des références tokenisées côté agrégateur/PSP (`cardToken`) et
+/// des identifiants tronqués à but d'affichage (`cardLast4`, `ibanLast4`).
+model PaymentMethod {
+  id          String               @id @default(uuid())
+  userId      String
+  user        User                 @relation(fields: [userId], references: [id])
+  type        PaymentMethodType    @default(MOBILE_MONEY)
+
+  // --- type = MOBILE_MONEY ---
+  provider    MobileMoneyProvider?
+  phoneNumber String?
+
+  // --- type = BANK_CARD (paiement diaspora par carte, via agrégateur) ---
+  cardBrand   String? // Visa, Mastercard...
+  cardLast4   String?
+  cardToken   String? // référence tokenisée côté PSP, jamais le PAN complet
+
+  // --- type = BANK_TRANSFER (virement diaspora) ---
+  bankName    String?
+  bankCountry String? // code ISO 3166-1 alpha-2
+  ibanLast4   String?
+
+  isDefault   Boolean              @default(false)
+  createdAt   DateTime             @default(now())
+
+  @@map("payment_methods")
+}
+
+enum NotificationType {
+  CONTRIBUTION_REMINDER
+  REPAYMENT_REMINDER
+  LATE_PAYMENT_ALERT
+  LOAN_STATUS_UPDATE
+  GROUP_ACTIVITY
+  SYSTEM
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id])
+  type      NotificationType
+  title     String
+  body      String
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@map("notifications")
+}
