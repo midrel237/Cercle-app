@@ -34,10 +34,31 @@
     "phoneNumberPlaceholder": "6 XX XX XX XX",
     "diasporaHint": "🌍 Membre de la diaspora ? Sélectionnez l'indicatif de votre pays de résidence.",
     "noAccountYet": "Pas encore de compte ?",
-    "createAccount": "Créer un compte",
     "phoneRequiredError": "Merci de renseigner un numéro de téléphone.",
     "otpSendError": "Impossible d'envoyer le code pour l'instant. Réessayez.",
     "sendingOtp": "Envoi en cours…",
+    "createAccount": {
+      "linkLabel": "Créer un compte",
+      "title": "Créer votre compte",
+      "subtitle": "Rejoignez vos tontines en quelques minutes, sans paperasse.",
+      "termsPrefix": "J'accepte les",
+      "termsLink": "Conditions d'utilisation",
+      "termsAnd": "et la",
+      "privacyLink": "Politique de confidentialité",
+      "termsSuffix": "de Cercle.",
+      "termsRequiredError": "Merci d'accepter les conditions pour continuer.",
+      "submitButton": "Créer mon compte",
+      "alreadyHaveAccount": "Déjà un compte ?",
+      "signIn": "Se connecter"
+    },
+    "countryPicker": {
+      "title": "Choisir un pays",
+      "subtitle": "Utilisé pour l'indicatif de votre numéro de téléphone",
+      "searchPlaceholder": "Rechercher un pays",
+      "suggestedSection": "Suggéré",
+      "diasporaSection": "Diaspora",
+      "regionalSection": "Afrique centrale & de l'Ouest"
+    },
     "otp": {
       "title": "Vérifiez votre numéro",
       "subtitle": "Un code à 6 chiffres a été envoyé au",

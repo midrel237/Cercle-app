@@ -34,10 +34,31 @@
     "phoneNumberPlaceholder": "6 XX XX XX XX",
     "diasporaHint": "🌍 Living abroad? Select your country of residence's dial code.",
     "noAccountYet": "Don't have an account yet?",
-    "createAccount": "Create an account",
     "phoneRequiredError": "Please enter a phone number.",
     "otpSendError": "Couldn't send the code right now. Please try again.",
     "sendingOtp": "Sending…",
+    "createAccount": {
+      "linkLabel": "Create an account",
+      "title": "Create your account",
+      "subtitle": "Join your tontines in a few minutes, no paperwork.",
+      "termsPrefix": "I agree to the",
+      "termsLink": "Terms of Use",
+      "termsAnd": "and the",
+      "privacyLink": "Privacy Policy",
+      "termsSuffix": "of Cercle.",
+      "termsRequiredError": "Please accept the terms to continue.",
+      "submitButton": "Create my account",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "countryPicker": {
+      "title": "Choose a country",
+      "subtitle": "Used for your phone number's dial code",
+      "searchPlaceholder": "Search for a country",
+      "suggestedSection": "Suggested",
+      "diasporaSection": "Diaspora",
+      "regionalSection": "Central & West Africa"
+    },
     "otp": {
       "title": "Verify your number",
       "subtitle": "A 6-digit code was sent to",

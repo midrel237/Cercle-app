@@ -13,6 +13,8 @@ export default function AuthLayout() {
       <Stack.Screen name="language" />
       <Stack.Screen name="welcome" />
       <Stack.Screen name="login" />
+      <Stack.Screen name="create-account" />
+      <Stack.Screen name="country-picker" options={{ presentation: 'modal' }} />
       <Stack.Screen name="otp" />
     </Stack>
   );

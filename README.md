@@ -1,7 +1,7 @@
 # Cercle — Plateforme de tontine digitalisée (Njangi)
 
 Monorepo du MVP, conforme au *Cahier des charges Tontine App* (stack §6.1) et
-à la maquette `Cercle_maquettes_ecrans.html` (78 écrans).
+à la maquette `Cercle_maquettes_ecrans.html` (80 écrans).
 
 ## Stack
 
@@ -19,7 +19,7 @@ Monorepo du MVP, conforme au *Cahier des charges Tontine App* (stack §6.1) et
 ```
 tontine-app/
 ├── apps/
-│   ├── mobile/        # App Expo Router (78 écrans de la maquette, en placeholders)
+│   ├── mobile/        # App Expo Router (80 écrans de la maquette, en placeholders)
 │   └── backend/       # API NestJS (auth, users, groups, transactions/ledger, loans, payments, notifications)
 ├── packages/
 │   └── shared/        # Types TypeScript partagés (User, Group, LedgerTransaction, Loan...)
@@ -129,9 +129,10 @@ npm run mobile                    # démarre Expo (scanner le QR code avec Expo 
   agrégateur Mobile Money + webhook), `notifications` — squelettes fonctionnels avec DTOs
   validés, à brancher sur la logique métier réelle.
 - ✅ Schéma PostgreSQL complet (`prisma/schema.prisma`) reflétant le ledger central et les prêts.
-- ✅ Mobile Expo Router : arborescence de routes pour les 78 écrans de la maquette,
+- ✅ Mobile Expo Router : arborescence de routes pour les 80 écrans de la maquette,
   regroupés par flux (`(auth)`, `(kyc)`, `(onboarding)`, `(tabs)`, `group/`, `loan/`, `payment/`,
-  `settings/`). Écrans 1 à 5 (`splash`, `language`, `welcome`, `login`, `otp`) implémentés fidèlement à
+  `settings/`). Écrans 1 à 5 (`splash`, `language`, `welcome`, `login`, `otp`), 79
+  (`country-picker`) et 80 (`create-account`) implémentés fidèlement à
   la maquette ; les autres restent en écran placeholder en attendant leur tour (voir
   `docs/screens-map.md`).
 - ✅ Thème (couleurs, typographies Fraunces/Inter/IBM Plex Mono) extrait de la maquette.
@@ -140,7 +141,7 @@ npm run mobile                    # démarre Expo (scanner le QR code avec Expo 
 ## Audit de cohérence (juillet 2026) — corrections apportées
 
 Une revue de cohérence a comparé le cahier des charges, le schéma Prisma, les DTOs
-et la maquette (78 écrans), à la lumière du fonctionnement réel des tontines
+et la maquette (80 écrans), à la lumière du fonctionnement réel des tontines
 traditionnelles camerounaises (njangi). Décisions prises et appliquées :
 
 - **Diaspora développée complètement** : `User.countryOfResidence` / `preferredCurrency`,

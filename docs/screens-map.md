@@ -133,4 +133,11 @@ des déplacements et le raisonnement).
 | 77 | Help & Support | `settings/help` |
 | 78 | Support Chat | `settings/support-chat` |
 
+## INSCRIPTION & SÉCURITÉ (complément)
+
+| # | Écran (maquette) | Route |
+|---|---|---|
+| 79 | Country / Dial Code Picker | `(auth)/country-picker` |
+| 80 | Create Account | `(auth)/create-account` |
+
 Écrans marqués 🌍 (diaspora) et 🚪 (sortie de groupe) : intégrés directement dans la section fonctionnelle où ils interviennent dans le parcours, plutôt que regroupés à part en fin de document (voir cahier des charges).

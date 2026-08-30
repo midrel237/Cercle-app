@@ -17,26 +17,28 @@ import { authApi } from '../../src/services/endpoints/auth';
 import { useCountryStore } from '../../src/store/country.store';
 import { colors, fonts, radii, spacing } from '../../src/theme';
 
-// Écran 4 — Connexion / entrée du parcours d'authentification.
-// C'est un écran unique de saisie du numéro de téléphone : il sert aussi
-// bien à un nouveau membre (« Créer un compte », écran 80) qu'à un membre
-// existant, puisque les deux parcours se rejoignent sur la vérification
-// par OTP (écran 5). Le couple téléphone + PIN (POST /auth/login) est
-// réservé à une reconnexion ultérieure sur un appareil déjà configuré, pas
-// à cet écran de première saisie. L'indicatif pays est géré par
-// useCountryStore, partagé avec l'écran 79 (sélection du pays) et l'écran
-// 80 (création de compte).
-export default function LoginScreen() {
+// Écran 80 — Création de compte, atteint via le lien « Créer un compte »
+// de l'écran 4. Fonctionnellement identique à la connexion (le compte est
+// réellement créé côté serveur à la vérification OTP, cf. auth.service.ts
+// verifyOtp — inscription progressive), mais avec un cadrage et une copie
+// dédiés à un nouveau membre, plus l'acceptation explicite des conditions
+// d'utilisation.
+export default function CreateAccountScreen() {
   const { t } = useTranslation();
   const selectedCountry = useCountryStore((s) => s.selectedCountry);
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleContinue = async () => {
+  const handleCreateAccount = async () => {
     const digits = phoneNumber.trim();
     if (!digits) {
       setError(t('auth.phoneRequiredError'));
+      return;
+    }
+    if (!acceptedTerms) {
+      setError(t('auth.createAccount.termsRequiredError'));
       return;
     }
 
@@ -58,11 +60,15 @@ export default function LoginScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={styles.content}>
-        <RotationMotif size={72} activeIndex={0} />
+      <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={12}>
+        <Text style={styles.backIcon}>←</Text>
+      </Pressable>
 
-        <Text style={styles.brand}>{t('auth.brandName')}</Text>
-        <Text style={styles.tagline}>{t('auth.brandTagline')}</Text>
+      <View style={styles.content}>
+        <RotationMotif size={60} activeIndex={0} />
+
+        <Text style={styles.title}>{t('auth.createAccount.title')}</Text>
+        <Text style={styles.tagline}>{t('auth.createAccount.subtitle')}</Text>
 
         <View style={styles.form}>
           <Text style={styles.label}>{t('auth.phoneNumberLabel')}</Text>
@@ -87,30 +93,44 @@ export default function LoginScreen() {
               keyboardType="phone-pad"
               autoComplete="tel"
               returnKeyType="done"
-              onSubmitEditing={handleContinue}
+              onSubmitEditing={handleCreateAccount}
             />
           </View>
 
-          {error ? (
-            <Text style={styles.errorText}>{error}</Text>
-          ) : (
-            <Text style={styles.hint}>{t('auth.diasporaHint')}</Text>
-          )}
+          <Pressable
+            style={styles.termsRow}
+            onPress={() => {
+              setAcceptedTerms((v) => !v);
+              if (error) setError(null);
+            }}
+            hitSlop={6}
+          >
+            <View style={[styles.checkbox, acceptedTerms && styles.checkboxChecked]}>
+              {acceptedTerms && <Text style={styles.checkboxMark}>✓</Text>}
+            </View>
+            <Text style={styles.termsText}>
+              {t('auth.createAccount.termsPrefix')}{' '}
+              <Text style={styles.termsLink}>{t('auth.createAccount.termsLink')}</Text>{' '}
+              {t('auth.createAccount.termsAnd')}{' '}
+              <Text style={styles.termsLink}>{t('auth.createAccount.privacyLink')}</Text>{' '}
+              {t('auth.createAccount.termsSuffix')}
+            </Text>
+          </Pressable>
+
+          {error && <Text style={styles.errorText}>{error}</Text>}
 
           <AppButton
-            label={isSubmitting ? t('auth.sendingOtp') : t('common.continue')}
-            onPress={handleContinue}
+            label={isSubmitting ? t('auth.sendingOtp') : t('auth.createAccount.submitButton')}
+            onPress={handleCreateAccount}
             disabled={isSubmitting}
-            style={styles.continueButton}
+            style={styles.submitButton}
           />
-          {isSubmitting && (
-            <ActivityIndicator color={colors.gold} style={styles.spinner} />
-          )}
+          {isSubmitting && <ActivityIndicator color={colors.gold} style={styles.spinner} />}
 
-          <Pressable onPress={() => router.push('/(auth)/create-account')} hitSlop={8}>
+          <Pressable onPress={() => router.replace('/(auth)/login')} hitSlop={8}>
             <Text style={styles.footerText}>
-              {t('auth.noAccountYet')}{' '}
-              <Text style={styles.footerLink}>{t('auth.createAccount.linkLabel')}</Text>
+              {t('auth.createAccount.alreadyHaveAccount')}{' '}
+              <Text style={styles.footerLink}>{t('auth.createAccount.signIn')}</Text>
             </Text>
           </Pressable>
         </View>
@@ -124,26 +144,44 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.navy,
   },
+  backBtn: {
+    marginTop: 16,
+    marginLeft: 20,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(255,255,255,.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backIcon: {
+    fontSize: 15,
+    color: colors.white,
+  },
   content: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.lg + 2,
+    marginTop: -40,
   },
-  brand: {
+  title: {
     fontFamily: fonts.fraunces.semiBold,
-    fontSize: 30,
+    fontSize: 22,
     color: colors.white,
-    marginTop: spacing.md + 2,
+    marginTop: spacing.sm + 2,
     marginBottom: spacing.xs + 2,
+    textAlign: 'center',
   },
   tagline: {
     fontFamily: fonts.inter.regular,
-    fontSize: 12.5,
+    fontSize: 12,
     color: colors.lavender,
     textAlign: 'center',
     lineHeight: 18,
-    marginBottom: spacing.xl + 2,
+    marginBottom: spacing.lg,
   },
   form: {
     width: '100%',
@@ -183,23 +221,50 @@ const styles = StyleSheet.create({
     fontSize: 14,
     paddingHorizontal: spacing.sm + 2,
   },
-  hint: {
+  termsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.xs + 2,
+    marginTop: spacing.sm + 2,
+    marginBottom: spacing.sm,
+  },
+  checkbox: {
+    width: 16,
+    height: 16,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: colors.gold,
+    marginTop: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: colors.cream,
+  },
+  checkboxMark: {
+    fontSize: 10,
+    color: colors.goldDark,
+    fontFamily: fonts.inter.bold,
+  },
+  termsText: {
+    flex: 1,
     fontFamily: fonts.inter.regular,
     fontSize: 10.5,
     color: colors.navySoft,
     lineHeight: 15,
-    marginTop: spacing.sm,
-    marginBottom: spacing.md - 2,
+  },
+  termsLink: {
+    fontFamily: fonts.inter.bold,
+    color: colors.gold,
   },
   errorText: {
     fontFamily: fonts.inter.medium,
     fontSize: 10.5,
     color: colors.danger,
     lineHeight: 15,
-    marginTop: spacing.sm,
-    marginBottom: spacing.md - 2,
+    marginBottom: spacing.sm,
   },
-  continueButton: {
+  submitButton: {
     marginBottom: spacing.sm + 2,
   },
   spinner: {
