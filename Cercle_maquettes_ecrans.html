@@ -1,0 +1,2804 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Maquettes — Cercle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1B2340;
+  --navy-2:#262F55;
+  --cream:#F6F2EA;
+  --paper:#FFFDF9;
+  --gold:#C9962C;
+  --gold-l:#E8C989;
+  --green:#2F8F5B;
+  --green-bg:#E4F1E9;
+  --terra:#C15B3D;
+  --terra-bg:#F7E6DF;
+  --ink:#232323;
+  --ink-soft:#6B6F80;
+  --line:#E7E1D4;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--cream);
+  font-family:'Inter',sans-serif;
+  color:var(--ink);
+  padding:48px 32px 96px;
+}
+.intro{max-width:920px;margin:0 auto 56px;}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--gold); font-weight:600; margin-bottom:10px;
+}
+.intro h1{
+  font-family:'Fraunces',serif; font-weight:600; font-size:40px;
+  color:var(--navy); margin:0 0 12px; letter-spacing:-.01em;
+}
+.intro p{font-size:15.5px; line-height:1.6; color:var(--ink-soft); max-width:620px; margin:0;}
+.legend{display:flex; gap:10px; flex-wrap:wrap; margin-top:22px;}
+.legend span{
+  font-size:12.5px; font-family:'IBM Plex Mono',monospace; color:var(--navy);
+  background:var(--paper); border:1px solid var(--line); padding:5px 11px; border-radius:20px;
+}
+.grid{
+  max-width:1400px; margin:0 auto;
+  display:flex; flex-wrap:wrap; gap:44px 36px; justify-content:center;
+}
+.unit{display:flex; flex-direction:column; align-items:center; width:300px;}
+.unit .tag{
+  font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--gold);
+  letter-spacing:.08em; margin-bottom:6px; font-weight:600;
+}
+.unit h3{
+  font-family:'Fraunces',serif; font-size:18px; font-weight:600; color:var(--navy);
+  margin:0 0 16px; text-align:center;
+}
+.phone{
+  width:300px; height:632px; background:var(--navy); border-radius:38px;
+  padding:10px; box-shadow:0 18px 40px -12px rgba(27,35,64,.35), 0 2px 8px rgba(0,0,0,.08);
+  position:relative;
+}
+.screen{
+  width:100%; height:100%; background:var(--paper); border-radius:29px; overflow:hidden;
+  display:flex; flex-direction:column; position:relative;
+}
+.notch{
+  position:absolute; top:10px; left:50%; transform:translateX(-50%);
+  width:90px; height:18px; background:var(--navy); border-radius:0 0 14px 14px; z-index:5;
+}
+.statusbar{
+  height:38px; flex:none; display:flex; align-items:center; justify-content:space-between;
+  padding:0 22px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink); font-weight:600;
+}
+.body{flex:1; overflow:hidden; position:relative; display:flex; flex-direction:column;}
+.app-header{
+  padding:6px 20px 14px; background:var(--navy); color:#fff; flex:none;
+}
+.app-header .greet{font-size:12px; color:var(--gold-l); font-family:'IBM Plex Mono',monospace; margin-bottom:2px;}
+.app-header .name{font-family:'Fraunces',serif; font-size:21px; font-weight:600;}
+.scroll{flex:1; overflow:auto; padding:16px 18px 90px;}
+.scroll::-webkit-scrollbar{display:none;}
+
+/* back button */
+.backbtn{
+  width:30px; height:30px; border-radius:50%; background:var(--paper);
+  border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
+  font-size:15px; color:var(--navy); margin-bottom:10px; flex:none;
+}
+.backbtn-dark{
+  width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.18); display:flex; align-items:center; justify-content:center;
+  font-size:15px; color:#fff; margin-bottom:8px; flex:none;
+}
+
+/* tab bar */
+.tabbar{
+  position:absolute; bottom:0; left:0; right:0; height:66px; background:var(--paper);
+  border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-around;
+  padding-bottom:8px;
+}
+.tabitem{display:flex; flex-direction:column; align-items:center; gap:4px; font-size:9.5px; color:var(--ink-soft); font-family:'Inter'; font-weight:600;}
+.tabitem.active{color:var(--navy);}
+.tabicon{width:20px; height:20px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:13px;}
+.tabitem.active .tabicon{background:var(--gold); color:var(--navy);}
+
+/* cards */
+.card{
+  background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:16px;
+  margin-bottom:12px;
+}
+.balance-card{
+  background:linear-gradient(135deg,var(--navy),var(--navy-2)); color:#fff; border-radius:18px;
+  padding:20px; margin-bottom:18px;
+}
+.balance-card .lbl{font-size:11px; color:var(--gold-l); font-family:'IBM Plex Mono',monospace; letter-spacing:.05em;}
+.balance-card .amt{font-family:'IBM Plex Mono',monospace; font-size:26px; font-weight:600; margin-top:4px;}
+.balance-card .sub{font-size:11.5px; color:#B9BFDA; margin-top:6px;}
+
+.grouprow{display:flex; align-items:center; gap:12px;}
+.gname{font-weight:700; font-size:14.5px; color:var(--navy);}
+.gmeta{font-size:11.5px; color:var(--ink-soft); margin-top:2px;}
+.chip{
+  font-size:10.5px; font-family:'IBM Plex Mono',monospace; font-weight:600; padding:4px 9px;
+  border-radius:20px; display:inline-block;
+}
+.chip.paid{background:var(--green-bg); color:var(--green);}
+.chip.pending{background:var(--terra-bg); color:var(--terra);}
+.chip.neutral{background:#EDEBF3; color:var(--navy);}
+
+/* ring - member rotation wheel */
+.ringwrap{position:relative; width:64px; height:64px; flex:none;}
+.ringwrap svg{position:absolute; inset:0;}
+.ringavatars{position:absolute; inset:0;}
+.avdot{
+  position:absolute; top:50%; left:50%; width:16px; height:16px; margin:-8px; border-radius:50%;
+  background:var(--navy); border:2px solid var(--paper); font-size:0;
+}
+.avdot.on{background:var(--gold);}
+
+.ringbig{position:relative; width:200px; height:200px; margin:6px auto 14px;}
+.ringbig svg{position:absolute; inset:0;}
+.ringbig .center{
+  position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+}
+.ringbig .center .cyc{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft);}
+.ringbig .center .amt{font-family:'Fraunces',serif; font-weight:700; font-size:22px; color:var(--navy);}
+.ringbig .avdot{width:30px; height:30px; margin:-15px; display:flex; align-items:center; justify-content:center;
+  font-family:'Inter'; font-size:10px; font-weight:700; color:#fff;}
+
+/* buttons */
+.btn{
+  width:100%; padding:13px; border-radius:12px; border:none; font-family:'Inter'; font-weight:700;
+  font-size:13.5px; text-align:center; cursor:default;
+}
+.btn.primary{background:var(--gold); color:var(--navy);}
+.btn.dark{background:var(--navy); color:#fff;}
+.btn.ghost{background:transparent; color:var(--navy); border:1.5px solid var(--line);}
+
+.field{margin-bottom:14px;}
+.field label{font-size:11.5px; color:var(--ink-soft); font-weight:600; display:block; margin-bottom:6px;}
+.field .box{
+  border:1.5px solid var(--line); border-radius:11px; padding:11px 13px; font-size:14px;
+  font-family:'IBM Plex Mono',monospace; color:var(--navy); font-weight:600; background:var(--paper);
+}
+.pindots{display:flex; gap:12px; justify-content:center; margin:22px 0;}
+.pindots i{width:12px; height:12px; border-radius:50%; background:var(--line); display:block;}
+.pindots i.on{background:var(--gold);}
+
+.tabs2{display:flex; gap:6px; margin-bottom:14px; background:var(--cream); padding:4px; border-radius:12px;}
+.tabs2 span{flex:1; text-align:center; padding:8px; font-size:12px; font-weight:700; border-radius:9px; color:var(--ink-soft);}
+.tabs2 span.on{background:var(--paper); color:var(--navy); box-shadow:0 1px 3px rgba(0,0,0,.08);}
+
+.memrow{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line);}
+.memrow:last-child{border-bottom:none;}
+.av{width:30px; height:30px; border-radius:50%; background:var(--navy); color:#fff; font-size:11px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; flex:none;}
+.memname{font-size:12.5px; font-weight:600; color:var(--navy); flex:1;}
+
+.ledgerrow{display:flex; align-items:center; gap:11px; padding:11px 0; border-bottom:1px solid var(--line);}
+.ledgerrow:last-child{border-bottom:none;}
+.licon{width:34px; height:34px; border-radius:10px; flex:none; display:flex; align-items:center; justify-content:center; font-size:15px;}
+.lmain{flex:1;}
+.ltitle{font-size:12.5px; font-weight:700; color:var(--navy);}
+.ldate{font-size:10.5px; color:var(--ink-soft); margin-top:1px; font-family:'IBM Plex Mono',monospace;}
+.lamt{font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:13px;}
+.lamt.pos{color:var(--green);} .lamt.neg{color:var(--terra);}
+
+.sectitle{font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); font-weight:700;
+  margin:16px 0 8px; font-family:'IBM Plex Mono',monospace;}
+.sectitle:first-child{margin-top:0;}
+
+.notif{display:flex; gap:11px; padding:12px; border-radius:13px; margin-bottom:10px;}
+.notif.unread{background:#EFEBFB1A; background:var(--cream); border:1px solid var(--line);}
+.notif .dot{width:8px; height:8px; border-radius:50%; background:var(--gold); flex:none; margin-top:5px;}
+.notif .txt .t{font-size:12.5px; font-weight:700; color:var(--navy);}
+.notif .txt .d{font-size:11.5px; color:var(--ink-soft); margin-top:2px; line-height:1.4;}
+.notif .txt .time{font-size:10px; color:#A8ACBD; margin-top:4px; font-family:'IBM Plex Mono',monospace;}
+
+.contractpaper{
+  background:var(--paper); border:1px solid var(--line); border-radius:4px; padding:18px;
+  font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-soft); line-height:1.7;
+  position:relative; margin-bottom:14px;
+}
+.contractpaper .stamp{
+  position:absolute; top:14px; right:14px; border:2px solid var(--green); color:var(--green);
+  font-weight:700; font-size:9px; padding:4px 8px; border-radius:6px; transform:rotate(8deg);
+  font-family:'Inter';
+}
+.contractpaper h4{font-family:'Fraunces',serif; color:var(--navy); font-size:15px; margin:0 0 10px;}
+
+.gauge{position:relative; width:120px; height:70px; margin:10px auto 4px;}
+.gauge svg{position:absolute; inset:0;}
+.gauge .val{position:absolute; bottom:0; width:100%; text-align:center; font-family:'Fraunces',serif;
+  font-size:22px; font-weight:700; color:var(--navy);}
+
+.menurow{display:flex; align-items:center; justify-content:space-between; padding:13px 2px; border-bottom:1px solid var(--line); font-size:13px; font-weight:600; color:var(--navy);}
+.menurow .r{color:var(--ink-soft); font-size:11px; font-weight:500; font-family:'IBM Plex Mono',monospace;}
+
+.progressbar{height:6px; background:var(--line); border-radius:4px; overflow:hidden; margin:10px 0 4px;}
+.progressbar i{display:block; height:100%; background:var(--gold);}
+
+.upload{border:1.5px dashed var(--line); border-radius:13px; padding:22px 14px; text-align:center; margin-bottom:12px;}
+.upload .ic{font-size:22px; margin-bottom:6px;}
+.upload .t{font-size:12px; font-weight:700; color:var(--navy);}
+.upload .s{font-size:10.5px; color:var(--ink-soft); margin-top:3px;}
+
+.otprow{display:flex; gap:8px; justify-content:center; margin:22px 0 10px;}
+.otprow .d{width:38px; height:46px; border:1.5px solid var(--line); border-radius:10px; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:700; color:var(--navy); background:var(--paper);}
+.otprow .d.on{border-color:var(--gold); background:#FBF3E2;}
+
+.pillrow{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:4px;}
+.pill{padding:8px 13px; border-radius:20px; border:1.5px solid var(--line); font-size:11.5px; font-weight:700; color:var(--ink-soft);}
+.pill.on{background:var(--navy); color:#fff; border-color:var(--navy);}
+
+.switchrow{display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--line); gap:10px;}
+.switchrow:last-child{border-bottom:none;}
+.switchrow .lab{font-size:12.5px; font-weight:600; color:var(--navy);}
+.switchrow .sub{font-size:10.5px; color:var(--ink-soft); margin-top:2px;}
+.sw{width:38px; height:22px; border-radius:20px; background:var(--line); position:relative; flex:none;}
+.sw i{position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.2); display:block;}
+.sw.on{background:var(--gold);}
+.sw.on i{left:18px;}
+
+.voterow{display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line);}
+.voterow:last-child{border-bottom:none;}
+.vstatus{font-size:14px; width:20px; text-align:center;}
+
+.codebig{
+  font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; letter-spacing:.14em;
+  color:var(--navy); text-align:center; padding:16px; border:1.5px dashed var(--gold); border-radius:14px; background:#FBF3E2; margin-bottom:14px;
+}
+
+.emptywrap{display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; padding:0 28px; text-align:center;}
+.spin{width:34px; height:34px; border-radius:50%; border:3px solid rgba(255,255,255,.2); border-top-color:var(--gold); animation:sp 1s linear infinite; margin-bottom:20px;}
+@keyframes sp{to{transform:rotate(360deg);}}
+
+.walletbadge{display:inline-flex; align-items:center; gap:6px; padding:6px 11px; border-radius:9px; font-size:10.5px; font-weight:700; font-family:'IBM Plex Mono',monospace;}
+.walletbadge.mtn{background:#FFF3D6; color:#8A6A00;}
+.walletbadge.om{background:#FFE4D6; color:#A34400;}
+
+.dotpage{display:flex; gap:6px; justify-content:center; margin-top:22px;}
+.dotpage i{width:7px; height:7px; border-radius:50%; background:#3A4372; display:block;}
+.dotpage i.on{width:20px; background:var(--gold);}
+
+.keypad{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; padding:0 22px; margin-top:10px;}
+.key{aspect-ratio:1; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:19px; font-weight:600; color:#fff; border:1px solid #3A4372; background:#232C52;}
+.key.ghost2{border:none; background:transparent; color:#8A90B5; font-size:13px; font-family:'Inter';}
+
+.searchbar{display:flex; align-items:center; gap:8px; border:1.5px solid var(--line); border-radius:12px; padding:10px 13px; font-size:12px; color:var(--ink-soft); margin-bottom:14px; background:var(--paper); font-weight:500;}
+
+.faqrow{padding:13px 2px; border-bottom:1px solid var(--line);}
+.faqrow:last-child{border-bottom:none;}
+.faqrow .q{display:flex; justify-content:space-between; align-items:center; font-size:12.5px; font-weight:700; color:var(--navy); gap:8px;}
+.faqrow .q .chev{color:var(--gold); font-size:13px; flex:none;}
+.faqrow .a{font-size:11.5px; color:var(--ink-soft); margin-top:8px; line-height:1.55;}
+
+.kebab{margin-left:auto; color:var(--ink-soft); font-size:15px; font-weight:700; letter-spacing:1px;}
+
+.walletrow{display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line);}
+.walletrow:last-child{border-bottom:none;}
+.walleticon{width:36px; height:36px; border-radius:10px; flex:none; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; color:#fff;}
+
+.resulticon{width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; margin:0 auto 16px;}
+
+.confettidot{position:absolute; border-radius:50%;}
+.docsheet{background:var(--paper); border:1px solid var(--line); box-shadow:0 4px 14px rgba(27,35,64,.08); padding:18px; font-family:'IBM Plex Mono',monospace;}
+
+/* ============ EFFETS D'ENTRÉE & MICRO-INTERACTIONS (tous écrans) ============ */
+@keyframes fadeUp{from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:translateY(0);}}
+@keyframes shimmer{0%{background-position:-160% 0;} 100%{background-position:160% 0;}}
+@keyframes pulseDot{0%,100%{transform:scale(1); opacity:1;} 50%{transform:scale(1.5); opacity:.45;}}
+@keyframes softGlow{0%,100%{box-shadow:0 18px 40px -12px rgba(27,35,64,.35), 0 2px 8px rgba(0,0,0,.08);} 50%{box-shadow:0 20px 46px -10px rgba(201,150,44,.30), 0 2px 8px rgba(0,0,0,.08);}}
+@keyframes popIn{0%{opacity:0; transform:scale(.85);} 100%{opacity:1; transform:scale(1);}}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0); opacity:.5;} 30%{transform:translateY(-4px); opacity:1;}}
+
+.phone{animation:softGlow 5.5s ease-in-out infinite;}
+.scroll > *{animation:fadeUp .5s cubic-bezier(.2,.8,.2,1) both;}
+.scroll > *:nth-child(1){animation-delay:.02s;}
+.scroll > *:nth-child(2){animation-delay:.07s;}
+.scroll > *:nth-child(3){animation-delay:.12s;}
+.scroll > *:nth-child(4){animation-delay:.17s;}
+.scroll > *:nth-child(5){animation-delay:.22s;}
+.scroll > *:nth-child(6){animation-delay:.27s;}
+.scroll > *:nth-child(n+7){animation-delay:.32s;}
+.balance-card{background-image:linear-gradient(120deg, transparent 30%, rgba(255,255,255,.10) 50%, transparent 70%), linear-gradient(135deg,var(--navy),var(--navy-2)); background-size:220% 220%, 100% 100%; animation:shimmer 4.5s linear infinite, fadeUp .5s ease both;}
+.btn.primary{position:relative; overflow:hidden; animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both;}
+.btn.primary::after{content:''; position:absolute; inset:0; background:linear-gradient(115deg, transparent 20%, rgba(255,255,255,.55) 50%, transparent 80%); background-size:250% 100%; animation:shimmer 2.8s linear infinite;}
+.btn.dark, .btn.ghost{animation:fadeUp .45s ease both;}
+.tabitem.active .tabicon{animation:popIn .3s cubic-bezier(.34,1.56,.64,1);}
+.notif.unread .dot{animation:pulseDot 1.6s ease-in-out infinite;}
+.avdot{animation:popIn .45s cubic-bezier(.34,1.56,.64,1) both;}
+.avdot:nth-of-type(1){animation-delay:.03s;} .avdot:nth-of-type(2){animation-delay:.08s;} .avdot:nth-of-type(3){animation-delay:.13s;} .avdot:nth-of-type(4){animation-delay:.18s;} .avdot:nth-of-type(5){animation-delay:.23s;} .avdot:nth-of-type(6){animation-delay:.28s;}
+.ringbig .center .amt{animation:fadeUp .5s ease .2s both;}
+.chip{animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both;}
+.progressbar i{position:relative; overflow:hidden;}
+.progressbar i::after{content:''; position:absolute; inset:0; background:linear-gradient(115deg, transparent 20%, rgba(255,255,255,.6) 50%, transparent 80%); background-size:250% 100%; animation:shimmer 1.8s linear infinite;}
+.resulticon{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both;}
+.codebig{animation:softGlow 2.4s ease-in-out infinite;}
+.app-header .name{animation:fadeUp .45s ease both;}
+.docsheet, .contractpaper{animation:fadeUp .5s ease both;}
+
+/* ============ ÉCRAN 36 · DISCUSSION DE GROUPE ============ */
+.chatheader{display:flex; align-items:center; gap:10px; padding:6px 16px 14px; background:var(--navy); color:#fff; flex:none;}
+.chatheader .avgrp{width:36px; height:36px; border-radius:50%; background:var(--gold); color:var(--navy); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex:none;}
+.chatheader .info .t{font-family:'Fraunces',serif; font-size:15.5px; font-weight:600;}
+.chatheader .info .s{font-size:10.5px; color:var(--gold-l); font-family:'IBM Plex Mono',monospace; margin-top:1px; display:flex; align-items:center; gap:5px;}
+.chatheader .info .s .liveDot{width:6px; height:6px; border-radius:50%; background:#6FE0A0; display:inline-block; animation:pulseDot 1.4s ease-in-out infinite;}
+.chatday{text-align:center; font-size:10px; font-family:'IBM Plex Mono',monospace; color:var(--ink-soft); background:var(--cream); border-radius:20px; padding:4px 12px; display:inline-block; margin:6px auto 14px; position:relative; left:50%; transform:translateX(-50%);}
+.msgrow{display:flex; gap:8px; margin-bottom:14px; max-width:88%; animation:fadeUp .45s cubic-bezier(.2,.8,.2,1) both;}
+.msgrow.me{margin-left:auto; flex-direction:row-reverse;}
+.msgrow .mav{width:26px; height:26px; border-radius:50%; background:var(--navy); color:#fff; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex:none; margin-top:2px;}
+.msgrow.me .mav{background:var(--gold); color:var(--navy);}
+.msgcol .mname{font-size:10.5px; font-weight:700; color:var(--gold); margin-bottom:3px; font-family:'IBM Plex Mono',monospace;}
+.msgrow.me .msgcol .mname{text-align:right; color:var(--navy);}
+.bubble{border-radius:16px; padding:9px 13px; font-size:12.5px; line-height:1.5; position:relative; box-shadow:0 2px 6px rgba(27,35,64,.06);}
+.bubble.other{background:var(--paper); border:1px solid var(--line); color:var(--ink); border-top-left-radius:4px;}
+.bubble.me{background:linear-gradient(135deg,var(--navy),var(--navy-2)); color:#fff; border-top-right-radius:4px;}
+.bubble.system{background:var(--cream); color:var(--ink-soft); border-radius:12px; font-size:11px; text-align:center; margin:4px auto 14px; max-width:80%; padding:8px 12px;}
+.bubble.pay{background:var(--green-bg); border:1px solid #C9E6D4; color:var(--navy); border-top-left-radius:4px;}
+.bubble.pay .pt{font-weight:700; font-size:11.5px; display:flex; align-items:center; gap:5px; color:var(--green);}
+.mtime{font-size:9px; color:var(--ink-soft); margin-top:4px; font-family:'IBM Plex Mono',monospace;}
+.msgrow.me .mtime{text-align:right;}
+.reactrow{display:flex; gap:4px; margin-top:5px;}
+.reactpill{font-size:10px; background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:2px 6px; display:flex; align-items:center; gap:3px; font-family:'IBM Plex Mono',monospace; color:var(--ink-soft);}
+.typingrow{display:flex; align-items:center; gap:8px; margin-bottom:6px;}
+.typingbubble{background:var(--paper); border:1px solid var(--line); border-radius:16px; border-top-left-radius:4px; padding:10px 14px; display:flex; gap:4px; align-items:center;}
+.typingbubble i{width:6px; height:6px; border-radius:50%; background:var(--ink-soft); display:block; animation:typingBounce 1.2s ease-in-out infinite;}
+.typingbubble i:nth-child(2){animation-delay:.15s;}
+.typingbubble i:nth-child(3){animation-delay:.3s;}
+.typingname{font-size:10px; color:var(--ink-soft); font-style:italic;}
+.chatinputbar{display:flex; align-items:center; gap:8px; padding:10px 14px 16px; background:var(--paper); border-top:1px solid var(--line); flex:none;}
+.chatinputbar .plus{width:32px; height:32px; border-radius:50%; background:var(--cream); color:var(--navy); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; flex:none;}
+.chatinputbar .field2{flex:1; border:1.5px solid var(--line); border-radius:20px; padding:9px 14px; font-size:12px; color:var(--ink-soft); background:var(--cream);}
+.chatinputbar .sendbtn{width:34px; height:34px; border-radius:50%; background:var(--gold); color:var(--navy); display:flex; align-items:center; justify-content:center; font-size:14px; flex:none; box-shadow:0 4px 10px rgba(201,150,44,.4); animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both;}
+
+/* ============ FLUX VÉRIFICATION D'IDENTITÉ (KYC) ============ */
+.doctypecard{display:flex; align-items:center; gap:12px; border:1.5px solid var(--line); border-radius:14px; padding:13px 14px; margin-bottom:10px; background:var(--paper);}
+.doctypecard.on{border-color:var(--gold); background:#FBF3E2;}
+.doctypecard .dic{font-size:21px; flex:none;}
+.doctypecard .dtx{flex:1;}
+.doctypecard .dtx .t{font-weight:700; font-size:13px; color:var(--navy);}
+.doctypecard .dtx .s{font-size:10.5px; color:var(--ink-soft); margin-top:1px;}
+.radiodot{width:18px; height:18px; border-radius:50%; border:2px solid var(--line); flex:none; position:relative;}
+.radiodot.on{border-color:var(--gold);}
+.radiodot.on::after{content:''; position:absolute; inset:3px; border-radius:50%; background:var(--gold);}
+
+.camera{position:relative; height:100%; background:#12162A; display:flex; flex-direction:column;}
+.camera .camtop{display:flex; justify-content:space-between; align-items:center; padding:14px 18px; color:#fff; flex:none;}
+.camera .camtop span{font-size:16px; opacity:.85;}
+.camera .camguide{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative;}
+.docframe{width:225px; height:142px; border:2.5px solid var(--gold); border-radius:14px; position:relative;}
+.docframe i{position:absolute; width:16px; height:16px; border:3px solid var(--gold-l);}
+.docframe i:nth-child(1){top:-3px; left:-3px; border-right:none; border-bottom:none; border-radius:6px 0 0 0;}
+.docframe i:nth-child(2){top:-3px; right:-3px; border-left:none; border-bottom:none; border-radius:0 6px 0 0;}
+.docframe i:nth-child(3){bottom:-3px; left:-3px; border-right:none; border-top:none; border-radius:0 0 0 6px;}
+.docframe i:nth-child(4){bottom:-3px; right:-3px; border-left:none; border-top:none; border-radius:0 0 6px 0;}
+.ovalframe{width:172px; height:222px; border:2.5px solid var(--gold); border-radius:50%; position:relative;}
+.scanline{position:absolute; left:6%; right:6%; height:2px; background:linear-gradient(90deg,transparent,var(--gold-l),transparent); animation:scanmove 2.2s ease-in-out infinite; border-radius:2px;}
+@keyframes scanmove{0%{top:8%;} 50%{top:88%;} 100%{top:8%;}}
+.caminstruction{color:#fff; font-size:12px; text-align:center; padding:0 32px; margin-top:18px; line-height:1.5;}
+.caminstruction b{color:var(--gold-l);}
+.camera .camfoot{flex:none; padding:20px 0 26px; display:flex; align-items:center; justify-content:center; gap:36px;}
+.shutterwrap{width:66px; height:66px; border-radius:50%; border:3.5px solid #fff; display:flex; align-items:center; justify-content:center; animation:softGlow 2.2s ease-in-out infinite;}
+.shutterwrap i{width:54px; height:54px; border-radius:50%; background:#fff; display:block;}
+.camside{width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.14); color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px;}
+
+.reviewshot{border:1.5px solid var(--line); border-radius:16px; overflow:hidden; margin-bottom:16px; animation:fadeUp .5s ease both;}
+.reviewshot .imgph{height:150px; background:linear-gradient(135deg,#2A3358,#1B2340); display:flex; align-items:center; justify-content:center; color:#6B72A0; font-size:34px;}
+.reviewshot .capt{padding:10px 13px; font-size:11px; color:var(--ink-soft); border-top:1px solid var(--line); display:flex; align-items:center; gap:6px;}
+
+.scanningwrap{display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:0 30px;}
+.scancircle{width:104px; height:104px; border-radius:50%; position:relative; margin-bottom:24px; display:flex; align-items:center; justify-content:center;}
+.scancircle svg{position:absolute; inset:0; animation:ringSpin2 1.6s linear infinite;}
+@keyframes ringSpin2{to{transform:rotate(360deg);}}
+.scancircle .ic{font-size:30px;}
+.scansteps{text-align:left; width:100%; margin-top:22px;}
+.scanstep{display:flex; align-items:center; gap:10px; padding:7px 0; font-size:11.5px; color:var(--ink-soft);}
+.scanstep .dotcheck{width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; flex:none; background:var(--green-bg); color:var(--green); font-weight:700;}
+.scanstep.pending .dotcheck{background:var(--line); color:transparent;}
+.scanstep.pending{color:var(--ink-soft);}
+
+/* ============ FEUILLES D'ACTION, MODALES & SIGNATURE ============ */
+@keyframes sheetUp{from{transform:translateY(100%);} to{transform:translateY(0);}}
+@keyframes overlayIn{from{opacity:0;} to{opacity:1;}}
+.sheetoverlay{position:absolute; inset:0; background:rgba(27,35,64,.5); display:flex; align-items:flex-end; animation:overlayIn .3s ease both;}
+.sheet{width:100%; background:var(--paper); border-radius:20px 20px 0 0; padding:10px 20px 22px; animation:sheetUp .38s cubic-bezier(.2,.8,.2,1) both;}
+.sheet .handle{width:36px; height:4px; background:var(--line); border-radius:3px; margin:0 auto 16px;}
+.sheetaction{display:flex; align-items:center; gap:12px; padding:13px 2px; font-size:13px; font-weight:600; color:var(--navy); border-bottom:1px solid var(--line);}
+.sheetaction:last-child{border-bottom:none;}
+.sheetaction.danger{color:var(--terra);}
+.sheetaction .ic{font-size:16px; width:22px; text-align:center; flex:none;}
+
+.ussdmodal{position:absolute; inset:0; background:rgba(10,13,26,.6); display:flex; align-items:center; justify-content:center; padding:0 28px; animation:overlayIn .3s ease both;}
+.ussdbox{background:#1B2340; border-radius:14px; padding:20px; width:100%; color:#fff; animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both; box-shadow:0 20px 50px rgba(0,0,0,.4);}
+.ussdbox .op{font-size:9.5px; color:var(--gold-l); font-family:'IBM Plex Mono',monospace; letter-spacing:.08em; margin-bottom:8px;}
+.ussdbox .msg{font-size:12px; line-height:1.6; margin-bottom:16px; color:#E4E7F5;}
+.ussdbox .pinrow{display:flex; gap:9px; justify-content:center; margin-bottom:18px;}
+.ussdbox .pinrow i{width:11px; height:11px; border-radius:50%; background:#3A4372; display:block;}
+.ussdbox .pinrow i.on{background:var(--gold);}
+.ussdbox .ubtns{display:flex; gap:10px;}
+.ussdbox .ubtns span{flex:1; text-align:center; padding:9px; border-radius:9px; font-size:11.5px; font-weight:700;}
+.ussdbox .ubtns .cancel{background:#232C52; color:#B9BFDA;}
+.ussdbox .ubtns .ok{background:var(--gold); color:var(--navy);}
+
+.signpad{border:1.5px dashed var(--line); border-radius:14px; height:132px; display:flex; align-items:center; justify-content:center; position:relative; background:var(--paper); margin-bottom:14px; overflow:hidden;}
+.signpad .ph{font-size:11px; color:var(--ink-soft);}
+.signpad svg{position:absolute; inset:0;}
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <div class="eyebrow">Cercle · Maquettes UI</div>
+  <h1>Écrans clés de l'application</h1>
+  <p>80 écrans organisés selon le parcours réel de l'utilisateur, en 10 sections : découverte (démarrage, langue, bienvenue) ; inscription & sécurité (connexion avec indicatif international et sélecteur de pays dédié, création de compte distincte, KYC en 10 étapes, PIN, biométrie, notifications) ; premier accès (état vide, accueil) ; créer/rejoindre un groupe (étapes de création, règles, adhésion, tirage au sort) ; vie quotidienne du groupe (détail, cotisation par Mobile Money ou paiement international — carte bancaire, virement —, reçu, discussion) ; membres & administration (ajout/retrait, désignation du caissier et compte de dépôt, sortie volontaire d'un membre avec remboursement ou règlement du solde dû) ; évènements communautaires (cagnotte libre pour deuil, mariage, naissance, maladie) ; prêts internes (demande, vote collectif, contrat signé électroniquement, remboursement) ; suivi & traçabilité (historique, export, notifications, clôture de cycle) ; et enfin profil & paramètres (édition, devise d'affichage et pays de résidence, aide et support). Palette et typographie reprennent l'identité posée dans le cahier des charges (navy / or), avec la roue de rotation comme motif signature du produit — un cercle qui, précisément, ne s'arrête pas aux frontières. Chaque écran intègre des micro-animations (apparition en cascade, reflets animés sur les montants et boutons, pulsations sur les éléments live) pour renforcer l'aspect vivant et engageant de l'interface.</p>
+  <div class="legend">
+    <span>Fraunces — titres</span>
+    <span>Inter — texte</span>
+    <span>IBM Plex Mono — montants & données</span>
+    <span>🌍 Diaspora — écrans adaptés</span>
+    <span>🚪 Sortie de groupe — écrans adaptés</span>
+  </div>
+</div>
+
+<div class="grid">
+
+  <div class="catlabel" style="width:100%; text-align:center; margin:38px 0 -6px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--navy); background:var(--gold-l); padding:6px 16px; border-radius:20px; font-weight:700;">DÉCOUVERTE</span></div>
+
+<!-- 1. SPLASH -->
+  <div class="unit">
+    <div class="tag">01 · LANCEMENT</div>
+    <h3>Écran de démarrage</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body" style="background:var(--navy);">
+        <div class="emptywrap">
+          <svg width="84" height="84" viewBox="0 0 84 84" style="margin-bottom:18px;">
+            <circle cx="42" cy="42" r="34" fill="none" stroke="#3A4372" stroke-width="2"/>
+            <circle cx="42" cy="8" r="6" fill="#E8C989"/>
+            <circle cx="70" cy="24" r="4.5" fill="#5A6394"/>
+            <circle cx="70" cy="60" r="4.5" fill="#5A6394"/>
+            <circle cx="42" cy="76" r="4.5" fill="#5A6394"/>
+            <circle cx="14" cy="60" r="4.5" fill="#5A6394"/>
+            <circle cx="14" cy="24" r="4.5" fill="#5A6394"/>
+          </svg>
+          <div style="font-family:'Fraunces',serif; font-size:26px; font-weight:600; color:#fff;">Cercle</div>
+        </div>
+        <div style="position:absolute; bottom:36px; left:0; right:0; text-align:center;">
+          <div class="spin" style="margin:0 auto 10px;"></div>
+          <div style="font-size:10.5px; color:#8A90B5; font-family:'IBM Plex Mono',monospace;">v1.0.0</div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 2. LANGUAGE SELECTION -->
+  <div class="unit">
+    <div class="tag">02 · LANGUE</div>
+    <h3>Choix de la langue</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body" style="background:var(--navy); color:#fff;">
+        <div class="scroll" style="padding-top:60px;">
+          <div style="text-align:center; margin-bottom:28px;">
+            <div style="font-family:'Fraunces',serif; font-size:22px; font-weight:600;">Bienvenue</div>
+            <div style="font-size:12px; color:#B9BFDA; margin-top:6px;">Choisissez votre langue · Choose your language</div>
+          </div>
+          <div class="doctypecard on" style="background:#232C52; border-color:var(--gold);"><div class="dic">🇫🇷</div><div class="dtx"><div class="t" style="color:#fff;">Français</div><div class="s" style="color:#B9BFDA;">Langue par défaut</div></div><div class="radiodot on"></div></div>
+          <div class="doctypecard" style="background:#232C52; border-color:#3A4372;"><div class="dic">🇬🇧</div><div class="dtx"><div class="t" style="color:#fff;">English</div><div class="s" style="color:#B9BFDA;">Switch anytime in settings</div></div><div class="radiodot"></div></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px;">
+        <div class="btn primary">Continuer</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 3. WELCOME CAROUSEL -->
+  <div class="unit">
+    <div class="tag">03 · BIENVENUE</div>
+    <h3>Écran d'introduction</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body" style="background:var(--navy); color:#fff;">
+        <div style="position:absolute; top:20px; right:20px; font-size:11px; color:#B9BFDA; font-weight:600;">Passer</div>
+        <div class="emptywrap">
+          <svg width="120" height="120" viewBox="0 0 120 120" style="margin-bottom:26px;">
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#3A4372" stroke-width="2"/>
+            <circle cx="60" cy="12" r="7" fill="#E8C989"/>
+            <circle cx="98" cy="35" r="6" fill="#5A6394"/>
+            <circle cx="98" cy="85" r="6" fill="#5A6394"/>
+            <circle cx="60" cy="108" r="6" fill="#5A6394"/>
+            <circle cx="22" cy="85" r="6" fill="#5A6394"/>
+            <circle cx="22" cy="35" r="6" fill="#5A6394"/>
+            <path d="M60,60 L60,12" stroke="#E8C989" stroke-width="1.5" stroke-dasharray="2 3"/>
+          </svg>
+          <div style="font-family:'Fraunces',serif; font-size:22px; font-weight:600; margin-bottom:10px;">Chacun son tour, en toute confiance</div>
+          <div style="font-size:13px; color:#B9BFDA; line-height:1.6;">Cotisez, empruntez et suivez chaque franc avec les membres de votre groupe — où que vous soyez.</div>
+          <div class="dotpage"><i class="on"></i><i></i><i></i></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:transparent;">
+        <div class="btn primary">Suivant</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="catlabel" style="width:100%; text-align:center; margin:38px 0 -6px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--navy); background:var(--gold-l); padding:6px 16px; border-radius:20px; font-weight:700;">INSCRIPTION & SÉCURITÉ</span></div>
+
+<!-- 4. LOGIN -->
+  <div class="unit">
+    <div class="tag">04 · AUTHENTIFICATION</div>
+    <h3>Connexion</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body" style="background:var(--navy); align-items:center; justify-content:center; padding:0 26px;">
+        <svg width="72" height="72" viewBox="0 0 72 72" style="margin-bottom:18px;">
+          <circle cx="36" cy="36" r="30" fill="none" stroke="#3A4372" stroke-width="2"/>
+          <circle cx="36" cy="6" r="5" fill="#E8C989"/>
+          <circle cx="60" cy="20" r="4" fill="#5A6394"/>
+          <circle cx="60" cy="52" r="4" fill="#5A6394"/>
+          <circle cx="36" cy="66" r="4" fill="#5A6394"/>
+          <circle cx="12" cy="52" r="4" fill="#5A6394"/>
+          <circle cx="12" cy="20" r="4" fill="#5A6394"/>
+        </svg>
+        <div style="font-family:'Fraunces',serif; color:#fff; font-size:30px; font-weight:600; margin-bottom:6px;">Cercle</div>
+        <div style="font-family:'Inter'; color:#B9BFDA; font-size:12.5px; text-align:center; margin-bottom:34px; line-height:1.5;">Vos tontines, sans les cahiers.</div>
+        <div style="width:100%;">
+          <div class="field"><label style="color:#B9BFDA;">Numéro de téléphone</label>
+            <div style="display:flex; gap:8px;">
+              <div class="box" style="background:#232C52; border-color:#3A4372; color:#fff; width:84px; flex:none; text-align:center;">🇨🇲 +237 ▾</div>
+              <div class="box" style="background:#232C52; border-color:#3A4372; color:#fff; flex:1;">6 XX XX XX XX</div>
+            </div>
+          </div>
+          <div style="font-size:10.5px; color:#8A90B5; margin:-8px 0 14px; line-height:1.5;">🌍 Membre de la diaspora ? Sélectionnez l'indicatif de votre pays de résidence.</div>
+          <div class="btn primary" style="margin-bottom:10px;">Continuer</div>
+          <div style="text-align:center; font-size:11.5px; color:#8A90B5; margin-top:6px;">Pas encore de compte ? <b style="color:var(--gold-l);">Créer un compte</b></div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 5. OTP VERIFICATION -->
+  <div class="unit">
+    <div class="tag">05 · INSCRIPTION</div>
+    <h3>Vérification du code SMS</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="scroll" style="padding-top:40px; text-align:center;">
+          <div style="font-size:30px; margin-bottom:14px;">💬</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy); margin-bottom:8px;">Vérifiez votre numéro</div>
+          <div style="font-size:12px; color:var(--ink-soft); line-height:1.5;">Un code à 6 chiffres a été envoyé au<br><b style="color:var(--navy);">+237 6 77 XX XX XX</b></div>
+          <div class="otprow">
+            <div class="d on">4</div><div class="d on">8</div><div class="d on">1</div><div class="d">·</div><div class="d">·</div><div class="d">·</div>
+          </div>
+          <div style="font-size:11.5px; color:var(--ink-soft);">Renvoyer le code dans <b style="color:var(--navy);">00:42</b></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn primary">Vérifier</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 6. KYC INTRO -->
+  <div class="unit">
+    <div class="tag">06 · KYC</div>
+    <h3>Vérification d'identité — Intro</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:14px 20px 4px;"><div class="backbtn">←</div>
+          <div style="font-size:11px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace;">Étape 2 sur 3</div>
+          <div class="progressbar"><i style="width:50%;"></i></div>
+        </div>
+        <div class="scroll" style="text-align:center; padding-top:20px;">
+          <div style="font-size:44px; margin-bottom:14px;">🪪</div>
+          <div style="font-family:'Fraunces',serif; font-size:20px; font-weight:600; color:var(--navy); margin-bottom:8px;">Vérifions votre identité</div>
+          <p style="font-size:12px; color:var(--ink-soft); line-height:1.6; margin:0 0 20px;">Obligatoire avant de créer ou rejoindre un groupe, conformément à la réglementation. Prévoyez votre pièce d'identité et 2 minutes.</p>
+          <div class="card" style="text-align:left;">
+            <div class="menurow" style="border-bottom:1px solid var(--line);"><span>1. Choisir un document</span><span class="r">CNI, passeport…</span></div>
+            <div class="menurow" style="border-bottom:1px solid var(--line);"><span>2. Photographier recto/verso</span><span class="r">30 sec</span></div>
+            <div class="menurow"><span>3. Selfie de vérification</span><span class="r">15 sec</span></div>
+          </div>
+          <div class="switchrow" style="margin-top:6px;"><div><div class="lab">J'accepte le traitement de mes données</div><div class="sub">Conformément à la politique de confidentialité</div></div><div class="sw on"><i></i></div></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn dark">Commencer la vérification</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 7. KYC DOCUMENT CHOICE -->
+  <div class="unit">
+    <div class="tag">07 · KYC</div>
+    <h3>Choix du document</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:14px 20px 4px;"><div class="backbtn">←</div>
+          <div style="font-size:11px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace;">Étape 2 sur 3</div>
+          <div class="progressbar"><i style="width:56%;"></i></div>
+        </div>
+        <div class="scroll">
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy); margin:10px 0 4px;">Quel document allez-vous utiliser ?</div>
+          <p style="font-size:12px; color:var(--ink-soft); line-height:1.5; margin:0 0 18px;">Choisissez une pièce d'identité en cours de validité.</p>
+          <div class="doctypecard on"><div class="dic">🪪</div><div class="dtx"><div class="t">Carte Nationale d'Identité</div><div class="s">Recto et verso requis</div></div><div class="radiodot on"></div></div>
+          <div class="doctypecard"><div class="dic">📘</div><div class="dtx"><div class="t">Passeport</div><div class="s">Page photo uniquement</div></div><div class="radiodot"></div></div>
+          <div class="doctypecard"><div class="dic">🚗</div><div class="dtx"><div class="t">Permis de conduire</div><div class="s">Recto et verso requis</div></div><div class="radiodot"></div></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn dark">Continuer</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 8. KYC CAPTURE RECTO -->
+  <div class="unit">
+    <div class="tag">08 · KYC</div>
+    <h3>Capture — recto de la pièce</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="camera">
+        <div class="camtop"><span>✕</span><span style="font-size:11px; font-family:'IBM Plex Mono',monospace; color:var(--gold-l);">RECTO · 1/2</span><span>⚡</span></div>
+        <div class="camguide">
+          <div class="docframe"><i></i><i></i><i></i><i></i><div class="scanline"></div></div>
+          <div class="caminstruction">Placez le <b>recto</b> de votre CNI dans le cadre, sur une surface plane et bien éclairée</div>
+        </div>
+        <div class="camfoot"><div class="camside">🖼</div><div class="shutterwrap"><i></i></div><div class="camside" style="opacity:0;">·</div></div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 9. KYC CAPTURE VERSO -->
+  <div class="unit">
+    <div class="tag">09 · KYC</div>
+    <h3>Capture — verso de la pièce</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="camera">
+        <div class="camtop"><span>✕</span><span style="font-size:11px; font-family:'IBM Plex Mono',monospace; color:var(--gold-l);">VERSO · 2/2</span><span>⚡</span></div>
+        <div class="camguide">
+          <div class="docframe"><i></i><i></i><i></i><i></i><div class="scanline"></div></div>
+          <div class="caminstruction">Retournez votre CNI et placez le <b>verso</b> dans le cadre</div>
+        </div>
+        <div class="camfoot"><div class="camside">🖼</div><div class="shutterwrap"><i></i></div><div class="camside" style="opacity:0;">·</div></div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 10. KYC REVIEW DOCS -->
+  <div class="unit">
+    <div class="tag">10 · KYC</div>
+    <h3>Vérification des photos</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Les photos sont-elles nettes ?</div></div>
+        <div class="scroll">
+          <div class="reviewshot"><div class="imgph">🪪</div><div class="capt">✓ Recto — texte lisible</div></div>
+          <div class="reviewshot"><div class="imgph">🪪</div><div class="capt">✓ Verso — texte lisible</div></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper); display:flex; gap:10px;">
+        <div class="btn ghost" style="flex:1;">Reprendre</div>
+        <div class="btn dark" style="flex:1;">Valider</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 11. KYC SELFIE -->
+  <div class="unit">
+    <div class="tag">11 · KYC</div>
+    <h3>Capture — selfie de vérification</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="camera">
+        <div class="camtop"><span>✕</span><span style="font-size:11px; font-family:'IBM Plex Mono',monospace; color:var(--gold-l);">SELFIE</span><span style="opacity:0;">⚡</span></div>
+        <div class="camguide">
+          <div class="ovalframe"><div class="scanline" style="left:12%; right:12%;"></div></div>
+          <div class="caminstruction">Centrez votre visage dans l'ovale puis <b>tournez lentement la tête</b> à droite</div>
+        </div>
+        <div class="camfoot"><div class="camside" style="opacity:0;">·</div><div class="shutterwrap"><i></i></div><div class="camside" style="opacity:0;">·</div></div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 12. KYC INFOS -->
+  <div class="unit">
+    <div class="tag">12 · KYC</div>
+    <h3>Informations complémentaires</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:14px 20px 4px;"><div class="backbtn">←</div>
+          <div style="font-size:11px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace;">Étape 2 sur 3</div>
+          <div class="progressbar"><i style="width:88%;"></i></div>
+        </div>
+        <div class="scroll">
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy); margin:10px 0 16px;">Quelques informations</div>
+          <div class="field"><label>Nom complet (tel que sur la pièce)</label><div class="box">Amina Moussa</div></div>
+          <div class="field"><label>Date de naissance</label><div class="box" style="font-family:'IBM Plex Mono',monospace;">14 / 03 / 1990</div></div>
+          <div class="field"><label>Profession</label><div class="box">Commerçante</div></div>
+          <div class="field"><label>Ville de résidence</label><div class="box">Douala</div></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn dark">Envoyer pour vérification</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 13. KYC PROCESSING -->
+  <div class="unit">
+    <div class="tag">13 · KYC</div>
+    <h3>Analyse en cours</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body" style="background:var(--navy); color:#fff;">
+        <div class="scanningwrap">
+          <div class="scancircle">
+            <svg viewBox="0 0 104 104"><circle cx="52" cy="52" r="46" fill="none" stroke="#3A4372" stroke-width="4"/><circle cx="52" cy="52" r="46" fill="none" stroke="var(--gold)" stroke-width="4" stroke-linecap="round" stroke-dasharray="80 209"/></svg>
+            <div class="ic">🔍</div>
+          </div>
+          <div style="font-family:'Fraunces',serif; font-size:18px; font-weight:600;">Analyse de votre dossier</div>
+          <div style="font-size:12px; color:#B9BFDA; margin-top:6px;">Cela prend généralement moins de 2 minutes</div>
+          <div class="scansteps">
+            <div class="scanstep"><div class="dotcheck">✓</div>Documents reçus</div>
+            <div class="scanstep"><div class="dotcheck">✓</div>Lisibilité vérifiée</div>
+            <div class="scanstep pending"><div class="dotcheck"></div>Correspondance du visage</div>
+            <div class="scanstep pending"><div class="dotcheck"></div>Vérification finale</div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 14. KYC SUCCESS -->
+  <div class="unit">
+    <div class="tag">14 · KYC</div>
+    <h3>Identité vérifiée</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="scroll" style="padding-top:40px; text-align:center;">
+          <div class="resulticon" style="background:var(--green-bg); color:var(--green);">✓</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Identité vérifiée</div>
+          <div style="font-size:12px; color:var(--ink-soft); margin:8px 0 20px; line-height:1.6; padding:0 14px;">Votre compte est maintenant certifié. Vous pouvez créer ou rejoindre un groupe de tontine.</div>
+          <div class="card" style="text-align:left;">
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle">Statut</div></div><span class="chip paid">Certifié</span></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle">Vérifié le</div></div><div style="font-size:12px; font-family:'IBM Plex Mono',monospace;">22/07/2026</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn primary">Continuer</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 15. KYC REJECTED -->
+  <div class="unit">
+    <div class="tag">15 · KYC</div>
+    <h3>Vérification refusée</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="scroll" style="padding-top:40px; text-align:center;">
+          <div class="resulticon" style="background:var(--terra-bg); color:var(--terra);">✕</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Vérification impossible</div>
+          <div style="font-size:12px; color:var(--ink-soft); margin:8px 0 20px; line-height:1.6; padding:0 10px;">La photo du document est trop floue pour être validée automatiquement.</div>
+          <div class="card" style="text-align:left;">
+            <div class="sectitle" style="margin-top:0;">Conseils</div>
+            <div style="font-size:12px; color:var(--ink); line-height:1.6;">Utilisez un fond uni, évitez les reflets et assurez-vous que les 4 coins du document sont visibles.</div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn dark">Réessayer</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 16. CREATE PIN -->
+  <div class="unit">
+    <div class="tag">16 · INSCRIPTION</div>
+    <h3>Création du code PIN</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body" style="background:var(--navy); color:#fff;">
+        <div style="padding-top:36px; text-align:center;">
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; margin-bottom:8px;">Créez votre code PIN</div>
+          <div style="font-size:12px; color:#B9BFDA; padding:0 30px; line-height:1.5;">Ce code protège l'accès à votre compte et vos transactions.</div>
+          <div class="pindots" style="margin:26px 0 6px;"><i class="on"></i><i class="on"></i><i></i><i></i></div>
+        </div>
+        <div class="keypad">
+          <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+          <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+          <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+          <div class="key ghost2"></div><div class="key">0</div><div class="key ghost2">⌫</div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 17. PIN CONFIRM -->
+  <div class="unit">
+    <div class="tag">17 · SÉCURITÉ</div>
+    <h3>Confirmation du code PIN</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body" style="background:var(--navy); color:#fff;">
+        <div class="scroll" style="padding-top:50px; text-align:center;">
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600;">Confirmez votre code</div>
+          <div style="font-size:12px; color:#B9BFDA; margin-top:6px; margin-bottom:8px;">Saisissez à nouveau le même code à 4 chiffres</div>
+          <div class="pindots" style="margin:26px 0;"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>
+          <div class="keypad">
+            <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+            <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+            <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+            <div class="key ghost2"></div><div class="key">0</div><div class="key ghost2">⌫</div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 18. BIOMETRIC SETUP -->
+  <div class="unit">
+    <div class="tag">18 · SÉCURITÉ</div>
+    <h3>Activer la biométrie</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="scroll" style="padding-top:50px; text-align:center;">
+          <div style="width:88px; height:88px; border-radius:50%; background:var(--green-bg); display:flex; align-items:center; justify-content:center; font-size:38px; margin:0 auto 22px; animation:softGlow 2.4s ease-in-out infinite;">🫆</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Déverrouillage rapide</div>
+          <div style="font-size:12px; color:var(--ink-soft); margin:8px 0 22px; line-height:1.6; padding:0 16px;">Utilisez votre empreinte digitale ou Face ID pour ouvrir Cercle plus rapidement, en plus de votre code PIN.</div>
+          <div class="switchrow"><div><div class="lab">Empreinte digitale / Face ID</div><div class="sub">Recommandé pour un accès rapide</div></div><div class="sw on"><i></i></div></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn primary">Activer</div>
+        <div style="text-align:center; font-size:12px; color:var(--ink-soft); margin-top:12px; font-weight:600;">Plus tard</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 19. NOTIFICATION PERMISSION -->
+  <div class="unit">
+    <div class="tag">19 · AUTORISATION</div>
+    <h3>Activer les notifications</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="emptywrap">
+          <div style="width:74px; height:74px; border-radius:50%; background:#FBF3E2; display:flex; align-items:center; justify-content:center; font-size:32px; margin-bottom:22px;">🔔</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy); margin-bottom:10px;">Restez informée à temps</div>
+          <div style="font-size:12px; color:var(--ink-soft); line-height:1.6;">Recevez un rappel avant chaque cotisation, et soyez alertée dès qu'un versement ou un remboursement vous concerne.</div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn primary" style="margin-bottom:10px;">Activer les notifications</div>
+        <div style="text-align:center; font-size:11.5px; color:var(--ink-soft); font-weight:600;">Plus tard</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 20. SECURITY -->
+  <div class="unit">
+    <div class="tag">20 · SÉCURITÉ</div>
+    <h3>Sécurité & PIN</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Sécurité</div></div>
+        <div class="scroll">
+          <div class="sectitle">Code PIN</div>
+          <div class="pindots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>
+          <div class="btn ghost" style="margin-bottom:16px;">Modifier mon code PIN</div>
+
+          <div class="sectitle">Biométrie</div>
+          <div class="switchrow"><div><div class="lab">Empreinte / Face ID</div><div class="sub">Déverrouiller l'app sans code PIN</div></div><div class="sw on"><i></i></div></div>
+
+          <div class="sectitle">Appareils connectés</div>
+          <div class="memrow"><div class="av" style="background:var(--green);">📱</div><div class="memname">iPhone 13 <span style="color:var(--ink-soft); font-weight:500;">(cet appareil)</span></div><span class="chip paid">Actif</span></div>
+          <div class="memrow"><div class="av">📱</div><div class="memname">Samsung A14</div><span class="chip neutral">12 juin</span></div>
+
+          <div class="btn ghost" style="border-color:var(--terra); color:var(--terra); margin-top:14px;">Déconnecter tous les autres appareils</div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="catlabel" style="width:100%; text-align:center; margin:38px 0 -6px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--navy); background:var(--gold-l); padding:6px 16px; border-radius:20px; font-weight:700;">PREMIER ACCÈS</span></div>
+
+<!-- 21. EMPTY STATE -->
+  <div class="unit">
+    <div class="tag">21 · ÉTAT VIDE</div>
+    <h3>Aucun groupe pour l'instant</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="app-header"><div class="greet">Bonjour</div><div class="name">Paul Etoundi</div></div>
+        <div class="emptywrap" style="color:var(--ink);">
+          <svg width="88" height="88" viewBox="0 0 88 88" style="margin-bottom:20px;">
+            <circle cx="44" cy="44" r="36" fill="none" stroke="#E7E1D4" stroke-width="2.5" stroke-dasharray="4 5"/>
+            <circle cx="44" cy="10" r="5" fill="#E7E1D4"/>
+            <circle cx="74" cy="27" r="5" fill="#E7E1D4"/>
+            <circle cx="74" cy="61" r="5" fill="#E7E1D4"/>
+            <circle cx="44" cy="78" r="5" fill="#E7E1D4"/>
+            <circle cx="14" cy="61" r="5" fill="#E7E1D4"/>
+            <circle cx="14" cy="27" r="5" fill="#E7E1D4"/>
+          </svg>
+          <div style="font-family:'Fraunces',serif; font-size:17px; font-weight:600; color:var(--navy); margin-bottom:8px;">Vous n'avez encore rejoint aucun groupe</div>
+          <div style="font-size:12px; color:var(--ink-soft); line-height:1.6; margin-bottom:24px;">Créez votre propre tontine ou rejoignez-en une avec un code d'invitation.</div>
+          <div style="width:100%;">
+            <div class="btn primary" style="margin-bottom:10px;">+ Créer un groupe</div>
+            <div class="btn ghost">Rejoindre avec un code</div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 22. HOME -->
+  <div class="unit">
+    <div class="tag">22 · ACCUEIL</div>
+    <h3>Mes groupes</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="app-header">
+          <div class="greet">Bonjour</div>
+          <div class="name">Amina Njoya</div>
+        </div>
+        <div class="scroll" style="padding-top:16px;">
+          <div class="balance-card">
+            <div class="lbl">TOTAL COTISÉ CE MOIS</div>
+            <div class="amt">85 000 FCFA</div>
+            <div class="sub">3 groupes actifs · 1 cotisation en attente</div>
+          </div>
+          <div class="sectitle">Mes groupes</div>
+
+          <div class="card">
+            <div class="grouprow">
+              <div class="ringwrap">
+                <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="27" fill="none" stroke="#E7E1D4" stroke-width="4"/>
+                <circle cx="32" cy="32" r="27" fill="none" stroke="#C9962C" stroke-width="4" stroke-dasharray="169.6" stroke-dashoffset="55" stroke-linecap="round" transform="rotate(-90 32 32)"/></svg>
+              </div>
+              <div style="flex:1;">
+                <div class="gname">Njangi Marché Central</div>
+                <div class="gmeta">Cycle 4/12 · 12 membres</div>
+              </div>
+              <span class="chip pending">En attente</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="grouprow">
+              <div class="ringwrap">
+                <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="27" fill="none" stroke="#E7E1D4" stroke-width="4"/>
+                <circle cx="32" cy="32" r="27" fill="none" stroke="#2F8F5B" stroke-width="4" stroke-dasharray="169.6" stroke-dashoffset="20" stroke-linecap="round" transform="rotate(-90 32 32)"/></svg>
+              </div>
+              <div style="flex:1;">
+                <div class="gname">Famille Njoya</div>
+                <div class="gmeta">Cycle 9/12 · 8 membres</div>
+              </div>
+              <span class="chip paid">À jour</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="grouprow">
+              <div class="ringwrap">
+                <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="27" fill="none" stroke="#E7E1D4" stroke-width="4"/>
+                <circle cx="32" cy="32" r="27" fill="none" stroke="#2F8F5B" stroke-width="4" stroke-dasharray="169.6" stroke-dashoffset="90" stroke-linecap="round" transform="rotate(-90 32 32)"/></svg>
+              </div>
+              <div style="flex:1;">
+                <div class="gname">Collègues Bureau Douala</div>
+                <div class="gmeta">Cycle 2/6 · 6 membres</div>
+              </div>
+              <span class="chip paid">À jour</span>
+            </div>
+          </div>
+
+          <div class="btn ghost" style="margin-top:6px;">+ Rejoindre ou créer un groupe</div>
+        </div>
+        <div class="tabbar">
+          <div class="tabitem active"><div class="tabicon">⌂</div>Accueil</div>
+          <div class="tabitem"><div class="tabicon">◎</div>Groupes</div>
+          <div class="tabitem"><div class="tabicon">₣</div>Prêts</div>
+          <div class="tabitem"><div class="tabicon">≡</div>Historique</div>
+          <div class="tabitem"><div class="tabicon">☺</div>Profil</div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="catlabel" style="width:100%; text-align:center; margin:38px 0 -6px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--navy); background:var(--gold-l); padding:6px 16px; border-radius:20px; font-weight:700;">CRÉER / REJOINDRE UN GROUPE</span></div>
+
+<!-- 23. CREATE GROUP STEP 1 -->
+  <div class="unit">
+    <div class="tag">23 · CRÉATION</div>
+    <h3>Créer un groupe — Règles</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div>
+          <div style="font-size:11px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace;">Étape 1 sur 3</div>
+          <div class="progressbar"><i style="width:33%;"></i></div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy); margin-top:10px;">Nouveau groupe</div>
+        </div>
+        <div class="scroll">
+          <div class="field"><label>Nom du groupe</label><div class="box" style="font-family:'Inter'; font-weight:600; color:var(--ink);">Njangi Quartier Bonamoussadi</div></div>
+          <div class="field"><label>Montant de cotisation</label><div class="box">10 000 <span style="font-size:11px; color:var(--ink-soft); font-family:'Inter';">FCFA / cycle</span></div></div>
+          <div class="field"><label>Périodicité</label>
+            <div class="pillrow"><span class="pill">Hebdomadaire</span><span class="pill on">Mensuelle</span></div>
+          </div>
+          <div class="field"><label>Mode de fonctionnement</label>
+            <div class="pillrow"><span class="pill on">Rotative</span><span class="pill on">Prêts internes</span><span class="pill">Mixte auto</span></div>
+          </div>
+          <div class="field"><label>Nombre de membres visé</label><div class="box">12</div></div>
+          <div class="switchrow"><div><div class="lab">🌍 Ouvert aux membres de la diaspora</div><div class="sub">Autorise les cotisations depuis l'étranger (carte bancaire, virement)</div></div><div class="sw on"><i></i></div></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn dark">Continuer</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 24. CREATE GROUP STEP 2 -->
+  <div class="unit">
+    <div class="tag">24 · CRÉATION</div>
+    <h3>Créer un groupe — Inviter</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div>
+          <div style="font-size:11px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace;">Étape 2 sur 3</div>
+          <div class="progressbar"><i style="width:66%;"></i></div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy); margin-top:10px;">Invitez vos membres</div>
+        </div>
+        <div class="scroll">
+          <div style="font-size:11.5px; color:var(--ink-soft); margin-bottom:8px;">Code d'invitation du groupe</div>
+          <div class="codebig">NJ7 · 42K</div>
+          <div style="display:flex; gap:8px; margin-bottom:18px;">
+            <div class="btn ghost" style="flex:1;">↗ WhatsApp</div>
+            <div class="btn ghost" style="flex:1;">✉ Par e-mail</div>
+          </div>
+
+          <div class="sectitle">Membres ajoutés (5)</div>
+          <div class="memrow"><div class="av" style="background:var(--gold);">AN</div><div class="memname">Amina Njoya <span style="color:var(--ink-soft); font-weight:500;">(vous, admin)</span></div></div>
+          <div class="memrow"><div class="av">JP</div><div class="memname">Jean Paul</div><span class="chip paid">Rejoint</span></div>
+          <div class="memrow"><div class="av">SK</div><div class="memname">Sarah K.</div><span class="chip pending">Invité(e)</span></div>
+          <div class="memrow"><div class="av">RT</div><div class="memname">Robert T.</div><span class="chip pending">Invité(e)</span></div>
+          <div class="memrow"><div class="av" style="background:var(--navy);">FD</div><div class="memname">Fatou D. <span style="color:var(--ink-soft); font-weight:500;">🇫🇷 Paris</span></div><span class="chip pending">Invité(e) · e-mail</span></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn primary">Créer le groupe</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 25. CREATE GROUP STEP 3 -->
+  <div class="unit">
+    <div class="tag">25 · CRÉATION</div>
+    <h3>Créer un groupe — Récapitulatif</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div>
+          <div style="font-size:11px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace;">Étape 3 sur 3</div>
+          <div class="progressbar"><i style="width:100%;"></i></div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy); margin-top:10px;">Vérifiez avant de lancer</div>
+        </div>
+        <div class="scroll">
+          <div class="card">
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle">Nom du groupe</div></div><div style="font-size:12px; font-weight:600;">Njangi Quartier Bonamoussadi</div></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle">Cotisation</div></div><div style="font-size:12px; font-weight:600;">10 000 FCFA / mois</div></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle">Mode</div></div><div style="font-size:12px; font-weight:600;">Rotatif + Prêts internes</div></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle">Membres invités</div></div><div style="font-size:12px; font-weight:600;">4</div></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle">Pénalité de retard</div></div><div style="font-size:12px; font-weight:600;">500 FCFA / jour</div></div>
+          </div>
+          <div class="switchrow"><div><div class="lab">Je confirme les règles ci-dessus</div><div class="sub">Modifiable plus tard en tant qu'admin</div></div><div class="sw on"><i></i></div></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn primary">Créer le groupe</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 26. GROUP RULES (ADMIN) -->
+  <div class="unit">
+    <div class="tag">26 · ADMINISTRATION</div>
+    <h3>Règles du groupe</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Paramètres du groupe</div><div style="font-size:11px; color:var(--ink-soft); margin-top:2px;">Visible par l'administrateur uniquement</div></div>
+        <div class="scroll">
+          <div class="sectitle">Cotisation</div>
+          <div class="field"><label>Montant</label><div class="box">10 000 FCFA</div></div>
+          <div class="field"><label>Pénalité de retard</label><div class="box">2 % / jour de retard</div></div>
+          <div class="field"><label>Délai de grâce</label><div class="box">48 heures</div></div>
+
+          <div class="sectitle">Prêts internes</div>
+          <div class="field"><label>Validation requise</label>
+            <div class="pillrow"><span class="pill">Admin seul</span><span class="pill on">Majorité</span><span class="pill">Unanimité</span></div>
+          </div>
+          <div class="field"><label>Montant maximum par prêt</label><div class="box">100 000 FCFA</div></div>
+
+          <div class="sectitle">Caissier & compte de dépôt</div>
+          <div class="walletrow">
+            <div class="walleticon" style="background:#FFC107;">M</div>
+            <div style="flex:1;"><div style="font-size:12.5px; font-weight:700; color:var(--navy);">Jean P. · Caissier</div><div style="font-size:11px; color:var(--ink-soft);">MTN MoMo · +237 6 77 •• •• 42</div></div>
+            <span class="chip neutral">Modifier →</span>
+          </div>
+
+          <div class="sectitle">Notifications</div>
+          <div class="switchrow"><div><div class="lab">Rappels de cotisation</div><div class="sub">3 jours avant l'échéance</div></div><div class="sw on"><i></i></div></div>
+          <div class="switchrow"><div><div class="lab">Alerte de retard aux membres</div><div class="sub">Visible par tout le groupe</div></div><div class="sw on"><i></i></div></div>
+
+          <div class="sectitle" style="color:var(--terra);">Zone sensible</div>
+          <div class="btn ghost" style="border-color:var(--terra); color:var(--terra);">Clôturer le groupe</div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 27. JOIN GROUP -->
+  <div class="unit">
+    <div class="tag">27 · REJOINDRE</div>
+    <h3>Rejoindre un groupe</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="scroll" style="padding-top:22px;">
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy); margin-bottom:6px;">Rejoindre avec un code</div>
+          <p style="font-size:12px; color:var(--ink-soft); margin:0 0 16px; line-height:1.5;">Demandez le code d'invitation à l'administrateur du groupe.</p>
+          <div class="field"><div class="box" style="text-align:center; font-size:18px; letter-spacing:.1em;">NJ7 · 42K</div></div>
+
+          <div class="card" style="margin-top:18px;">
+            <div style="font-size:11px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; margin-bottom:8px;">GROUPE TROUVÉ</div>
+            <div class="gname" style="font-size:16px;">Njangi Quartier Bonamoussadi</div>
+            <div class="gmeta" style="margin-bottom:10px;">12 membres visés · 4 déjà inscrits</div>
+            <div style="display:flex; gap:16px; font-size:11.5px; color:var(--ink-soft);">
+              <div><b style="color:var(--navy);">10 000</b> FCFA/cycle</div>
+              <div><b style="color:var(--navy);">Mensuelle</b></div>
+              <div><b style="color:var(--navy);">Rotative + Prêts</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn primary">Demander à rejoindre</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 28. JOIN REQUEST PENDING -->
+  <div class="unit">
+    <div class="tag">28 · REJOINDRE</div>
+    <h3>Demande envoyée</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="scroll" style="padding-top:44px; text-align:center;">
+          <div class="resulticon" style="background:#FBF3E2; color:var(--gold);">⏳</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Demande envoyée</div>
+          <div style="font-size:12px; color:var(--ink-soft); margin:8px 0 20px; line-height:1.6; padding:0 14px;">Votre demande d'adhésion à <b style="color:var(--navy);">Njangi Quartier Bonamoussadi</b> a été transmise à l'administrateur du groupe.</div>
+          <div class="card" style="text-align:left;">
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle">Statut</div></div><span class="chip pending">En attente</span></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle">Envoyée à</div></div><div style="font-size:12px;">Marthe B. (admin)</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn ghost">Retour à l'accueil</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 29. DRAW ORDER -->
+  <div class="unit">
+    <div class="tag">29 · ROTATION</div>
+    <h3>Tirage au sort de l'ordre</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="app-header"><div class="backbtn-dark">←</div><div class="name" style="font-size:18px;">Ordre de rotation</div></div>
+        <div class="scroll" style="padding-top:16px;">
+          <div class="ringbig" style="width:170px; height:170px;">
+            <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="82" fill="none" stroke="#E7E1D4" stroke-width="3"/></svg>
+            <div class="center"><div class="cyc">6 MEMBRES</div><div class="amt" style="font-size:16px;">🎲</div></div>
+            <div class="avdot" style="top:18px; left:100px; background:var(--gold);">MB</div>
+            <div class="avdot" style="top:60px; left:172px; background:var(--navy);">JP</div>
+            <div class="avdot" style="top:140px; left:172px; background:var(--navy);">SK</div>
+            <div class="avdot" style="top:182px; left:100px; background:var(--navy);">AM</div>
+            <div class="avdot" style="top:140px; left:28px; background:var(--navy);">RT</div>
+            <div class="avdot" style="top:60px; left:28px; background:var(--navy);">CN</div>
+          </div>
+          <div class="btn ghost" style="margin:8px 0 16px;">🎲 Relancer le tirage au sort</div>
+
+          <div class="sectitle">Ordre déterminé</div>
+          <div class="memrow"><div style="font-family:'IBM Plex Mono',monospace; font-weight:700; color:var(--gold); width:16px;">1</div><div class="av" style="background:var(--gold);">MB</div><div class="memname">Marthe B.</div></div>
+          <div class="memrow"><div style="font-family:'IBM Plex Mono',monospace; font-weight:700; color:var(--ink-soft); width:16px;">2</div><div class="av">JP</div><div class="memname">Jean P.</div></div>
+          <div class="memrow"><div style="font-family:'IBM Plex Mono',monospace; font-weight:700; color:var(--ink-soft); width:16px;">3</div><div class="av">SK</div><div class="memname">Sarah K.</div></div>
+          <div class="memrow"><div style="font-family:'IBM Plex Mono',monospace; font-weight:700; color:var(--ink-soft); width:16px;">4</div><div class="av">AM</div><div class="memname">Amina M.</div></div>
+          <div style="font-size:10.5px; color:var(--ink-soft); margin-top:10px; line-height:1.5;">L'ordre peut aussi être fixé manuellement par l'administrateur.</div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn primary">Valider cet ordre</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 30. DRAW ORDER RESULT -->
+  <div class="unit">
+    <div class="tag">30 · ROTATION</div>
+    <h3>Ordre confirmé</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="scroll" style="padding-top:34px; text-align:center;">
+          <div class="resulticon" style="background:var(--green-bg); color:var(--green);">✓</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Ordre de rotation confirmé</div>
+          <div style="font-size:12px; color:var(--ink-soft); margin:8px 0 18px; line-height:1.6; padding:0 10px;">Le tirage a été validé par le groupe et ne peut plus être modifié.</div>
+          <div class="card" style="text-align:left;">
+            <div class="memrow"><div style="font-family:'IBM Plex Mono',monospace; font-weight:700; color:var(--gold); width:20px;">1</div><div class="av" style="background:var(--gold);">MB</div><div class="memname">Marthe B.</div></div>
+            <div class="memrow"><div style="font-family:'IBM Plex Mono',monospace; font-weight:700; color:var(--ink-soft); width:20px;">2</div><div class="av">JP</div><div class="memname">Jean P.</div></div>
+            <div class="memrow"><div style="font-family:'IBM Plex Mono',monospace; font-weight:700; color:var(--ink-soft); width:20px;">3</div><div class="av">SK</div><div class="memname">Sarah K.</div></div>
+            <div class="memrow"><div style="font-family:'IBM Plex Mono',monospace; font-weight:700; color:var(--ink-soft); width:20px;">4</div><div class="av">AM</div><div class="memname">Amina M.</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn primary">Démarrer le cycle 1</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="catlabel" style="width:100%; text-align:center; margin:38px 0 -6px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--navy); background:var(--gold-l); padding:6px 16px; border-radius:20px; font-weight:700;">VIE QUOTIDIENNE DU GROUPE</span></div>
+
+<!-- 31. GROUP DETAIL -->
+  <div class="unit">
+    <div class="tag">31 · GROUPE</div>
+    <h3>Détail du groupe — Rotation</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="app-header">
+          <div class="backbtn-dark">←</div>
+          <div class="greet">Njangi Marché Central</div>
+          <div class="name" style="font-size:17px;">Cycle 4 sur 12</div>
+        </div>
+        <div class="scroll" style="padding-top:14px;">
+          <div class="tabs2"><span class="on">Cotisation</span><span>Prêts internes</span></div>
+
+          <div class="ringbig">
+            <svg viewBox="0 0 200 200">
+              <circle cx="100" cy="100" r="82" fill="none" stroke="#E7E1D4" stroke-width="3"/>
+            </svg>
+            <div class="center"><div class="cyc">TOUR ACTUEL</div><div class="amt">120 000</div><div class="cyc">FCFA</div></div>
+            <div class="avdot" style="top:18px; left:100px; background:var(--gold);">MB</div>
+            <div class="avdot" style="top:60px; left:172px; background:var(--navy);">JP</div>
+            <div class="avdot" style="top:140px; left:172px; background:var(--navy);">SK</div>
+            <div class="avdot" style="top:182px; left:100px; background:var(--navy);">AM</div>
+            <div class="avdot" style="top:140px; left:28px; background:var(--navy);">RT</div>
+            <div class="avdot" style="top:60px; left:28px; background:var(--navy);">CN</div>
+          </div>
+          <div style="text-align:center; font-size:11.5px; color:var(--ink-soft); margin-bottom:16px;">Bénéficiaire du tour : <b style="color:var(--navy);">Marthe B.</b> · dans 3 jours</div>
+
+          <div class="btn primary" style="margin-bottom:8px;">Payer ma cotisation — 10 000 FCFA</div>
+          <div style="font-size:10.5px; color:var(--ink-soft); text-align:center; margin-bottom:14px;">Versée sur le compte de dépôt du caissier (Jean P.)</div>
+          <div class="walletrow" style="margin-bottom:16px;">
+            <div class="walleticon" style="background:var(--terra-bg); color:var(--terra);">🕯️</div>
+            <div style="flex:1;"><div style="font-size:12.5px; font-weight:700; color:var(--navy);">Évènements</div><div style="font-size:11px; color:var(--ink-soft);">1 cagnotte ouverte · Deuil, Naissance</div></div>
+            <span class="chip neutral">Voir →</span>
+          </div>
+
+          <div class="sectitle">Statut des membres</div>
+          <div class="memrow"><div class="av" style="background:var(--gold);">MB</div><div class="memname">Marthe B. <span style="color:var(--ink-soft); font-weight:500;">(bénéficiaire)</span></div><span class="chip neutral">—</span></div>
+          <div class="memrow"><div class="av">JP</div><div class="memname">Jean P.</div><span class="chip paid">Payé</span></div>
+          <div class="memrow"><div class="av">SK</div><div class="memname">Sarah K.</div><span class="chip paid">Payé</span></div>
+          <div class="memrow"><div class="av">AM</div><div class="memname">Amina M. (vous)</div><span class="chip pending">En attente</span></div>
+          <div class="memrow"><div class="av">RT</div><div class="memname">Robert T.</div><span class="chip pending">En retard</span></div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 32. MOBILE MONEY PIN PROMPT -->
+  <div class="unit">
+    <div class="tag">32 · PAIEMENT</div>
+    <h3>Confirmation via l'opérateur</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="app-header"><div class="backbtn-dark">←</div><div class="greet">Njangi Marché Central</div><div class="name" style="font-size:17px;">Payer ma cotisation</div></div>
+        <div class="scroll" style="filter:blur(1.5px); opacity:.5;">
+          <div class="card"><div class="sectitle" style="margin-top:0;">Récapitulatif</div><div class="ledgerrow"><div class="lmain"><div class="ltitle">Montant</div></div><div>10 000 FCFA</div></div></div>
+        </div>
+        <div class="ussdmodal">
+          <div class="ussdbox">
+            <div class="op">MTN MOBILE MONEY</div>
+            <div class="msg">Entrez votre code secret MoMo pour confirmer le paiement de <b>10 000 FCFA</b> à CERCLE.</div>
+            <div class="pinrow"><i class="on"></i><i class="on"></i><i></i><i></i></div>
+            <div class="ubtns"><span class="cancel">Annuler</span><span class="ok">Valider</span></div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 33. PAYMENT PROCESSING -->
+  <div class="unit">
+    <div class="tag">33 · PAIEMENT</div>
+    <h3>Paiement en cours</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body" style="background:var(--navy); color:#fff;">
+        <div class="emptywrap">
+          <div class="spin"></div>
+          <div style="font-family:'Fraunces',serif; font-size:18px; font-weight:600;">Confirmation en cours…</div>
+          <div style="font-size:12px; color:#B9BFDA; margin-top:8px;">En attente de la validation MTN Mobile Money. Ne fermez pas l'application.</div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 34. PAYMENT METHODS -->
+  <div class="unit">
+    <div class="tag">34 · PAIEMENT</div>
+    <h3>Moyens de paiement</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Moyens de paiement</div></div>
+        <div class="scroll">
+          <div class="sectitle">Comptes liés</div>
+          <div class="walletrow">
+            <div class="walleticon" style="background:#FFC107;">M</div>
+            <div style="flex:1;"><div style="font-size:12.5px; font-weight:700; color:var(--navy);">MTN MoMo</div><div style="font-size:11px; color:var(--ink-soft);">+237 6 77 •• •• 42</div></div>
+            <span class="chip paid">Vérifié</span>
+          </div>
+          <div class="walletrow">
+            <div class="walleticon" style="background:#FF6600;">O</div>
+            <div style="flex:1;"><div style="font-size:12.5px; font-weight:700; color:var(--navy);">Orange Money</div><div style="font-size:11px; color:var(--ink-soft);">Non lié</div></div>
+            <span class="chip neutral">Lier →</span>
+          </div>
+          <div class="btn ghost" style="margin-top:16px;">+ Ajouter un moyen de paiement</div>
+          <div style="font-size:10.5px; color:var(--ink-soft); margin-top:16px; line-height:1.6;">🔒 Vos identifiants Mobile Money ne sont jamais stockés par Cercle. Chaque paiement est confirmé directement via votre opérateur.</div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 35. ADD PAYMENT METHOD -->
+  <div class="unit">
+    <div class="tag">35 · PAIEMENT</div>
+    <h3>Ajouter un moyen de paiement</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Lier un compte Mobile Money</div></div>
+        <div class="scroll">
+          <div class="sectitle">Opérateur</div>
+          <div class="doctypecard on"><div class="dic" style="width:26px; height:26px; border-radius:7px; background:#FFC107; color:#5A4300; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px;">M</div><div class="dtx"><div class="t">MTN Mobile Money</div></div><div class="radiodot on"></div></div>
+          <div class="doctypecard"><div class="dic" style="width:26px; height:26px; border-radius:7px; background:#FF6600; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px;">O</div><div class="dtx"><div class="t">Orange Money</div></div><div class="radiodot"></div></div>
+          <div class="field" style="margin-top:16px;"><label>Numéro associé au compte</label><div class="box">+237 6 XX XX XX XX</div></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn dark">Lier ce compte</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 36. ADD BANK CARD -->
+  <div class="unit">
+    <div class="tag">36 · PAIEMENT</div>
+    <h3>Ajouter une carte bancaire</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Carte bancaire</div><div style="font-size:11px; color:var(--ink-soft); margin-top:2px;">🌍 Cotisez depuis l'étranger pour ce groupe ouvert à la diaspora.</div></div>
+        <div class="scroll">
+          <div class="sectitle">Type de carte</div>
+          <div class="doctypecard on"><div class="dic" style="width:26px; height:26px; border-radius:7px; background:#1A1F71; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:10px;">VISA</div><div class="dtx"><div class="t">Visa</div></div><div class="radiodot on"></div></div>
+          <div class="doctypecard"><div class="dic" style="width:26px; height:26px; border-radius:7px; background:#EB001B; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:9px;">MC</div><div class="dtx"><div class="t">Mastercard</div></div><div class="radiodot"></div></div>
+          <div class="field" style="margin-top:16px;"><label>Numéro de carte</label><div class="box">•••• •••• •••• 4821</div></div>
+          <div style="display:flex; gap:10px;">
+            <div class="field" style="flex:1;"><label>Expiration</label><div class="box">09 / 28</div></div>
+            <div class="field" style="flex:1;"><label>CVV</label><div class="box">•••</div></div>
+          </div>
+          <div style="font-size:10.5px; color:var(--ink-soft); margin-top:2px; line-height:1.6;">🔒 Carte traitée et tokenisée par notre prestataire de paiement. Cercle ne stocke jamais votre numéro complet ni votre CVV.</div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn dark">Enregistrer la carte</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 37. ADD BANK TRANSFER -->
+  <div class="unit">
+    <div class="tag">37 · PAIEMENT</div>
+    <h3>Ajouter un virement</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Virement bancaire</div><div style="font-size:11px; color:var(--ink-soft); margin-top:2px;">🌍 Pour les cotisations depuis un compte bancaire à l'étranger.</div></div>
+        <div class="scroll">
+          <div class="field"><label>Pays de la banque</label><div class="box">🇫🇷 France</div></div>
+          <div class="field"><label>Nom de la banque</label><div class="box">BNP Paribas</div></div>
+          <div class="field"><label>IBAN</label><div class="box">FR76 •••• •••• •••• •••• 4821</div></div>
+          <div class="card" style="margin-top:4px;">
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle" style="font-size:11.5px;">Délai habituel</div></div><div style="font-size:11.5px;">1 à 3 jours ouvrés</div></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle" style="font-size:11.5px;">Conversion</div></div><div style="font-size:11.5px;">EUR → FCFA au taux du jour</div></div>
+          </div>
+          <div style="font-size:10.5px; color:var(--ink-soft); margin-top:8px; line-height:1.6;">🔒 Seuls les 4 derniers chiffres de votre IBAN sont conservés. Le montant est converti et enregistré dans le ledger du groupe en FCFA.</div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn dark">Enregistrer le virement</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 38. MOBILE MONEY PAYMENT -->
+  <div class="unit">
+    <div class="tag">38 · PAIEMENT</div>
+    <h3>Confirmation Mobile Money</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body" style="background:var(--navy); color:#fff;">
+        <div class="emptywrap">
+          <div class="spin"></div>
+          <div style="font-family:'Fraunces',serif; font-size:18px; font-weight:600; margin-bottom:8px;">Confirmation en cours</div>
+          <div style="font-size:12px; color:#B9BFDA; line-height:1.6; margin-bottom:22px;">Validez la transaction sur votre téléphone via le code envoyé par votre opérateur.</div>
+          <div class="walletbadge om">● Orange Money</div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:24px; font-weight:700; margin-top:16px;">10 000 FCFA</div>
+          <div style="font-size:10.5px; color:#8A90B5; margin-top:6px;">Réf. transaction en attente...</div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 39. PAYMENT FAILED -->
+  <div class="unit">
+    <div class="tag">39 · ERREUR</div>
+    <h3>Échec du paiement</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="scroll" style="padding-top:34px; text-align:center;">
+          <div class="resulticon" style="background:var(--terra-bg); color:var(--terra);">!</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Le paiement n'a pas abouti</div>
+          <div style="font-size:12px; color:var(--ink-soft); margin:8px 0 20px; line-height:1.6; padding:0 6px;">Solde insuffisant sur le compte Orange Money utilisé. Aucun montant n'a été débité.</div>
+          <div class="card" style="text-align:left;">
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle" style="font-size:11.5px;">Montant</div></div><div style="font-size:12px; font-weight:600;">10 000 FCFA</div></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle" style="font-size:11.5px;">Code erreur</div></div><div style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">OM-402</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper); display:flex; gap:10px;">
+        <div class="btn ghost" style="flex:1;">Changer de moyen</div>
+        <div class="btn primary" style="flex:1;">Réessayer</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 40. RECEIPT -->
+  <div class="unit">
+    <div class="tag">40 · REÇU</div>
+    <h3>Reçu de transaction</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="scroll" style="padding-top:26px; text-align:center;">
+          <div style="width:52px; height:52px; border-radius:50%; background:var(--green-bg); color:var(--green); font-size:26px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">✓</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Paiement réussi</div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; color:var(--navy); margin:10px 0 18px;">10 000 FCFA</div>
+
+          <div class="card" style="text-align:left;">
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle" style="font-size:11.5px;">Groupe</div></div><div style="font-size:12px; font-weight:600;">Njangi Marché Central</div></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle" style="font-size:11.5px;">Opérateur</div></div><div class="walletbadge om">Orange Money</div></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle" style="font-size:11.5px;">Référence</div></div><div style="font-family:'IBM Plex Mono',monospace; font-size:11.5px;">REF-88190</div></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle" style="font-size:11.5px;">Date</div></div><div style="font-size:11.5px;">22 juil. 2026, 08:05</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper); display:flex; gap:10px;">
+        <div class="btn ghost" style="flex:1;">↓ PDF</div>
+        <div class="btn dark" style="flex:2;">↗ Partager le reçu</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 41. GROUP DISCUSSION / CHAT -->
+  <div class="unit">
+    <div class="tag">41 · DISCUSSION</div>
+    <h3>Discussion entre membres</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="chatheader">
+          <div class="backbtn-dark" style="margin-bottom:0;">←</div>
+          <div class="avgrp">NMC</div>
+          <div class="info" style="flex:1;">
+            <div class="t">Njangi Marché Central</div>
+            <div class="s"><span class="liveDot"></span>6 membres · 3 en ligne</div>
+          </div>
+          <div class="kebab" style="color:var(--gold-l);">⋮</div>
+        </div>
+        <div class="scroll" style="padding-top:6px; padding-bottom:14px;">
+          <div class="chatday">Aujourd'hui</div>
+
+          <div class="bubble system">🔔 Marthe B. a reçu la rotation du cycle 4 — 120 000 FCFA</div>
+
+          <div class="msgrow">
+            <div class="mav">JP</div>
+            <div class="msgcol">
+              <div class="mname">Jean P.</div>
+              <div class="bubble other">Salut tout le monde 👋 je viens de payer ma cotisation du cycle 4</div>
+              <div class="mtime">9:12</div>
+            </div>
+          </div>
+
+          <div class="msgrow">
+            <div class="mav" style="background:var(--green);">SK</div>
+            <div class="msgcol">
+              <div class="mname" style="color:var(--green);">Sarah K.</div>
+              <div class="bubble pay">
+                <div class="pt">✓ Paiement confirmé</div>
+                <div style="margin-top:3px;">10 000 FCFA · Orange Money</div>
+              </div>
+              <div class="mtime">9:14</div>
+            </div>
+          </div>
+
+          <div class="msgrow me">
+            <div class="mav">AM</div>
+            <div class="msgcol">
+              <div class="mname">Vous</div>
+              <div class="bubble me">Top ! Il ne manque plus que Robert et on aura bouclé le cycle 🎉</div>
+              <div class="mtime">9:16 ✓✓</div>
+            </div>
+          </div>
+
+          <div class="msgrow">
+            <div class="mav" style="background:var(--terra);">RT</div>
+            <div class="msgcol">
+              <div class="mname" style="color:var(--terra);">Robert T.</div>
+              <div class="bubble other">Désolé pour le retard, je paie ce soir promis 🙏</div>
+              <div class="mtime">9:20</div>
+            </div>
+          </div>
+
+          <div class="msgrow">
+            <div class="mav">MB</div>
+            <div class="msgcol">
+              <div class="mname">Marthe B.</div>
+              <div class="bubble other">Merci à tous pour la confiance sur cette rotation 🙏 Je vous partage une photo du stock acheté ce week-end</div>
+              <div class="reactrow"><span class="reactpill">❤ 3</span><span class="reactpill">👏 2</span></div>
+              <div class="mtime">9:24</div>
+            </div>
+          </div>
+
+          <div class="typingrow">
+            <div class="mav" style="background:var(--terra); width:24px; height:24px; font-size:9px;">RT</div>
+            <div class="typingbubble"><i></i><i></i><i></i></div>
+            <span class="typingname">Robert écrit…</span>
+          </div>
+        </div>
+        <div class="chatinputbar">
+          <div class="plus">+</div>
+          <div class="field2">Écrire un message…</div>
+          <div class="sendbtn">➤</div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="catlabel" style="width:100%; text-align:center; margin:38px 0 -6px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--navy); background:var(--gold-l); padding:6px 16px; border-radius:20px; font-weight:700;">MEMBRES & ADMINISTRATION</span></div>
+
+<!-- 42. MEMBERS LIST (ADMIN) -->
+  <div class="unit">
+    <div class="tag">42 · ADMINISTRATION</div>
+    <h3>Gestion des membres</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Membres</div><div style="font-size:11px; color:var(--ink-soft); margin-top:2px;">Njangi Marché Central · 12 membres</div></div>
+        <div class="scroll">
+          <div class="searchbar">🔍 Rechercher un membre</div>
+          <div class="memrow"><div class="av" style="background:var(--gold);">MB</div><div class="memname">Marthe B. <span style="color:var(--ink-soft); font-weight:500;">· Admin</span></div><span class="kebab">⋮</span></div>
+          <div class="memrow"><div class="av">JP</div><div class="memname">Jean P. <span style="color:var(--ink-soft); font-weight:500;">· Caissier</span></div><span class="kebab">⋮</span></div>
+          <div class="memrow"><div class="av">SK</div><div class="memname">Sarah K.</div><span class="kebab">⋮</span></div>
+          <div class="memrow"><div class="av">AM</div><div class="memname">Amina M. (vous)</div><span class="kebab">⋮</span></div>
+          <div class="memrow"><div class="av">RT</div><div class="memname">Robert T. <span class="chip pending" style="margin-left:4px;">Retard</span></div><span class="kebab">⋮</span></div>
+          <div class="memrow"><div class="av">CN</div><div class="memname">Claire N.</div><span class="kebab">⋮</span></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn dark">+ Inviter un membre</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 43. ADD MEMBER (ADMIN) -->
+  <div class="unit">
+    <div class="tag">43 · ADMINISTRATION</div>
+    <h3>Ajouter un membre</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Ajouter un membre</div></div>
+        <div class="scroll">
+          <div class="field"><label>Numéro de téléphone</label><div class="box">+237 6 XX XX XX XX</div></div>
+          <div class="btn ghost" style="margin-bottom:18px;">📇 Choisir depuis les contacts</div>
+          <div class="sectitle">Ou partager le lien du groupe</div>
+          <div class="codebig">NJ7 · 42K</div>
+          <div class="btn ghost">↗ Partager l'invitation</div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn dark">Envoyer l'invitation</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 44. MEMBER ACTIONS (ADMIN) -->
+  <div class="unit">
+    <div class="tag">44 · ADMINISTRATION</div>
+    <h3>Actions sur le membre</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Membres</div></div>
+        <div class="scroll" style="filter:blur(1.5px); opacity:.5;">
+          <div class="memrow"><div class="av">RT</div><div class="memname">Robert T.</div></div>
+          <div class="memrow"><div class="av">CN</div><div class="memname">Claire N.</div></div>
+        </div>
+        <div class="sheetoverlay">
+          <div class="sheet">
+            <div class="handle"></div>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;"><div class="av" style="background:var(--terra);">RT</div><div><div style="font-weight:700; color:var(--navy); font-size:13.5px;">Robert T.</div><div style="font-size:11px; color:var(--ink-soft);">Membre depuis mars 2026</div></div></div>
+            <div class="sheetaction"><span class="ic">📞</span>Contacter</div>
+            <div class="sheetaction"><span class="ic">🔔</span>Envoyer un rappel</div>
+            <div class="sheetaction"><span class="ic">⭐</span>Promouvoir administrateur</div>
+            <div class="sheetaction"><span class="ic">🧾</span>Désigner caissier</div>
+            <div class="sheetaction danger"><span class="ic">🚫</span>Retirer du groupe</div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 45. REMOVE MEMBER CONFIRM -->
+  <div class="unit">
+    <div class="tag">45 · ADMINISTRATION</div>
+    <h3>Retirer un membre</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="scroll" style="padding-top:40px; text-align:center;">
+          <div class="resulticon" style="background:var(--terra-bg); color:var(--terra);">⚠</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Retirer Robert T. ?</div>
+          <div style="font-size:12px; color:var(--ink-soft); margin:8px 0 20px; line-height:1.6; padding:0 16px;">Il ne pourra plus cotiser ni recevoir la rotation. Son historique reste visible pour la traçabilité du groupe.</div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper); display:flex; gap:10px;">
+        <div class="btn ghost" style="flex:1;">Annuler</div>
+        <div class="btn" style="flex:1; background:var(--terra); color:#fff;">Retirer</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 46. MEMBER PROFILE (VIEWED BY OTHERS) -->
+  <div class="unit">
+    <div class="tag">46 · MEMBRE</div>
+    <h3>Profil d'un membre</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="app-header" style="text-align:center; padding-bottom:20px; position:relative;">
+          <div class="backbtn-dark" style="position:absolute; top:6px; left:20px; margin:0;">←</div>
+          <div style="width:52px; height:52px; border-radius:50%; background:var(--gold); color:var(--navy); font-family:'Fraunces',serif; font-weight:700; font-size:18px; display:flex; align-items:center; justify-content:center; margin:6px auto 10px;">RT</div>
+          <div class="name" style="font-size:17px;">Robert T.</div>
+          <div style="font-size:11px; color:var(--gold-l); font-family:'IBM Plex Mono',monospace; margin-top:3px;">Membre depuis mars 2025</div>
+        </div>
+        <div class="scroll" style="padding-top:14px;">
+          <div class="card" style="text-align:center;">
+            <div style="font-size:11px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; margin-bottom:4px;">SCORE DE FIABILITÉ</div>
+            <div class="gauge" style="width:100px; height:60px;">
+              <svg viewBox="0 0 120 70">
+                <path d="M10,65 A50,50 0 0,1 110,65" fill="none" stroke="#E7E1D4" stroke-width="9" stroke-linecap="round"/>
+                <path d="M10,65 A50,50 0 0,1 55,15" fill="none" stroke="#C15B3D" stroke-width="9" stroke-linecap="round"/>
+              </svg>
+              <div class="val" style="font-size:18px;">61<span style="font-size:10px; color:var(--ink-soft);">/100</span></div>
+            </div>
+            <div style="font-size:11px; color:var(--terra); font-weight:700;">2 retards sur les 6 derniers cycles</div>
+          </div>
+          <div class="sectitle">Dans ce groupe</div>
+          <div class="menurow">Cotisations payées à temps <span class="r">9 / 12</span></div>
+          <div class="menurow">Prêts remboursés intégralement <span class="r">1 / 1</span></div>
+          <div class="menurow">Tour de rotation reçu <span class="r">Non (cycle 8)</span></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn ghost" style="border-color:var(--terra); color:var(--terra);">Envoyer un rappel de cotisation</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 47. MANUAL REMINDER -->
+  <div class="unit">
+    <div class="tag">47 · RELANCE</div>
+    <h3>Rappel manuel à un membre</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:18px; font-weight:600; color:var(--navy);">Envoyer un rappel</div></div>
+        <div class="scroll">
+          <div class="memrow" style="margin-bottom:14px;"><div class="av">RT</div><div class="memname">Robert T. <span class="chip pending" style="margin-left:4px;">3 jours de retard</span></div></div>
+          <div class="field"><label>Message</label>
+            <div class="box" style="font-family:'Inter'; font-weight:500; color:var(--ink); font-size:12px; line-height:1.5;">Bonjour Robert, ta cotisation de 10 000 FCFA pour le cycle 4 est en retard de 3 jours. Merci de régulariser rapidement.</div>
+          </div>
+          <div class="switchrow"><div><div class="lab">Envoyer aussi par SMS</div><div class="sub">En plus de la notification push</div></div><div class="sw on"><i></i></div></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn primary">Envoyer le rappel</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 48. ASSIGN CASHIER (ADMIN) -->
+  <div class="unit">
+    <div class="tag">48 · ADMINISTRATION</div>
+    <h3>Désigner le caissier</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Désigner le caissier</div><div style="font-size:11px; color:var(--ink-soft); margin-top:2px;">Il reste membre du groupe et cotise comme les autres</div></div>
+        <div class="scroll">
+          <div class="doctypecard on"><div class="av" style="background:var(--gold); margin:0;">MB</div><div class="dtx"><div class="t">Marthe B.</div><div style="font-size:10.5px; color:var(--ink-soft);">Admin</div></div><div class="radiodot on"></div></div>
+          <div class="doctypecard"><div class="av" style="margin:0;">JP</div><div class="dtx"><div class="t">Jean P.</div></div><div class="radiodot"></div></div>
+          <div class="doctypecard"><div class="av" style="margin:0;">SK</div><div class="dtx"><div class="t">Sarah K.</div></div><div class="radiodot"></div></div>
+          <div class="doctypecard"><div class="av" style="margin:0;">AM</div><div class="dtx"><div class="t">Amina M. (vous)</div></div><div class="radiodot"></div></div>
+          <div class="doctypecard"><div class="av" style="margin:0;">RT</div><div class="dtx"><div class="t">Robert T.</div></div><div class="radiodot"></div></div>
+          <div style="font-size:10.5px; color:var(--ink-soft); margin-top:12px; line-height:1.6;">🔒 Le caissier collecte les cotisations sur son propre compte Mobile Money et reverse la cagnotte au bénéficiaire. Cercle ne détient jamais les fonds.</div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn dark">Confirmer Marthe B. comme caissière</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 49. DEPOSIT ACCOUNT (CASHIER) -->
+  <div class="unit">
+    <div class="tag">49 · CAISSIER</div>
+    <h3>Compte de dépôt du groupe</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Lier le compte de dépôt</div><div style="font-size:11px; color:var(--ink-soft); margin-top:2px;">Vous êtes désignée caissière de Njangi Marché Central</div></div>
+        <div class="scroll">
+          <div class="sectitle">Opérateur</div>
+          <div class="doctypecard on"><div class="dic" style="width:26px; height:26px; border-radius:7px; background:#FFC107; color:#5A4300; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px;">M</div><div class="dtx"><div class="t">MTN Mobile Money</div></div><div class="radiodot on"></div></div>
+          <div class="doctypecard"><div class="dic" style="width:26px; height:26px; border-radius:7px; background:#FF6600; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px;">O</div><div class="dtx"><div class="t">Orange Money</div></div><div class="radiodot"></div></div>
+          <div class="field" style="margin-top:16px;"><label>Numéro du compte de dépôt</label><div class="box">+237 6 77 XX XX 42</div></div>
+          <div style="font-size:10.5px; color:var(--ink-soft); margin-top:16px; line-height:1.6;">🔒 Les cotisations des membres seront versées sur ce compte, qui reste le vôtre. Vous reverserez ensuite la cagnotte au bénéficiaire du tour — Cercle ne détient jamais les fonds (facilitateur technique, Option A).</div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn dark">Enregistrer le compte de dépôt</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 50. REQUEST GROUP EXIT -->
+  <div class="unit">
+    <div class="tag">50 · MEMBRES</div>
+    <h3>Quitter le groupe</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="scroll" style="padding-top:26px;">
+          <div class="resulticon" style="background:var(--terra-bg); color:var(--terra); margin:0 auto 14px;">🚪</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy); text-align:center;">Quitter Njangi Marché Central ?</div>
+          <div class="card" style="margin-top:16px; text-align:left;">
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle" style="font-size:11.5px;">Votre tour de rotation</div></div><span class="chip pending">Pas encore passé</span></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle" style="font-size:11.5px;">Cotisations déjà versées</div></div><div style="font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:700;">30 000 FCFA</div></div>
+          </div>
+          <div style="font-size:11.5px; color:var(--ink-soft); margin:10px 0 16px; line-height:1.6; padding:0 2px;">Votre tour n'étant pas encore passé, vos cotisations déjà versées vous seront remboursées après validation de l'administrateur.</div>
+          <div class="field"><label>Motif (optionnel)</label><div class="box" style="font-family:'Inter'; font-weight:400; color:var(--ink-soft); font-size:12.5px;">Déménagement, je ne pourrai plus cotiser régulièrement...</div></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper); display:flex; gap:10px;">
+        <div class="btn ghost" style="flex:1;">Annuler</div>
+        <div class="btn" style="flex:1; background:var(--terra); color:#fff;">Envoyer la demande</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 51. EXIT REQUEST PENDING -->
+  <div class="unit">
+    <div class="tag">51 · MEMBRES</div>
+    <h3>Demande de sortie envoyée</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="scroll" style="padding-top:44px; text-align:center;">
+          <div class="resulticon" style="background:#FBF3E2; color:var(--gold);">⏳</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Demande en attente</div>
+          <div style="font-size:12px; color:var(--ink-soft); margin:8px 0 20px; line-height:1.6; padding:0 14px;">Votre demande de sortie de <b style="color:var(--navy);">Njangi Marché Central</b> a été transmise à l'administrateur pour validation.</div>
+          <div class="card" style="text-align:left;">
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle">Statut</div></div><span class="chip pending">En attente</span></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle">Envoyée à</div></div><div style="font-size:12px;">Marthe B. (admin)</div></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle">Si approuvée</div></div><div style="font-size:12px;">Remboursement de 30 000 FCFA</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn ghost">Retour au groupe</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 52. EXIT REQUESTS (ADMIN) -->
+  <div class="unit">
+    <div class="tag">52 · ADMINISTRATION</div>
+    <h3>Demandes de sortie</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Demandes de sortie</div></div>
+        <div class="scroll">
+          <div class="card">
+            <div style="display:flex; align-items:center; gap:10px;"><div class="av">RT</div><div style="flex:1;"><div class="memname">Robert T.</div><div style="font-size:10.5px; color:var(--ink-soft); margin-top:1px;">Tour pas encore passé · à rembourser : 30 000 FCFA</div></div></div>
+            <div style="font-size:11.5px; color:var(--ink-soft); margin:10px 0; line-height:1.5;">"Déménagement, je ne pourrai plus cotiser régulièrement."</div>
+            <div style="display:flex; gap:8px;"><div class="btn ghost" style="flex:1; padding:9px;">Refuser</div><div class="btn dark" style="flex:1; padding:9px;">Approuver</div></div>
+          </div>
+          <div class="card">
+            <div style="display:flex; align-items:center; gap:10px;"><div class="av" style="background:var(--gold);">CN</div><div style="flex:1;"><div class="memname">Claire N.</div><div style="font-size:10.5px; color:var(--ink-soft); margin-top:1px;">Tour déjà passé · solde dû : 15 000 FCFA</div></div></div>
+            <div style="display:flex; gap:8px;"><div class="btn ghost" style="flex:1; padding:9px;">Refuser</div><div class="btn dark" style="flex:1; padding:9px;">Approuver</div></div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 53. EXIT SETTLEMENT -->
+  <div class="unit">
+    <div class="tag">53 · MEMBRES</div>
+    <h3>Règlement de sortie</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="scroll" style="padding-top:26px; text-align:center;">
+          <div style="width:52px; height:52px; border-radius:50%; background:var(--terra-bg); color:var(--terra); font-size:22px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">⚠</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Solde à régler avant la sortie</div>
+          <div style="font-size:12px; color:var(--ink-soft); margin:8px 0 18px; line-height:1.6; padding:0 10px;">Claire N. a déjà reçu son tour de rotation. Le solde restant dû doit être réglé avant que sa sortie du groupe soit effective.</div>
+          <div class="card" style="text-align:left;">
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle" style="font-size:11.5px;">Cagnotte reçue</div></div><div style="font-size:12px; font-weight:600;">120 000 FCFA</div></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle" style="font-size:11.5px;">Déjà cotisé</div></div><div style="font-size:12px; font-weight:600;">105 000 FCFA</div></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle" style="font-size:11.5px;">Solde dû</div></div><div style="font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:700; color:var(--terra);">15 000 FCFA</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn primary">Régler 15 000 FCFA via Mobile Money</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="catlabel" style="width:100%; text-align:center; margin:38px 0 -6px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--navy); background:var(--gold-l); padding:6px 16px; border-radius:20px; font-weight:700;">ÉVÉNEMENTS COMMUNAUTAIRES</span></div>
+
+<!-- 54. GROUP EVENTS -->
+  <div class="unit">
+    <div class="tag">54 · GROUPE</div>
+    <h3>Évènements</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="app-header"><div class="backbtn-dark">←</div><div class="name" style="font-size:19px;">Évènements</div><div class="greet">Njangi Marché Central</div></div>
+        <div class="scroll" style="padding-top:14px;">
+          <div class="card">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><span style="font-size:16px;">🕯️</span><div class="gname">Deuil — famille de Robert T.</div></div>
+            <div class="gmeta" style="margin-bottom:10px;">42 000 FCFA collectés · suggestion 5 000 FCFA / membre</div>
+            <div class="progressbar"><i style="width:70%;"></i></div>
+            <div style="display:flex; justify-content:space-between; font-size:10.5px; color:var(--ink-soft); margin:6px 0 12px;">
+              <span>8 membres ont cotisé</span><span>4 restants</span>
+            </div>
+            <div class="btn primary">Cotiser — 5 000 FCFA</div>
+          </div>
+          <div class="card">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><span style="font-size:16px;">👶</span><div class="gname">Naissance — bébé de Sarah K.</div></div>
+            <div class="gmeta" style="margin-bottom:10px;">18 000 FCFA collectés · suggestion 3 000 FCFA / membre</div>
+            <div class="progressbar"><i style="width:40%;"></i></div>
+            <span class="chip pending">Ouvert</span>
+          </div>
+          <div class="sectitle">Clôturés</div>
+          <div class="ledgerrow"><div class="licon" style="background:var(--green-bg);">🎂</div><div class="lmain"><div class="ltitle">Anniversaire — Marthe B.</div><div class="ldate">36 000 FCFA · Clôturé le 2 mai</div></div></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn dark">+ Créer un évènement</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 55. CREATE EVENT -->
+  <div class="unit">
+    <div class="tag">55 · ÉVÈNEMENT</div>
+    <h3>Créer un évènement</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Nouvel évènement</div><div style="font-size:11px; color:var(--ink-soft); margin-top:2px;">Les membres du groupe pourront y cotiser librement</div></div>
+        <div class="scroll">
+          <div class="sectitle">Type d'évènement</div>
+          <div class="pillrow" style="flex-wrap:wrap;">
+            <span class="pill">🕯️ Deuil</span><span class="pill">🎂 Anniversaire</span><span class="pill on">👶 Naissance</span><span class="pill">💍 Mariage</span><span class="pill">🏥 Maladie</span><span class="pill">Autre</span>
+          </div>
+          <div class="sectitle">Bénéficiaire</div>
+          <div class="memrow"><div class="av">SK</div><div class="memname">Sarah K.</div><span class="chip paid">Sélectionné</span></div>
+          <div class="field" style="margin-top:12px;"><label>Montant suggéré par membre</label><div class="box">3 000 FCFA</div></div>
+          <div class="field"><label>Message (optionnel)</label><div class="box">Pour la naissance du petit dernier de Sarah 🎉</div></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn dark">Publier l'évènement</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 56. CONTRIBUTE TO EVENT -->
+  <div class="unit">
+    <div class="tag">56 · ÉVÈNEMENT</div>
+    <h3>Cotiser à l'évènement</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="display:flex; align-items:center; gap:8px;"><span style="font-size:18px;">👶</span><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Naissance — Sarah K.</div></div><div style="font-size:11px; color:var(--ink-soft); margin-top:2px;">Ouvert par Amina M. · 12 membres</div></div>
+        <div class="scroll">
+          <div class="balance-card" style="margin:12px 0;">
+            <div class="lbl">COLLECTÉ</div>
+            <div class="amt">18 000 FCFA</div>
+            <div class="sub">6 membres ont déjà cotisé · suggestion 3 000 FCFA</div>
+          </div>
+          <div class="field"><label>Votre cotisation</label><div class="box">3 000 FCFA</div></div>
+          <div class="btn primary" style="margin:14px 0 18px;">Cotiser — 3 000 FCFA</div>
+          <div class="sectitle">Contributions</div>
+          <div class="memrow"><div class="av" style="background:var(--gold);">MB</div><div class="memname">Marthe B.</div><span class="chip paid">3 000 FCFA</span></div>
+          <div class="memrow"><div class="av">JP</div><div class="memname">Jean P.</div><span class="chip paid">5 000 FCFA</span></div>
+          <div class="memrow"><div class="av">RT</div><div class="memname">Robert T.</div><span class="chip paid">2 000 FCFA</span></div>
+          <div class="memrow"><div class="av">CN</div><div class="memname">Claire N.</div><span class="chip pending">En attente</span></div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="catlabel" style="width:100%; text-align:center; margin:38px 0 -6px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--navy); background:var(--gold-l); padding:6px 16px; border-radius:20px; font-weight:700;">PRÊTS INTERNES</span></div>
+
+<!-- 57. LOANS OVERVIEW -->
+  <div class="unit">
+    <div class="tag">57 · PRÊTS</div>
+    <h3>Mes prêts — Vue d'ensemble</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="app-header"><div class="name" style="font-size:19px;">Mes prêts</div></div>
+        <div class="scroll" style="padding-top:14px;">
+          <div class="balance-card">
+            <div class="lbl">RESTE À REMBOURSER</div>
+            <div class="amt">50 000 FCFA</div>
+            <div class="sub">1 prêt actif · 2 échéances restantes</div>
+          </div>
+          <div class="tabs2"><span class="on">Actifs (1)</span><span>Soldés (2)</span></div>
+
+          <div class="card">
+            <div class="gname">Njangi Marché Central</div>
+            <div class="gmeta" style="margin-bottom:10px;">75 000 FCFA sur 3 mois</div>
+            <div class="progressbar"><i style="width:33%;"></i></div>
+            <div style="display:flex; justify-content:space-between; font-size:10.5px; color:var(--ink-soft); margin-bottom:12px;">
+              <span>25 000 remboursés</span><span>50 000 restants</span>
+            </div>
+            <span class="chip pending">Prochaine échéance : 20 août</span>
+          </div>
+
+          <div class="sectitle">Soldés</div>
+          <div class="ledgerrow"><div class="licon" style="background:var(--green-bg);">✓</div><div class="lmain"><div class="ltitle">Famille Njoya</div><div class="ldate">30 000 FCFA · Soldé le 2 mai</div></div></div>
+          <div class="ledgerrow"><div class="licon" style="background:var(--green-bg);">✓</div><div class="lmain"><div class="ltitle">Collègues Bureau Douala</div><div class="ldate">20 000 FCFA · Soldé le 14 mars</div></div></div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 58. LOAN REQUEST -->
+  <div class="unit">
+    <div class="tag">58 · PRÊT INTERNE</div>
+    <h3>Demande de prêt</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Demander un prêt</div>
+          <div style="font-size:11.5px; color:var(--ink-soft); margin-top:2px;">Groupe : Njangi Marché Central</div>
+        </div>
+        <div class="scroll">
+          <div class="field">
+            <label>Montant souhaité</label>
+            <div class="box" style="font-size:20px; display:flex; align-items:baseline; gap:6px;">75 000 <span style="font-size:11px; font-weight:500; color:var(--ink-soft);">FCFA</span></div>
+          </div>
+          <div class="field">
+            <label>Durée de remboursement</label>
+            <div style="display:flex; gap:8px;">
+              <div class="box" style="flex:1; text-align:center; font-size:12px;">1 mois</div>
+              <div class="box" style="flex:1; text-align:center; font-size:12px; background:var(--navy); color:#fff; border-color:var(--navy);">3 mois</div>
+              <div class="box" style="flex:1; text-align:center; font-size:12px;">6 mois</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Motif</label>
+            <div class="box" style="font-family:'Inter'; font-weight:500; color:var(--ink); font-size:12.5px;">Achat de stock pour la boutique</div>
+          </div>
+          <div class="field">
+            <label>Garant (optionnel)</label>
+            <div class="box" style="font-family:'Inter'; font-weight:500; color:var(--ink-soft); font-size:12.5px;">+ Choisir un membre du groupe</div>
+          </div>
+
+          <div class="sectitle">Échéancier prévisionnel</div>
+          <div class="card" style="padding:12px 14px;">
+            <div class="ledgerrow" style="padding:8px 0;"><div class="lmain"><div class="ltitle" style="font-size:11.5px;">Échéance 1 — 20 août</div></div><div class="lamt" style="font-size:12px;">25 000</div></div>
+            <div class="ledgerrow" style="padding:8px 0;"><div class="lmain"><div class="ltitle" style="font-size:11.5px;">Échéance 2 — 20 sept.</div></div><div class="lamt" style="font-size:12px;">25 000</div></div>
+            <div class="ledgerrow" style="padding:8px 0;"><div class="lmain"><div class="ltitle" style="font-size:11.5px;">Échéance 3 — 20 oct.</div></div><div class="lamt" style="font-size:12px;">25 000</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn primary">Envoyer la demande</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 59. LOAN VOTE -->
+  <div class="unit">
+    <div class="tag">59 · VALIDATION</div>
+    <h3>Approbation collective du prêt</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:18px; font-weight:600; color:var(--navy);">Demande à valider</div></div>
+        <div class="scroll">
+          <div class="card">
+            <div class="gname">Robert T. demande 50 000 FCFA</div>
+            <div class="gmeta">Remboursement sur 2 mois · Motif : frais médicaux</div>
+          </div>
+          <div style="font-size:11px; color:var(--ink-soft); margin-bottom:6px; font-family:'IBM Plex Mono',monospace;">4 / 6 APPROBATIONS REQUISES (MAJORITÉ)</div>
+          <div class="progressbar"><i style="width:66%; background:var(--green);"></i></div>
+
+          <div class="sectitle">Votes des membres</div>
+          <div class="voterow"><div class="av" style="background:var(--gold);">MB</div><div class="memname">Marthe B.</div><div class="vstatus" style="color:var(--green);">✓</div></div>
+          <div class="voterow"><div class="av">JP</div><div class="memname">Jean P.</div><div class="vstatus" style="color:var(--green);">✓</div></div>
+          <div class="voterow"><div class="av">SK</div><div class="memname">Sarah K.</div><div class="vstatus" style="color:var(--green);">✓</div></div>
+          <div class="voterow"><div class="av">CN</div><div class="memname">Claire N.</div><div class="vstatus" style="color:var(--ink-soft);">…</div></div>
+          <div class="voterow"><div class="av">AM</div><div class="memname">Amina M. (vous)</div><div class="vstatus">—</div></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper); display:flex; gap:10px;">
+        <div class="btn ghost" style="flex:1; border-color:var(--terra); color:var(--terra);">Refuser</div>
+        <div class="btn primary" style="flex:1;">Approuver</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 60. LOAN APPROVED -->
+  <div class="unit">
+    <div class="tag">60 · PRÊT</div>
+    <h3>Demande de prêt approuvée</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="scroll" style="padding-top:40px; text-align:center;">
+          <div class="resulticon" style="background:var(--green-bg); color:var(--green);">✓</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Prêt approuvé</div>
+          <div style="font-size:12px; color:var(--ink-soft); margin:8px 0 20px; line-height:1.6; padding:0 10px;">Votre demande de 75 000 FCFA a obtenu la majorité requise du groupe (5 approbations sur 6).</div>
+          <div class="card" style="text-align:left;">
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle">Montant</div></div><div style="font-weight:700;">75 000 FCFA</div></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle">Prochaine étape</div></div><div style="font-size:12px;">Signature du contrat</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn primary">Signer le contrat</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 61. LOAN REJECTED -->
+  <div class="unit">
+    <div class="tag">61 · PRÊT</div>
+    <h3>Demande de prêt refusée</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="scroll" style="padding-top:34px; text-align:center;">
+          <div class="resulticon" style="background:var(--terra-bg); color:var(--terra);">✕</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Demande refusée</div>
+          <div style="font-size:12px; color:var(--ink-soft); margin:8px 0 20px; line-height:1.6; padding:0 10px;">Votre demande de 75 000 FCFA n'a pas obtenu la majorité requise du groupe (2 approbations sur 6).</div>
+          <div class="card" style="text-align:left;">
+            <div class="sectitle" style="margin-top:0;">Motif indiqué par le groupe</div>
+            <div style="font-size:12px; color:var(--ink); line-height:1.5;">Montant élevé par rapport aux prêts en cours dans le groupe. Proposition : redéposer une demande pour un montant plus faible.</div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn dark">Faire une nouvelle demande</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 62. ELECTRONIC SIGNATURE -->
+  <div class="unit">
+    <div class="tag">62 · CONTRAT</div>
+    <h3>Signature électronique</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Signez pour confirmer</div></div>
+        <div class="scroll">
+          <p style="font-size:12px; color:var(--ink-soft); line-height:1.6; margin:0 0 14px;">Dessinez votre signature dans le cadre ci-dessous pour valider le contrat de prêt.</p>
+          <div class="signpad">
+            <svg viewBox="0 0 260 120"><path d="M30,80 C50,40 70,100 95,60 S150,20 180,70 S220,90 235,55" fill="none" stroke="var(--navy)" stroke-width="2.5" stroke-linecap="round"/></svg>
+          </div>
+          <div class="btn ghost" style="margin-bottom:16px;">↺ Effacer</div>
+          <div class="switchrow"><div><div class="lab">J'ai lu et j'accepte les termes</div><div class="sub">Contrat réf. NJ-2026-0417</div></div><div class="sw on"><i></i></div></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn dark">Confirmer la signature</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 63. CONTRACT -->
+  <div class="unit">
+    <div class="tag">63 · CONTRAT</div>
+    <h3>Contrat numérique</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Contrat de prêt</div>
+          <div style="font-size:11.5px; color:var(--ink-soft); margin-top:2px;">Réf. NJ-2026-0417</div>
+        </div>
+        <div class="scroll">
+          <div class="contractpaper">
+            <div class="stamp">APPROUVÉ</div>
+            <h4>Accord entre membres</h4>
+            Emprunteur : <b style="color:var(--navy);">Amina Njoya</b><br>
+            Groupe : Njangi Marché Central<br>
+            Montant : <b style="color:var(--navy);">75 000 FCFA</b><br>
+            Durée : 3 mois — 3 échéances<br>
+            Taux : 0 % (frais de service groupe uniquement)<br>
+            Garant : Jean P.<br><br>
+            En signant, l'emprunteuse s'engage à rembourser selon l'échéancier indiqué. En cas de retard, une pénalité définie par les règles du groupe s'applique.
+          </div>
+          <div class="card" style="display:flex; align-items:center; gap:10px;">
+            <div style="width:20px; height:20px; border:2px solid var(--gold); border-radius:5px; background:var(--gold); color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px;">✓</div>
+            <div style="font-size:11.5px; color:var(--ink); font-weight:500;">Je certifie avoir lu et j'accepte les termes.</div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn dark">🔒 Signer avec mon code PIN</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 64. LOAN DETAIL -->
+  <div class="unit">
+    <div class="tag">64 · PRÊT</div>
+    <h3>Détail du prêt & remboursement</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Prêt — Njangi Marché Central</div>
+          <div style="font-size:11px; color:var(--ink-soft); margin-top:2px;">Réf. NJ-2026-0417 · Actif</div>
+        </div>
+        <div class="scroll">
+          <div class="card" style="text-align:center;">
+            <div style="font-size:11px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace;">MONTANT EMPRUNTÉ</div>
+            <div style="font-family:'Fraunces',serif; font-size:26px; font-weight:700; color:var(--navy); margin:4px 0 10px;">75 000 FCFA</div>
+            <div class="progressbar"><i style="width:33%;"></i></div>
+          </div>
+
+          <div class="sectitle">Échéancier</div>
+          <div class="ledgerrow"><div class="licon" style="background:var(--green-bg);">✓</div><div class="lmain"><div class="ltitle">Échéance 1 — 20 juillet</div><div class="ldate">Payée le 19 juillet</div></div><div class="lamt pos">25 000</div></div>
+          <div class="ledgerrow"><div class="licon" style="background:var(--terra-bg);">!</div><div class="lmain"><div class="ltitle">Échéance 2 — 20 août</div><div class="ldate">À venir dans 4 jours</div></div><div class="lamt" style="color:var(--terra);">25 000</div></div>
+          <div class="ledgerrow"><div class="licon" style="background:#EDEBF3; color:var(--navy);">·</div><div class="lmain"><div class="ltitle">Échéance 3 — 20 sept.</div><div class="ldate">Non échue</div></div><div class="lamt" style="color:var(--ink-soft);">25 000</div></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn primary">Rembourser l'échéance — 25 000 FCFA</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 65. MAKE REPAYMENT -->
+  <div class="unit">
+    <div class="tag">65 · PRÊT</div>
+    <h3>Rembourser une échéance</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Rembourser l'échéance 2</div></div>
+        <div class="scroll">
+          <div class="balance-card" style="padding:18px;">
+            <div class="lbl">MONTANT DE L'ÉCHÉANCE</div>
+            <div class="amt">25 000 FCFA</div>
+            <div class="sub">Échéance du 20 août · Prêt NJ-2026-0417</div>
+          </div>
+          <div class="sectitle">Payer avec</div>
+          <div class="walletrow"><div class="walleticon" style="background:#FFC107;">M</div><div style="flex:1;"><div style="font-size:12.5px; font-weight:700; color:var(--navy);">MTN MoMo</div><div style="font-size:11px; color:var(--ink-soft);">+237 6 77 •• •• 42</div></div><div class="radiodot on"></div></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn primary">Rembourser 25 000 FCFA</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 66. REPAYMENT CONFIRMED -->
+  <div class="unit">
+    <div class="tag">66 · PRÊT</div>
+    <h3>Remboursement confirmé</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="scroll" style="padding-top:40px; text-align:center;">
+          <div class="resulticon" style="background:var(--green-bg); color:var(--green);">✓</div>
+          <div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Échéance remboursée</div>
+          <div style="font-size:12px; color:var(--ink-soft); margin:8px 0 20px; line-height:1.6;">25 000 FCFA ont été transférés avec succès. Il reste 1 échéance sur ce prêt.</div>
+          <div class="progressbar"><i style="width:66%;"></i></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn primary">Voir le prêt</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="catlabel" style="width:100%; text-align:center; margin:38px 0 -6px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--navy); background:var(--gold-l); padding:6px 16px; border-radius:20px; font-weight:700;">SUIVI & TRAÇABILITÉ</span></div>
+
+<!-- 67. HISTORY -->
+  <div class="unit">
+    <div class="tag">67 · TRAÇABILITÉ</div>
+    <h3>Historique</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="app-header"><div class="name" style="font-size:19px;">Historique</div></div>
+        <div class="scroll" style="padding-top:14px;">
+          <div class="tabs2"><span class="on">Tout</span><span>Cotisations</span><span>Prêts</span></div>
+
+          <div class="sectitle">Aujourd'hui</div>
+          <div class="ledgerrow">
+            <div class="licon" style="background:var(--green-bg);">↓</div>
+            <div class="lmain"><div class="ltitle">Remboursement reçu — Sarah K.</div><div class="ldate">14:22 · MTN MoMo · REF-88213</div></div>
+            <div class="lamt pos">+25 000</div>
+          </div>
+          <div class="ledgerrow">
+            <div class="licon" style="background:var(--terra-bg);">↑</div>
+            <div class="lmain"><div class="ltitle">Cotisation — Njangi Marché Central</div><div class="ldate">08:05 · Orange Money · REF-88190</div></div>
+            <div class="lamt neg">-10 000</div>
+          </div>
+
+          <div class="sectitle">12 juillet</div>
+          <div class="ledgerrow">
+            <div class="licon" style="background:var(--green-bg);">↓</div>
+            <div class="lmain"><div class="ltitle">Versement de rotation reçu</div><div class="ldate">Famille Njoya · REF-87904</div></div>
+            <div class="lamt pos">+96 000</div>
+          </div>
+          <div class="ledgerrow">
+            <div class="licon" style="background:#EDEBF3; color:var(--navy);">₣</div>
+            <div class="lmain"><div class="ltitle">Prêt accordé — Robert T.</div><div class="ldate">Njangi Marché Central · REF-87890</div></div>
+            <div class="lamt neg">-50 000</div>
+          </div>
+          <div class="ledgerrow">
+            <div class="licon" style="background:var(--terra-bg);">↑</div>
+            <div class="lmain"><div class="ltitle">Cotisation — Collègues Bureau</div><div class="ldate">Orange Money · REF-87850</div></div>
+            <div class="lamt neg">-15 000</div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tabitem"><div class="tabicon">⌂</div>Accueil</div>
+          <div class="tabitem"><div class="tabicon">◎</div>Groupes</div>
+          <div class="tabitem"><div class="tabicon">₣</div>Prêts</div>
+          <div class="tabitem active"><div class="tabicon">≡</div>Historique</div>
+          <div class="tabitem"><div class="tabicon">☺</div>Profil</div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 68. TRANSACTION DETAIL -->
+  <div class="unit">
+    <div class="tag">68 · TRAÇABILITÉ</div>
+    <h3>Détail de la transaction</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Détail de la transaction</div></div>
+        <div class="scroll">
+          <div class="card" style="text-align:center;">
+            <div class="licon" style="background:var(--green-bg); margin:0 auto 10px; width:44px; height:44px; font-size:18px;">↓</div>
+            <div style="font-family:'Fraunces',serif; font-size:22px; font-weight:700; color:var(--navy);">+ 10 000 FCFA</div>
+            <div style="font-size:11.5px; color:var(--ink-soft); margin-top:2px;">Cotisation · cycle 4</div>
+          </div>
+          <div class="card">
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle">Statut</div></div><span class="chip paid">Confirmée</span></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle">Date</div></div><div style="font-size:12px; font-family:'IBM Plex Mono',monospace;">01/04/2026 · 09:14</div></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle">Moyen de paiement</div></div><div style="font-size:12px;">MTN MoMo •• 42</div></div>
+            <div class="ledgerrow"><div class="lmain"><div class="ltitle">Référence opérateur</div></div><div style="font-size:11.5px; font-family:'IBM Plex Mono',monospace;">MP240401.0914.A2</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn ghost">↗ Partager le reçu</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 69. STATEMENT EXPORT -->
+  <div class="unit">
+    <div class="tag">69 · RELEVÉ</div>
+    <h3>Export du relevé</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Relevé de groupe</div></div>
+        <div class="scroll">
+          <div class="docsheet">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <div style="font-family:'Fraunces',serif; font-size:14px; font-weight:700; color:var(--navy);">Cercle</div>
+              <div style="font-size:9.5px; color:var(--ink-soft);">Généré le 22/07/2026</div>
+            </div>
+            <div style="font-size:10px; color:var(--ink-soft); margin-bottom:10px;">NJANGI MARCHÉ CENTRAL — CYCLE 1 À 4</div>
+            <div style="font-size:9.5px; color:var(--ink); line-height:2;">
+              01/04 · Cotisation Amina M. ............ 10 000<br>
+              01/04 · Cotisation Jean P. ................. 10 000<br>
+              05/04 · Versement rotation Marthe B. ... 120 000<br>
+              12/05 · Prêt accordé Robert T. ........... 50 000<br>
+              20/06 · Remboursement Robert T. ....... 25 000
+            </div>
+            <div style="border-top:1px dashed var(--line); margin-top:12px; padding-top:10px; display:flex; justify-content:space-between; font-size:10.5px; font-weight:700; color:var(--navy);">
+              <span>Total tracé</span><span>215 000 FCFA</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper); display:flex; gap:10px;">
+        <div class="btn ghost" style="flex:1;">↗ Partager</div>
+        <div class="btn dark" style="flex:2;">↓ Télécharger le PDF</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 70. NOTIFICATIONS -->
+  <div class="unit">
+    <div class="tag">70 · ALERTES</div>
+    <h3>Notifications</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 4px;"><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Notifications</div></div>
+        <div class="scroll">
+          <div class="notif unread">
+            <div class="dot"></div>
+            <div class="txt"><div class="t">Cotisation à venir</div><div class="d">Votre cotisation de 10 000 FCFA pour « Njangi Marché Central » est due dans 3 jours.</div><div class="time">Il y a 1 h</div></div>
+          </div>
+          <div class="notif unread">
+            <div class="dot"></div>
+            <div class="txt"><div class="t">Prêt approuvé</div><div class="d">Votre demande de prêt de 75 000 FCFA a été approuvée par le groupe. Signez le contrat pour recevoir les fonds.</div><div class="time">Il y a 3 h</div></div>
+          </div>
+          <div class="notif">
+            <div class="dot" style="background:var(--line);"></div>
+            <div class="txt"><div class="t">Membre en retard</div><div class="d">Robert T. n'a pas encore réglé sa cotisation du cycle 4 dans « Njangi Marché Central ».</div><div class="time">Hier</div></div>
+          </div>
+          <div class="notif">
+            <div class="dot" style="background:var(--line);"></div>
+            <div class="txt"><div class="t">Versement reçu</div><div class="d">Vous avez reçu 96 000 FCFA suite au tour de rotation dans « Famille Njoya ».</div><div class="time">12 juillet</div></div>
+          </div>
+          <div class="notif">
+            <div class="dot" style="background:var(--line);"></div>
+            <div class="txt"><div class="t">Échéance de remboursement</div><div class="d">Prochaine échéance de votre prêt : 25 000 FCFA le 20 août.</div><div class="time">11 juillet</div></div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 71. CYCLE COMPLETED -->
+  <div class="unit">
+    <div class="tag">71 · CÉLÉBRATION</div>
+    <h3>Cycle terminé</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body" style="background:var(--navy); color:#fff;">
+        <div class="emptywrap" style="position:relative; overflow:hidden;">
+          <div class="confettidot" style="top:14%; left:20%; width:8px; height:8px; background:var(--gold);"></div>
+          <div class="confettidot" style="top:10%; left:70%; width:6px; height:6px; background:#6FA98A;"></div>
+          <div class="confettidot" style="top:30%; left:85%; width:7px; height:7px; background:var(--gold-l);"></div>
+          <div class="confettidot" style="top:26%; left:8%; width:6px; height:6px; background:#6FA98A;"></div>
+          <div style="font-size:44px; margin-bottom:14px;">🎉</div>
+          <div style="font-family:'Fraunces',serif; font-size:21px; font-weight:600; margin-bottom:8px;">Cycle terminé !</div>
+          <div style="font-size:12px; color:#B9BFDA; line-height:1.6; margin-bottom:18px;">Njangi Marché Central a bouclé son cycle 12 sans aucun défaut de paiement.</div>
+          <div style="display:flex; gap:22px;">
+            <div><div style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:700;">1,44 M</div><div style="font-size:10px; color:#8A90B5;">FCFA distribués</div></div>
+            <div><div style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:700; color:var(--gold-l);">100 %</div><div style="font-size:10px; color:#8A90B5;">taux de remboursement</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px;">
+        <div class="btn primary">Démarrer un nouveau cycle</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="catlabel" style="width:100%; text-align:center; margin:38px 0 -6px;"><span style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--navy); background:var(--gold-l); padding:6px 16px; border-radius:20px; font-weight:700;">PROFIL & PARAMÈTRES</span></div>
+
+<!-- 72. PROFILE -->
+  <div class="unit">
+    <div class="tag">72 · PROFIL</div>
+    <h3>Profil & fiabilité</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="app-header" style="text-align:center; padding-bottom:20px;">
+          <div style="width:56px; height:56px; border-radius:50%; background:var(--gold); color:var(--navy); font-family:'Fraunces',serif; font-weight:700; font-size:20px; display:flex; align-items:center; justify-content:center; margin:6px auto 10px;">AN</div>
+          <div class="name">Amina Njoya</div>
+          <div style="font-size:11px; color:var(--gold-l); font-family:'IBM Plex Mono',monospace; margin-top:3px;">✓ Identité vérifiée · +237 6 77 XX XX XX</div>
+        </div>
+        <div class="scroll" style="padding-top:14px;">
+          <div class="card" style="text-align:center;">
+            <div style="font-size:11px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; margin-bottom:4px;">SCORE DE FIABILITÉ</div>
+            <div class="gauge">
+              <svg viewBox="0 0 120 70">
+                <path d="M10,65 A50,50 0 0,1 110,65" fill="none" stroke="#E7E1D4" stroke-width="9" stroke-linecap="round"/>
+                <path d="M10,65 A50,50 0 0,1 96,32" fill="none" stroke="#2F8F5B" stroke-width="9" stroke-linecap="round"/>
+              </svg>
+              <div class="val">92<span style="font-size:12px; color:var(--ink-soft);">/100</span></div>
+            </div>
+            <div style="font-size:11px; color:var(--green); font-weight:700;">Excellent — 14 cotisations sans retard</div>
+          </div>
+
+          <div class="sectitle">Compte</div>
+          <div class="menurow">Moyens de paiement <span class="r">MoMo, OM ›</span></div>
+          <div class="menurow">Mes groupes <span class="r">3 ›</span></div>
+          <div class="menurow">Sécurité & PIN <span class="r">›</span></div>
+          <div class="sectitle">Préférences</div>
+          <div class="menurow">Langue <span class="r">Français ›</span></div>
+          <div class="menurow">Notifications <span class="r">Activées ›</span></div>
+          <div class="menurow" style="color:var(--terra); border-bottom:none;">Se déconnecter <span class="r"></span></div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 73. EDIT PROFILE -->
+  <div class="unit">
+    <div class="tag">73 · PROFIL</div>
+    <h3>Modifier le profil</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Modifier mon profil</div></div>
+        <div class="scroll">
+          <div style="width:64px; height:64px; border-radius:50%; background:var(--gold); color:var(--navy); font-family:'Fraunces',serif; font-weight:700; font-size:22px; display:flex; align-items:center; justify-content:center; margin:6px auto 8px;">AN</div>
+          <div style="text-align:center; font-size:11.5px; color:var(--gold); font-weight:700; margin-bottom:18px;">Changer la photo</div>
+          <div class="field"><label>Nom complet</label><div class="box">Amina Njoya</div></div>
+          <div class="field"><label>Numéro de téléphone</label><div class="box">+237 6 77 XX XX XX</div></div>
+          <div class="field"><label>Ville</label><div class="box">Douala</div></div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn dark">Enregistrer</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 74. SETTINGS -->
+  <div class="unit">
+    <div class="tag">74 · PARAMÈTRES</div>
+    <h3>Paramètres</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Paramètres</div></div>
+        <div class="scroll">
+          <div class="sectitle">Général</div>
+          <div class="menurow">🌐 Langue <span class="r">Français</span></div>
+          <div class="menurow">🔔 Notifications <span class="r">›</span></div>
+          <div class="menurow">🔒 Sécurité & PIN <span class="r">›</span></div>
+          <div class="sectitle">Compte</div>
+          <div class="menurow">✉ SMS de secours <span class="r">Activé</span></div>
+          <div class="menurow" style="color:var(--terra);">🗑 Supprimer mon compte <span class="r">›</span></div>
+          <div class="menurow" style="color:var(--terra); border-bottom:none;">↪ Se déconnecter <span class="r">›</span></div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 75. CURRENCY & COUNTRY SETTINGS -->
+  <div class="unit">
+    <div class="tag">75 · PROFIL</div>
+    <h3>Pays & devise</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Pays & devise</div></div>
+        <div class="scroll">
+          <div class="sectitle">Pays de résidence</div>
+          <div class="field"><div class="box">🇨🇦 Canada</div></div>
+          <div style="font-size:10.5px; color:var(--ink-soft); margin:-6px 0 4px; line-height:1.5;">Utilisé pour vos moyens de paiement et vos échanges avec des groupes ouverts à la diaspora.</div>
+          <div class="sectitle">Devise d'affichage</div>
+          <div class="pillrow">
+            <div class="pill on">FCFA</div>
+            <div class="pill">EUR €</div>
+            <div class="pill">USD $</div>
+            <div class="pill">GBP £</div>
+            <div class="pill">CAD $</div>
+          </div>
+          <div style="font-size:10.5px; color:var(--ink-soft); margin-top:10px; line-height:1.6;">Les montants restent enregistrés en FCFA dans le ledger du groupe ; seul l'affichage est converti dans la devise choisie, au taux du jour.</div>
+        </div>
+      </div>
+      <div style="position:absolute; bottom:0; left:0; right:0; padding:14px 18px 20px; background:var(--paper);">
+        <div class="btn primary">Enregistrer</div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 76. LOGOUT CONFIRM -->
+  <div class="unit">
+    <div class="tag">76 · PARAMÈTRES</div>
+    <h3>Se déconnecter</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="scroll" style="filter:blur(1.5px); opacity:.5; padding-top:16px;">
+          <div class="menurow">🌐 Langue <span class="r">Français</span></div>
+          <div class="menurow">🔔 Notifications <span class="r">›</span></div>
+        </div>
+        <div class="sheetoverlay">
+          <div class="sheet" style="text-align:center;">
+            <div class="handle"></div>
+            <div style="font-size:32px; margin-bottom:10px;">👋</div>
+            <div style="font-family:'Fraunces',serif; font-size:17px; font-weight:600; color:var(--navy); margin-bottom:6px;">Se déconnecter ?</div>
+            <div style="font-size:12px; color:var(--ink-soft); margin-bottom:18px;">Vous devrez ressaisir votre code PIN à la prochaine connexion.</div>
+            <div class="btn" style="background:var(--terra); color:#fff; margin-bottom:10px;">Se déconnecter</div>
+            <div class="btn ghost">Annuler</div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 77. HELP & SUPPORT -->
+  <div class="unit">
+    <div class="tag">77 · SUPPORT</div>
+    <h3>Aide & support</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Aide</div></div>
+        <div class="scroll">
+          <div class="searchbar">🔍 Chercher une question</div>
+          <div class="sectitle">Questions fréquentes</div>
+          <div class="faqrow"><div class="q">Que se passe-t-il si je rate une cotisation ? <span class="chev">︿</span></div><div class="a">Une pénalité de retard définie par votre groupe s'applique après le délai de grâce. Les autres membres en sont informés pour préserver la transparence.</div></div>
+          <div class="faqrow"><div class="q">Comment sont sécurisés mes paiements Mobile Money ? <span class="chev">﹀</span></div></div>
+          <div class="faqrow"><div class="q">Puis-je quitter un groupe en cours de cycle ? <span class="chev">﹀</span></div></div>
+          <div class="faqrow"><div class="q">Comment fonctionne le score de fiabilité ? <span class="chev">﹀</span></div></div>
+
+          <div class="sectitle">Nous contacter</div>
+          <div class="menurow">💬 Discuter avec le support <span class="r">›</span></div>
+          <div class="menurow">📱 WhatsApp <span class="r">›</span></div>
+          <div class="menurow">☎ Appeler <span class="r">7j/7 · 8h–20h</span></div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 78. SUPPORT CHAT -->
+  <div class="unit">
+    <div class="tag">78 · SUPPORT</div>
+    <h3>Discussion avec le support</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div class="chatheader">
+          <div class="backbtn-dark" style="margin-bottom:0;">←</div>
+          <div class="avgrp" style="background:var(--green); color:#fff;">CS</div>
+          <div class="info" style="flex:1;"><div class="t">Support Cercle</div><div class="s"><span class="liveDot"></span>Répond en quelques minutes</div></div>
+        </div>
+        <div class="scroll" style="padding-top:6px;">
+          <div class="chatday">Aujourd'hui</div>
+          <div class="msgrow"><div class="mav" style="background:var(--green);">CS</div><div class="msgcol"><div class="mname" style="color:var(--green);">Support</div><div class="bubble other">Bonjour Amina 👋 Comment pouvons-nous vous aider aujourd'hui ?</div><div class="mtime">10:02</div></div></div>
+          <div class="msgrow me"><div class="mav">AM</div><div class="msgcol"><div class="mname">Vous</div><div class="bubble me">Mon paiement de cotisation n'apparaît pas dans l'historique du groupe</div><div class="mtime">10:04 ✓✓</div></div></div>
+          <div class="typingrow"><div class="mav" style="background:var(--green); width:24px; height:24px; font-size:9px;">CS</div><div class="typingbubble"><i></i><i></i><i></i></div><span class="typingname">Support écrit…</span></div>
+        </div>
+        <div class="chatinputbar"><div class="plus">+</div><div class="field2">Écrire un message…</div><div class="sendbtn">➤</div></div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 79. COUNTRY / DIAL CODE PICKER -->
+  <div class="unit">
+    <div class="tag">79 · AUTHENTIFICATION</div>
+    <h3>Choisir un pays</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body">
+        <div style="padding:16px 20px 0;"><div class="backbtn">←</div><div style="font-family:'Fraunces',serif; font-size:19px; font-weight:600; color:var(--navy);">Choisir un pays</div><div style="font-size:11px; color:var(--ink-soft); margin-top:2px;">Utilisé pour l'indicatif de votre numéro de téléphone</div></div>
+        <div class="scroll">
+          <div class="searchbar">🔍 Rechercher un pays</div>
+          <div class="sectitle">Suggéré</div>
+          <div class="doctypecard on"><div style="font-size:20px;">🇨🇲</div><div class="dtx"><div class="t">Cameroun</div><div style="font-size:10.5px; color:var(--ink-soft);">+237</div></div><div class="radiodot on"></div></div>
+          <div class="sectitle">Diaspora</div>
+          <div class="doctypecard"><div style="font-size:20px;">🇫🇷</div><div class="dtx"><div class="t">France</div><div style="font-size:10.5px; color:var(--ink-soft);">+33</div></div><div class="radiodot"></div></div>
+          <div class="doctypecard"><div style="font-size:20px;">🇧🇪</div><div class="dtx"><div class="t">Belgique</div><div style="font-size:10.5px; color:var(--ink-soft);">+32</div></div><div class="radiodot"></div></div>
+          <div class="doctypecard"><div style="font-size:20px;">🇩🇪</div><div class="dtx"><div class="t">Allemagne</div><div style="font-size:10.5px; color:var(--ink-soft);">+49</div></div><div class="radiodot"></div></div>
+          <div class="doctypecard"><div style="font-size:20px;">🇬🇧</div><div class="dtx"><div class="t">Royaume-Uni</div><div style="font-size:10.5px; color:var(--ink-soft);">+44</div></div><div class="radiodot"></div></div>
+          <div class="doctypecard"><div style="font-size:20px;">🇺🇸</div><div class="dtx"><div class="t">États-Unis</div><div style="font-size:10.5px; color:var(--ink-soft);">+1</div></div><div class="radiodot"></div></div>
+          <div class="doctypecard"><div style="font-size:20px;">🇨🇦</div><div class="dtx"><div class="t">Canada</div><div style="font-size:10.5px; color:var(--ink-soft);">+1</div></div><div class="radiodot"></div></div>
+          <div class="sectitle">Afrique centrale &amp; de l'Ouest</div>
+          <div class="doctypecard"><div style="font-size:20px;">🇬🇦</div><div class="dtx"><div class="t">Gabon</div><div style="font-size:10.5px; color:var(--ink-soft);">+241</div></div><div class="radiodot"></div></div>
+          <div class="doctypecard"><div style="font-size:20px;">🇹🇩</div><div class="dtx"><div class="t">Tchad</div><div style="font-size:10.5px; color:var(--ink-soft);">+235</div></div><div class="radiodot"></div></div>
+          <div class="doctypecard"><div style="font-size:20px;">🇨🇮</div><div class="dtx"><div class="t">Côte d'Ivoire</div><div style="font-size:10.5px; color:var(--ink-soft);">+225</div></div><div class="radiodot"></div></div>
+          <div class="doctypecard"><div style="font-size:20px;">🇳🇬</div><div class="dtx"><div class="t">Nigeria</div><div style="font-size:10.5px; color:var(--ink-soft);">+234</div></div><div class="radiodot"></div></div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+<!-- 80. CREATE ACCOUNT -->
+  <div class="unit">
+    <div class="tag">80 · AUTHENTIFICATION</div>
+    <h3>Créer un compte</h3>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="color:#fff;"><span>9:41</span><span>●●● ▂▄▆ 100%</span></div>
+      <div class="body" style="background:var(--navy); padding:0 26px;">
+        <div style="padding-top:20px;"><div class="backbtn-dark">←</div></div>
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+          <svg width="60" height="60" viewBox="0 0 72 72" style="margin-bottom:14px;">
+            <circle cx="36" cy="36" r="30" fill="none" stroke="#3A4372" stroke-width="2"/>
+            <circle cx="36" cy="6" r="5" fill="#E8C989"/>
+            <circle cx="60" cy="20" r="4" fill="#5A6394"/>
+            <circle cx="60" cy="52" r="4" fill="#5A6394"/>
+            <circle cx="36" cy="66" r="4" fill="#5A6394"/>
+            <circle cx="12" cy="52" r="4" fill="#5A6394"/>
+            <circle cx="12" cy="20" r="4" fill="#5A6394"/>
+          </svg>
+          <div style="font-family:'Fraunces',serif; color:#fff; font-size:22px; font-weight:600; margin-bottom:6px; text-align:center;">Créer votre compte</div>
+          <div style="font-family:'Inter'; color:#B9BFDA; font-size:12px; text-align:center; margin-bottom:28px; line-height:1.5;">Rejoignez vos tontines en quelques minutes, sans paperasse.</div>
+          <div style="width:100%;">
+            <div class="field"><label style="color:#B9BFDA;">Numéro de téléphone</label>
+              <div style="display:flex; gap:8px;">
+                <div class="box" style="background:#232C52; border-color:#3A4372; color:#fff; width:84px; flex:none; text-align:center;">🇨🇲 +237 ▾</div>
+                <div class="box" style="background:#232C52; border-color:#3A4372; color:#fff; flex:1;">6 XX XX XX XX</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:flex-start; gap:8px; margin:2px 0 16px;">
+              <div style="width:16px; height:16px; border-radius:4px; border:1.5px solid var(--gold); background:#FBF3E2; flex:none; margin-top:1px;"></div>
+              <div style="font-size:10.5px; color:#8A90B5; line-height:1.5;">J'accepte les <b style="color:var(--gold-l);">Conditions d'utilisation</b> et la <b style="color:var(--gold-l);">Politique de confidentialité</b> de Cercle.</div>
+            </div>
+            <div class="btn primary" style="margin-bottom:10px;">Créer mon compte</div>
+            <div style="text-align:center; font-size:11.5px; color:#8A90B5;">Déjà un compte ? <b style="color:var(--gold-l);">Se connecter</b></div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
