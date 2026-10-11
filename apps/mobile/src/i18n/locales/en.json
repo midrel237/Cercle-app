@@ -48,7 +48,7 @@
       "termsSuffix": "of Cercle.",
       "termsRequiredError": "Please accept the terms to continue.",
       "submitButton": "Create my account",
-      "alreadyHaveAccount": "Already have an account?",
+      "alreadyHaveAccount": "Already an account?",
       "signIn": "Sign in"
     },
     "countryPicker": {
@@ -68,6 +68,49 @@
       "verifyButton": "Verify",
       "verifying": "Verifying…",
       "verifyError": "Incorrect code. Check and try again."
+    }
+  },
+  "kyc": {
+    "intro": {
+      "stepLabel": "Step 1 of 2 · Identity verification",
+      "title": "Let's verify your identity",
+      "description": "A secure identity check protects your group and unlocks full access to Cercle.",
+      "step1": "Choose your document",
+      "step1Hint": "National ID, passport, or driver's license",
+      "step2": "Secure verification",
+      "step2Hint": "Guided by our partner, in a few minutes",
+      "step3": "Instant validation",
+      "step3Hint": "Most checks are processed within 2 minutes",
+      "consentLabel": "I agree to the processing of my data",
+      "consentSub": "Documents collected only for identity verification",
+      "startButton": "Start verification",
+      "consentRequiredError": "Please accept the data processing terms to continue."
+    },
+    "documentChoice": {
+      "stepLabel": "Step 2 of 2 · Your document",
+      "title": "Which document will you verify?",
+      "subtitle": "You'll be redirected to a secure verification. Keep your document at hand.",
+      "cni": "National ID card",
+      "cniHint": "The most common in Cameroon",
+      "passport": "Passport",
+      "passportHint": "Valid worldwide",
+      "license": "Driver's license",
+      "licenseHint": "With photo, currently valid",
+      "sessionError": "Couldn't start verification right now. Please try again."
+    },
+    "processing": {
+      "title": "Verification in progress…",
+      "subtitle": "We're confirming your identity. It usually takes just a few moments — please keep the app open."
+    },
+    "success": {
+      "title": "Identity verified!",
+      "subtitle": "Your identity has been successfully confirmed. Your Cercle account is now secure and complete.",
+      "continueButton": "Continue"
+    },
+    "rejected": {
+      "title": "Verification declined",
+      "subtitle": "Your document couldn't be validated this time. You can try again with another document or better lighting.",
+      "retryButton": "Try again"
     }
   },
   "home": {
