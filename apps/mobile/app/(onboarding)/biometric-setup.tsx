@@ -16,7 +16,7 @@ export const BIOMETRIC_ENABLED_KEY = 'cercle_biometric_enabled';
 // locale (SecureStore) : le backend ne stocke aucune donnée biométrique,
 // l'authentification elle-même est déléguée à l'OS via
 // expo-local-authentication. Si aucun capteur n'est disponible sur
-// l'appareil, l'écran est sauté automatiquement.
+// l'appareil, l'écran informe simplement l'utilisateur.
 export default function BiometricSetupScreen() {
   const { t } = useTranslation();
   const [hasHardware, setHasHardware] = useState<boolean | null>(null);
@@ -33,8 +33,7 @@ export default function BiometricSetupScreen() {
       setHasHardware(hardware);
       setIsEnrolled(enrolled);
       if (enrolled) {
-        const types =
-          await LocalAuthentication.supportedAuthenticationTypesAsync();
+        const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
         if (types.length > 0) {
           setType(types[0]);
         }
@@ -44,7 +43,7 @@ export default function BiometricSetupScreen() {
     })();
   }, []);
 
-  const handleNext = async () => {
+  const handleNext = () => {
     router.replace('/(onboarding)/notification-permission');
   };
 
@@ -55,7 +54,7 @@ export default function BiometricSetupScreen() {
   };
 
   // Appareil sans capteur biométrique (ou sans empreinte enregistrée) :
-  // écran sans action possible, juste une information et un bouton passer.
+  // écran d'information sans action possible.
   if (hasHardware !== null && (!hasHardware || !isEnrolled)) {
     return (
       <View style={styles.container}>
@@ -153,12 +152,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.inter.medium,
     fontSize: 12.5,
     color: colors.navyDark,
-  },
-  cardInterruptible: {
-    fontFamily: fonts.inter.regular,
-    fontSize: 10.5,
-    color: colors.inkSoft,
-    marginTop: 1,
   },
   cardHint: {
     fontFamily: fonts.inter.regular,
