@@ -78,8 +78,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.creamLight,
   },
   content: {
-    flex: sharpCenter(),
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: spacing.md + 4,
   },
   emoji: {
@@ -104,7 +105,6 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     borderWidth: 1.5,
-    StyleSheet: undefined,
     borderColor: colors.sand,
     borderRadius: radii.md,
     backgroundColor: colors.creamLight,
@@ -120,9 +120,6 @@ const styles = StyleSheet.create({
   rowBorder: {
     borderBottomWidth: 1,
     borderBottomColor: colors.sand,
-  },
-  StyleSheet: {
-    borderWidth: 1.5,
   },
   rowEmoji: {
     fontSize: 18,
@@ -148,7 +145,3 @@ const styles = StyleSheet.create({
     backgroundColor: colors.creamLight,
   },
 });
-
-function sharpCenter() {
-  return 1;
-}
