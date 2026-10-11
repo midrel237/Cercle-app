@@ -70,6 +70,49 @@
       "verifyError": "Code incorrect. Vérifiez et réessayez."
     }
   },
+  "kyc": {
+    "intro": {
+      "stepLabel": "Étape 1 sur 2 · Vérification d'identité",
+      "title": "Vérifions votre identité",
+      "description": "Une vérification d'identité sécurisée protège votre groupe et débloque l'accès complet à Cercle.",
+      "step1": "Choisissez votre document",
+      "step1Hint": "CNI, passeport ou permis de conduire",
+      "step2": "Vérification sécurisée",
+      "step2Hint": "Guidé par notre partenaire, en quelques minutes",
+      "step3": "Validation immédiate",
+      "step3Hint": "La plupart des vérifications sont traitées sous 2 minutes",
+      "consentLabel": "J'accepte le traitement de mes données",
+      "consentSub": "Documents collectés uniquement pour la vérification d'identité",
+      "startButton": "Commencer la vérification",
+      "consentRequiredError": "Merci d'accepter le traitement de vos données pour continuer."
+    },
+    "documentChoice": {
+      "stepLabel": "Étape 2 sur 2 · Votre document",
+      "title": "Quel document allez-vous vérifier ?",
+      "subtitle": "Vous serez redirigé vers une vérification sécurisée. Gardez votre document à portée de main.",
+      "cni": "Carte nationale d'identité",
+      "cniHint": "Le plus courant au Cameroun",
+      "passport": "Passeport",
+      "passportHint": "Valable partout dans le monde",
+      "license": "Permis de conduire",
+      "licenseHint": "Avec photo et en cours de validité",
+      "sessionError": "Impossible de démarrer la vérification pour l'instant. Réessayez."
+    },
+    "processing": {
+      "title": "Vérification en cours…",
+      "subtitle": "Nous confirmons votre identité. Cela ne prend généralement que quelques instants, ne fermez pas l'application."
+    },
+    "success": {
+      "title": "Identité vérifiée !",
+      "subtitle": "Votre identité a été confirmée avec succès. Votre compte Cercle est désormais sécurisé et complet.",
+      "continueButton": "Continuer"
+    },
+    "rejected": {
+      "title": "Vérification refusée",
+      "subtitle": "Votre document n'a pas pu être validé cette fois. Vous pouvez réessayer avec un autre document ou un meilleur éclairage.",
+      "retryButton": "Réessayer"
+    }
+  },
   "home": {
     "myGroups": "Mes groupes",
     "createGroup": "Créer un groupe",
