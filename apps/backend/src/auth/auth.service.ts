@@ -6,6 +6,7 @@ import {
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { randomInt } from 'crypto';
+import { SmsService } from '../common/sms/sms.service';
 import { PrismaService } from '../database/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { RequestOtpDto } from './dto/request-otp.dto';
@@ -19,37 +20,37 @@ const OTP_MAX_ATTEMPTS = 5;
 const PIN_SALT_ROUNDS = 10;
 
 /**
- * Gère l'inscription progressive (téléphone + OTP d'abord, profil et PIN
- * complétés ensuite), la connexion, et l'émission des jetons JWT.
+ * Gere l'inscription progressive (telephone + OTP d'abord, profil et PIN
+ * completes ensuite), la connexion, et l'emission des jetons JWT.
  *
- * Parcours réel côté mobile (écrans 4-5, cf. document de compréhension
- * §8.4/§8.5) : l'utilisateur ne saisit que son numéro de téléphone avant la
- * vérification OTP — il n'existe pas d'écran de saisie du nom à ce stade.
- * Le compte est donc créé dès la première vérification OTP réussie, avec
- * uniquement le numéro de téléphone ; `fullName` et `pinHash` restent
- * `null` jusqu'aux étapes KYC / création du PIN (onboarding, écrans 16-17).
+ * Parcours reel cote mobile (ecrans 4-5, cf. document de comprehension
+ * §8.4/§8.5) : l'utilisateur ne saisit que son numero de telephone avant la
+ * verification OTP - il n'existe pas d'ecran de saisie du nom a ce stade.
+ * Le compte est donc cree des la premiere verification OTP reussie, avec
+ * uniquement le numero de telephone ; `fullName` et `pinHash` restent
+ * `null` jusqu'aux etapes KYC / creation du PIN (onboarding, ecrans 16-17).
  *
- * Étape suivante côté produit : KYC (voir module `users`), biométrie gérée
- * côté mobile via Expo Local Authentication (le backend ne stocke aucune
- * donnée biométrique).
+ * Etape suivante cote produit : KYC (voir module `users`), biometrie geree
+ * cote mobile via Expo Local Authentication (le backend ne stocke aucune
+ * donnee biometrique).
  */
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
+    private readonly sms: SmsService,
   ) {}
 
   /**
-   * Génère un code à 6 chiffres, invalide les codes précédents non
-   * consommés pour ce numéro, et stocke son hash (jamais le code en clair)
+   * Genere un code a 6 chiffres, invalide les codes precedents non
+   * consommes pour ce numero, et stocke son hash (jamais le code en clair)
    * avec une expiration courte.
    *
-   * ⚠ Aucun fournisseur SMS n'est encore branché (à choisir, ex. Twilio /
-   * Vonage / un agrégateur local) : le code est pour l'instant seulement
-   * journalisé côté serveur. En développement, il est aussi renvoyé dans
-   * la réponse (`devCode`) pour permettre de tester le parcours sans SMS
-   * réel — ce champ est automatiquement omis si NODE_ENV=production.
+   * L'envoi passe par SmsService (SMS_PROVIDER : console en dev,
+   * africas-talking en production). En developpement, le code est aussi
+   * renvoye dans la reponse (`devCode`) pour faciliter les tests sans SMS
+   * reel - ce champ est automatiquement omis si NODE_ENV=production.
    */
   async requestOtp(dto: RequestOtpDto) {
     const { phoneNumber } = dto;
@@ -59,15 +60,16 @@ export class AuthService {
 
     await this.prisma.otpCode.updateMany({
       where: { phoneNumber, consumedAt: null },
-      data: { consumedAt: new Date() }, // invalide les codes précédents encore actifs
+      data: { consumedAt: new Date() },
     });
     await this.prisma.otpCode.create({
       data: { phoneNumber, codeHash, expiresAt },
     });
 
-    // TODO: remplacer par un vrai envoi SMS avant toute mise en production.
-    // eslint-disable-next-line no-console
-    console.log(`[OTP][DEV] ${phoneNumber} → ${code} (expire dans ${OTP_TTL_MINUTES} min)`);
+    await this.sms.send({
+      to: phoneNumber,
+      body: `Cercle: votre code de verification est ${code}. Valable ${OTP_TTL_MINUTES} minutes.`,
+    });
 
     return {
       phoneNumber,
@@ -77,12 +79,12 @@ export class AuthService {
   }
 
   /**
-   * Vérifie le code contre le dernier OTP actif du numéro. Verrouille
-   * après `OTP_MAX_ATTEMPTS` tentatives ratées pour limiter le brute-force
-   * d'un code à 6 chiffres. Crée le compte à la volée s'il n'existe pas
+   * Verifie le code contre le dernier OTP actif du numero. Verrouille
+   * apres `OTP_MAX_ATTEMPTS` tentatives ratees pour limiter le brute-force
+   * d'un code a 6 chiffres. Cree le compte a la volee s'il n'existe pas
    * encore (inscription progressive, cf. commentaire de classe), puis
-   * ouvre directement une session (jetons JWT) : côté mobile, l'écran OTP
-   * enchaîne sans repasser par un écran de connexion séparé.
+   * ouvre directement une session (jetons JWT) : cote mobile, l'ecran OTP
+   * enchaine sans repasser par un ecran de connexion separe.
    */
   async verifyOtp(dto: VerifyOtpDto) {
     const { phoneNumber, code } = dto;
@@ -92,10 +94,10 @@ export class AuthService {
       orderBy: { createdAt: 'desc' },
     });
     if (!otp) {
-      throw new BadRequestException('Aucun code en attente pour ce numéro. Demandez-en un nouveau.');
+      throw new BadRequestException('Aucun code en attente pour ce numero. Demandez-en un nouveau.');
     }
     if (otp.expiresAt < new Date()) {
-      throw new BadRequestException('Ce code a expiré. Demandez-en un nouveau.');
+      throw new BadRequestException('Ce code a expire. Demandez-en un nouveau.');
     }
     if (otp.attempts >= OTP_MAX_ATTEMPTS) {
       throw new UnauthorizedException('Trop de tentatives. Demandez un nouveau code.');
@@ -131,17 +133,17 @@ export class AuthService {
   }
 
   /**
-   * Complète le profil d'un compte déjà créé par `verifyOtp` (nom, langue,
-   * pays de résidence...). Reste utilisable pour une inscription
-   * explicite si un écran dédié est ajouté plus tard ; ne rejette plus le
-   * numéro comme "déjà existant" tant que le profil n'est pas complet.
+   * Complete le profil d'un compte deja cree par `verifyOtp` (nom, langue,
+   * pays de residence...). Reste utilisable pour une inscription
+   * explicite si un ecran dedie est ajoute plus tard ; ne rejette plus le
+   * numero comme "deja existant" tant que le profil n'est pas complet.
    */
   async register(dto: RegisterDto) {
     const existing = await this.prisma.user.findUnique({
       where: { phoneNumber: dto.phoneNumber },
     });
     if (existing?.fullName) {
-      throw new UnauthorizedException('Un compte existe déjà pour ce numéro.');
+      throw new UnauthorizedException('Un compte existe deja pour ce numero.');
     }
 
     const data = {
@@ -160,7 +162,7 @@ export class AuthService {
   async createPin(dto: CreatePinDto) {
     const user = await this.prisma.user.findUnique({ where: { phoneNumber: dto.phoneNumber } });
     if (!user) {
-      throw new BadRequestException('Aucun compte pour ce numéro. Vérifiez votre téléphone d\u2019abord.');
+      throw new BadRequestException('Aucun compte pour ce numero. Verifiez votre telephone d\'abord.');
     }
     const pinHash = await this.hashPin(dto.pin);
     return this.prisma.user.update({
@@ -174,16 +176,13 @@ export class AuthService {
       where: { phoneNumber: dto.phoneNumber },
     });
     if (!user || !user.pinHash || !(await this.verifyPin(dto.pin, user.pinHash))) {
-      throw new UnauthorizedException('Numéro ou code PIN invalide.');
+      throw new UnauthorizedException('Numero ou code PIN invalide.');
     }
     return this.issueTokens(user.id, user.phoneNumber);
   }
 
   private async issueTokens(userId: string, phoneNumber: string) {
     const payload = { sub: userId, phoneNumber };
-    // @nestjs/jwt 11 attend un littéral "StringValue" (ex. "15m") pour
-    // expiresIn ; une valeur issue de process.env reste un `string`
-    // générique côté typage, d'où le cast explicite ci-dessous.
     const accessToken = await this.jwt.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
       expiresIn: (process.env.JWT_ACCESS_EXPIRES_IN ?? '15m') as JwtSignOptions['expiresIn'],
