@@ -113,6 +113,57 @@
       "retryButton": "Réessayer"
     }
   },
+  "onboarding": {
+    "createPin": {
+      "stepLabel": "Sécurisez votre compte",
+      "title": "Créez votre code PIN",
+      "subtitle": "Ce code à 4 chiffres protégera l'accès à votre compte Cercle. Ne le partagez avec personne."
+    },
+    "pinConfirm": {
+      "stepLabel": "Sécurisez votre compte",
+      "title": "Confirmez votre code PIN",
+      "subtitle": "Ressaisissez le même code pour valider.",
+      "mismatchError": "Les codes ne correspondent pas. Retour à la saisie…",
+      "missingPhoneError": "Numéro introuvable. Veuillez vérifier votre téléphone à nouveau.",
+      "serverError": "Impossible d'enregistrer le code pour l'instant. Réessayez."
+    },
+    "biometric": {
+      "stepLabel": "Sécurisez votre compte",
+      "title": "Ouverture plus rapide",
+      "subtitle": "Activez la biométrie pour ouvrir Cercle sans ressaisir votre code à chaque fois.",
+      "fingerprintLabel": "Empreinte digitale",
+      "faceIdLabel": "Reconnaissance faciale",
+      "hint": "Vos données biométriques restent sur votre appareil",
+      "unavailableTitle": "Biométrie indisponible",
+      "unavailableSubtitle": "Votre appareil ne propose pas de déverrouillage biométrique (ou aucune empreinte n'est enregistrée). Votre code PIN reste votre protection."
+    },
+    "notifications": {
+      "stepLabel": "Sécurisez votre compte",
+      "title": "Rester au courant de votre cercle",
+      "subtitle": "Les notifications vous préviennent des moments clés de votre tontine.",
+      "row1Title": "Rappels de cotisation",
+      "row1Hint": "Avant chaque tour de cotisation",
+      "row2Title": "Mouvements du groupe",
+      "row2Hint": "Paiements reçus et décaissements",
+      "row3Title": "Demandes de prêt",
+      "row3Hint": "Quand un membre sollicite le groupe",
+      "allowButton": "Activer les notifications",
+      "skipButton": "Plus tard"
+    },
+    "security": {
+      "stepLabel": "Sécurisez votre compte",
+      "title": "Votre compte est protégé",
+      "subtitle": "Récapitulatif des protections activées. Vous pouvez tout modifier plus tard dans les paramètres.",
+      "rowKycLabel": "Identité vérifiée",
+      "rowKycHint": "Vérification d'identité confirmée",
+      "rowPinLabel": "Code PIN actif",
+      "rowPinHint": "Requis à l'ouverture de l'application",
+      "rowBiometricLabel": "Biométrie",
+      "rowBiometricHintOn": "Ouverture rapide activée",
+      "rowBiometricHintOff": "Non activée — disponible dans les paramètres",
+      "startButton": "Découvrir Cercle"
+    }
+  },
   "home": {
     "myGroups": "Mes groupes",
     "createGroup": "Créer un groupe",
