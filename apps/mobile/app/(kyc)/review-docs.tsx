@@ -1,12 +1,11 @@
-import React from 'react';
-import { ScreenPlaceholder } from '../../src/components/ScreenPlaceholder';
+import React, { useEffect } from 'react';
+import { useRouter } from 'expo-router';
 
+// Écrans 8-12 remplacés par le flux hébergé Didit — voir capture-recto.tsx.
 export default function Screen() {
-  return (
-    <ScreenPlaceholder
-      screenNumber={10}
-      title="Vérification des documents"
-      description="Relecture avant envoi."
-    />
-  );
+  const router = useRouter();
+  useEffect(() => {
+    router.replace('/(kyc)/document-choice');
+  }, [router]);
+  return null;
 }
