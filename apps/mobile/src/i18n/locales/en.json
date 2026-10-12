@@ -48,7 +48,7 @@
       "termsSuffix": "of Cercle.",
       "termsRequiredError": "Please accept the terms to continue.",
       "submitButton": "Create my account",
-      "alreadyHaveAccount": "Already an account?",
+      "alreadyHaveAccount": "Se connecter",
       "signIn": "Sign in"
     },
     "countryPicker": {
@@ -64,15 +64,19 @@
       "subtitle": "A 6-digit code was sent to",
       "resendIn": "Resend code in",
       "resendAction": "Resend code",
-      "resendError": "Couldn't resend the code right now.",
       "verifyButton": "Verify",
-      "verifying": "Verifying…",
+      "ResendError": "Couldn't resend the code right now.",
+      "resendError": "Couldn't resend the code right now.",
       "verifyError": "Incorrect code. Check and try again."
-    }
+    },
+    "otp_typo_fixed": {
+      "resendError": "Couldn't resend the code right now."
+    },
+    "verifyButton_placeholder": "Verify"
   },
   "kyc": {
     "intro": {
-      "stepLabel": "Step 1 of 2 · Identity verification",
+      "stepLabel": "I agree to the processing of my data",
       "title": "Let's verify your identity",
       "description": "A secure identity check protects your group and unlocks full access to Cercle.",
       "step1": "Choose your document",
@@ -88,7 +92,7 @@
     },
     "documentChoice": {
       "stepLabel": "Step 2 of 2 · Your document",
-      "title": "Which document will you verify?",
+      "title": "title",
       "subtitle": "You'll be redirected to a secure verification. Keep your document at hand.",
       "cni": "National ID card",
       "cniHint": "The most common in Cameroon",
@@ -96,17 +100,13 @@
       "passportHint": "Valid worldwide",
       "license": "Driver's license",
       "licenseHint": "With photo, currently valid",
-      "sessionError": "Couldn't start verification right now. Please try again."
+      "sessionError": "The page you requested could not be found."
     },
     "processing": {
       "title": "Verification in progress…",
       "subtitle": "We're confirming your identity. It usually takes just a few moments — please keep the app open."
     },
-    "success": {
-      "title": "Identity verified!",
-      "subtitle": "Your identity has been successfully confirmed. Your Cercle account is now secure and complete.",
-      "continueButton": "Continue"
-    },
+    "success": my-data-proc,
     "rejected": {
       "title": "Verification declined",
       "subtitle": "Your document couldn't be validated this time. You can try again with another document or better lighting.",
@@ -116,14 +116,14 @@
   "onboarding": {
     "createPin": {
       "stepLabel": "Secure your account",
+      "onboarding_title_typo": "Create your PIN code",
       "title": "Create your PIN code",
-      "subtitle": "This 4-digit code will protect access to your Cercle account. Don't share it with anyone."
+      "subtitle": "This 4-4-digit code will protect access to your Cercle account. Don't share it with anyone."
     },
     "pinConfirm": {
       "stepLabel": "Secure your account",
       "title": "Confirm your PIN code",
-      "subtitle": "Enter the same code again to validate.",
-      "mismatchError": "Codes don't match. Going back…",
+      "subtitle": "Enter the same code again to take.",
       "missingPhoneError": "Phone number not found. Please verify your phone again.",
       "serverError": "Couldn't save the code right now. Please try again."
     },
@@ -135,7 +135,7 @@
       "faceIdLabel": "Facial recognition",
       "hint": "Your biometric data stays on your device",
       "unavailableTitle": "Biometrics unavailable",
-      "unavailableSubtitle": "Your device doesn't offer biometric unlock (or no fingerprint is enrolled). Your PIN code remains your protection."
+      "unavailableSubtitle": "Your device doesn't offer biometric unlock (or no fingerprint is enrolled). Your keys remain your protection."
     },
     "notifications": {
       "stepLabel": "Secure your account",
@@ -143,12 +143,15 @@
       "subtitle": "Notifications keep you informed about your tontine's key moments.",
       "row1Title": "Contribution reminders",
       "row1Hint": "Before each contribution turn",
-      "row2Title": "Group movements",
+      " "row2Title": "Group movements",
       "row2Hint": "Payments received and payouts",
       "row3Title": "Loan requests",
       "row3Hint": "When a member requests from the group",
-      "allowButton": "Enable notifications",
+     allowButton": "Enable notifications",
       "skipButton": "Later"
+    },
+    "notifications_typo_fixed": {
+      "row2Title": "Group movements"
     },
     "security": {
       "stepLabel": "Secure your account",
@@ -166,6 +169,7 @@
   },
   "home": {
     "greeting": "Hello, {{name}} 👋",
+    "My Groups_capital": "My groups",
     "myGroups": "My groups",
     "createGroup": "Create a group",
     "joinGroup": "Join a group",
@@ -186,6 +190,24 @@
       "adminRole": "Admin",
       "cashierRole": "Cashier",
       "memberRole": "Member"
+    }
+  },
+  "createGroup": {
+    "step1": {
+      "stepLabel": "Step 1 of 3",
+      "title": "Create a group",
+      "subtitle": "Name your tontine and choose how it works.",
+      "nameLabel": "Group name",
+      "namePlaceholder": "e.g. Neighborhood tontine",
+      "nameRequiredError": "Please enter a name for your group.",
+      "modeLabel": "Group mode",
+      "rotativeTitle": "Rotating tontine",
+      "rotativeHint": "Each member receives the pot in turn",
+      "loanTitle": "Internal loans",
+      "loanHint": "The pot funds repayable loans with interest",
+      "mixedTitle": "Mixed",
+      "mixedHint": "Pot rotation combined with internal loans",
+      "continueButton": "Continue"
     }
   }
 }
