@@ -165,8 +165,27 @@
     }
   },
   "home": {
+    "greeting": "Hello, {{name}} 👋",
     "myGroups": "My groups",
     "createGroup": "Create a group",
-    "joinGroup": "Join a group"
+    "joinGroup": "Join a group",
+    "loading": "Loading…",
+    "loadError": "Couldn't load your groups right now.",
+    "retry": "Retry",
+    "empty": {
+      "title": "Welcome to Cercle",
+      "subtitle": "Create your first tontine group or join a relative's one with their invite code.",
+      "cardOneTitle": "Create a group",
+      "cardOneHint": "Set amount, schedule, and members",
+      "cardTwoTitle": "Join a group",
+      "cardTwoHint": "With the admin's invite code"
+    },
+    "group": {
+      "memberCount_one": "{{count}} member",
+      "memberCount_other": "{{count}} members",
+      "adminRole": "Admin",
+      "cashierRole": "Cashier",
+      "memberRole": "Member"
+    }
   }
 }
