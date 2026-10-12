@@ -221,6 +221,29 @@
       "monthly": "Chaque mois",
       "monthlyHint": "Tous les 30 jours",
       "continueButton": "Continuer"
+    },
+    "step3": {
+      "stepLabel": "Étape 3 sur 3",
+      "title": "Ordre de rotation",
+      "subtitle": "Comment déterminer qui reçoit la cagnotte en premier ?",
+      "drawTitle": "Tirage au sort",
+      "drawHint": "Un tirage équitable organisé avec les membres",
+      "fixedTitle": "Ordre fixe",
+      "fixedHint": "L'administrateur définit l'ordre manuellement",
+      "summaryTitle": "Récapitulatif",
+      "summaryName": "Nom",
+      "summaryMode": "Mode",
+      "summaryAmount": "Cotisation",
+      "summaryPeriodicity": "Périodicité",
+      "summaryRotation": "Ordre de rotation",
+      "modeRotative": "Rotative",
+      "modeLoan": "Prêts internes",
+      "modeMixed": "Mixte",
+      "periodicityDays_one": "Tous les {{count}} jour",
+      "periodicityDays_other": "Tous les {{count}} jours",
+      "createButton": "Créer le groupe",
+      "creating": "Création en cours…",
+      "createError": "Impossible de créer le groupe pour l'instant. Vérifiez votre connexion et réessayez."
     }
   }
 }
