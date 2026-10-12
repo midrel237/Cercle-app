@@ -204,6 +204,23 @@
       "mixedTitle": "Mixte",
       "mixedHint": "Rotation de la cagnotte et prêts internes combinés",
       "continueButton": "Continuer"
+    },
+    "step2": {
+      "stepLabel": "Étape 2 sur 3",
+      "title": "Créer un groupe",
+      "subtitle": "Définissez le montant de la cotisation et sa périodicité.",
+      "amountLabel": "Montant de la cotisation",
+      "amountSuffix": "FCFA / membre",
+      "amountPlaceholder": "Ex. 5000",
+      "amountError": "Montant invalide — saisissez un nombre entier supérieur à 0.",
+      "periodicityLabel": "Périodicité des cotisations",
+      "weekly": "Chaque semaine",
+      "weeklyHint": "Tous les 7 jours",
+      "biweekly": "Toutes les 2 semaines",
+      "biweeklyHint": "Tous les 14 jours",
+      "monthly": "Chaque mois",
+      "monthlyHint": "Tous les 30 jours",
+      "continueButton": "Continuer"
     }
   }
 }
