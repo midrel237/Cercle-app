@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontFamily: fonts.inter.regular,
-    fontsize: 12.5,
+    fontSize: 12.5,
     color: colors.inkSoft,
   },
   summaryValue: {
