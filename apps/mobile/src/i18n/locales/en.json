@@ -241,6 +241,21 @@
       "modeMixed": "Mixed",
       "periodicityDays_one": "Every {{count}} day",
       "periodicityDays_other": "Every {{count}} days",
+      "continueButton": "Continue"
+    },
+    "rules": {
+      "stepLabel": "Final step",
+      "title": "Group rules",
+      "subtitle": "Advanced options — you can change them later in the group settings.",
+      "interestLabel": "Internal loan interest rate (%)",
+      "interestHint": "Applied to repayable loans. Leave empty or 0 if not needed.",
+      "interestPlaceholder": "e.g. 5",
+      "interestError": "Invalid rate — enter a number between 0 and 100.",
+      "penaltyLabel": "Penalty rules",
+      "penaltyPlaceholder": "e.g. Late contribution: 500 FCFA penalty",
+      "penaltyHint": "Up to you — these rules will be shown to members.",
+      "diasporaLabel": "Open to diaspora",
+      "diasporaHint": "Members abroad can join and contribute from overseas (bank card, wire transfer).",
       "createButton": "Create the group",
       "creating": "Creating…",
       "createError": "Couldn't create the group right now. Check your connection and try again."
