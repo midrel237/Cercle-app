@@ -187,5 +187,23 @@
       "cashierRole": "Caissier",
       "memberRole": "Membre"
     }
+  },
+  "createGroup": {
+    "step1": {
+      "stepLabel": "Étape 1 sur 3",
+      "title": "Créer un groupe",
+      "subtitle": "Donnez un nom à votre tontine et choisissez son mode de fonctionnement.",
+      "nameLabel": "Nom du groupe",
+      "namePlaceholder": "Ex. Tontine du quartier",
+      "nameRequiredError": "Merci de renseigner un nom pour votre groupe.",
+      "modeLabel": "Mode du groupe",
+      "rotativeTitle": "Tontine rotative",
+      "rotativeHint": "Chaque membre reçoit la cagnotte à son tour",
+      "loanTitle": "Prêts internes",
+      "loanHint": "La cagnotte finance des prêts remboursables avec intérêts",
+      "mixedTitle": "Mixte",
+      "mixedHint": "Rotation de la cagnotte et prêts internes combinés",
+      "continueButton": "Continuer"
+    }
   }
 }
