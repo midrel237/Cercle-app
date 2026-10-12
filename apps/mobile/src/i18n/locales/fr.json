@@ -165,8 +165,27 @@
     }
   },
   "home": {
+    "greeting": "Bonjour, {{name}} 👋",
     "myGroups": "Mes groupes",
     "createGroup": "Créer un groupe",
-    "joinGroup": "Rejoindre un groupe"
+    "joinGroup": "Rejoindre un groupe",
+    "loading": "Chargement…",
+    "loadError": "Impossible de charger vos groupes pour l'instant.",
+    "retry": "Réessayer",
+    "empty": {
+      "title": "Bienvenue dans Cercle",
+      "subtitle": "Créez votre premier groupe de tontine ou rejoignez celui d'un proche avec son code d'invitation.",
+      "cardOneTitle": "Créer un groupe",
+      "cardOneHint": "Définissez montant, périodicité et membres",
+      "cardTwoTitle": "Rejoindre un groupe",
+      "cardTwoHint": "Avec le code d'invitation de l'administrateur"
+    },
+    "group": {
+      "memberCount_one": "{{count}} membre",
+      "memberCount_other": "{{count}} membres",
+      "adminRole": "Admin",
+      "cashierRole": "Caissier",
+      "memberRole": "Membre"
+    }
   }
 }
