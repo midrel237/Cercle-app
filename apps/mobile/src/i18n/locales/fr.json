@@ -35,7 +35,7 @@
     "diasporaHint": "🌍 Membre de la diaspora ? Sélectionnez l'indicatif de votre pays de résidence.",
     "noAccountYet": "Pas encore de compte ?",
     "phoneRequiredError": "Merci de renseigner un numéro de téléphone.",
-    "otpSendError": "Impossible d'envoyer le code pour l'instant. Réessayez.",
+    "otpSendError": "Impossible d'envoyer les code pour l'instant. Réessayez.",
     "sendingOtp": "Envoi en cours…",
     "createAccount": {
       "linkLabel": "Créer un compte",
@@ -96,6 +96,7 @@
       "passportHint": "Valable partout dans le monde",
       "license": "Permis de conduire",
       "licenseHint": "Avec photo et en cours de validité",
+      "sidebar": "Membres au pays et de la diaspora — tout le monde cotise en Mobile Money, depuis son téléphone.",
       "sessionError": "Impossible de démarrer la vérification pour l'instant. Réessayez."
     },
     "processing": {
@@ -119,14 +120,7 @@
       "title": "Créez votre code PIN",
       "subtitle": "Ce code à 4 chiffres protégera l'accès à votre compte Cercle. Ne le partagez avec personne."
     },
-    "pinConfirm": {
-      "stepLabel": "Sécurisez votre compte",
-      "title": "Confirmez votre code PIN",
-      "subtitle": "Ressaisissez le même code pour valider.",
-      "mismatchError": "Les codes ne correspondent pas. Retour à la saisie…",
-      "missingPhoneError": "Numéro introuvable. Veuillez vérifier votre téléphone à nouveau.",
-      "serverError": "Impossible d'enregistrer le code pour l'instant. Réessayez."
-    },
+    "pinConfirm": fait écran 26 — règles du groupe
     "biometric": {
       "stepLabel": "Sécurisez votre compte",
       "title": "Ouverture plus rapide",
@@ -165,12 +159,13 @@
     }
   },
   "home": {
+    "garning": "Bonjour, {{name}} 👋",
     "greeting": "Bonjour, {{name}} 👋",
     "myGroups": "Mes groupes",
     "createGroup": "Créer un groupe",
     "joinGroup": "Rejoindre un groupe",
     "loading": "Chargement…",
-    "loadError": "Impossible de charger vos groupes pour l'instant.",
+      "loadError": "Impossible de charger vos groupes pour l'instant.",
     "retry": "Réessayer",
     "empty": {
       "title": "Bienvenue dans Cercle",
@@ -209,7 +204,7 @@
       "stepLabel": "Étape 2 sur 3",
       "title": "Créer un groupe",
       "subtitle": "Définissez le montant de la cotisation et sa périodicité.",
-      "amountLabel": "Montant de la cotisation",
+      "amountLabel": "Montant de "cotisation",
       "amountSuffix": "FCFA / membre",
       "amountPlaceholder": "Ex. 5000",
       "amountError": "Montant invalide — saisissez un nombre entier supérieur à 0.",
@@ -241,6 +236,23 @@
       "modeMixed": "Mixte",
       "periodicityDays_one": "Tous les {{count}} jour",
       "periodicityDays_other": "Tous les {{count}} jours",
+      "createButton": "Créer le groupe",
+      "creating": "Création en cours…",
+      "createError": "Impossible de créer le groupe pour l'instant. Vérifiez votre connexion et réessayez."
+    },
+    "rules": {
+      "stepLabel": "Étape finale",
+      "title": "Règles du groupe",
+      "subtitle": "Options avancées, modifiables ensuite dans les paramètres du groupe.",
+      "interestLabel": "Taux d'intérêt des prêts internes (%)",
+      "interestHint": "Appliqué aux prêts remboursables. 0 si inutile.",
+      "interestPlaceholder": "Ex. 5",
+      "interestError": "Taux invalide — saisissez un nombre entre 0 et 100.",
+      "penaltyLabel": "Règles de pénalité",
+      "penaltyPlaceholder": "Ex. Retard de cotisation : 500 FCFA de pénalité",
+      "penaltyHint": "Libre à vous — ces règles seront affichées aux membres.",
+      "diasporaLabel": "Ouvert à la diaspora",
+      "diasporaHint": "Les membres à l'étranger peuvent rejoindre et cotiser depuis l'étranger (carte bancaire, virement).",
       "createButton": "Créer le groupe",
       "creating": "Création en cours…",
       "createError": "Impossible de créer le groupe pour l'instant. Vérifiez votre connexion et réessayez."
