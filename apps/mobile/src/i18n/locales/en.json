@@ -221,6 +221,29 @@
       "monthly": "Every month",
       "monthlyHint": "Every 30 days",
       "continueButton": "Continue"
+    },
+    "step3": {
+      "stepLabel": "Step 3 of 3",
+      "title": "Rotation order",
+      "subtitle": "How will you decide who receives the pot first?",
+      "drawTitle": "Random draw",
+      "drawHint": "A fair draw organized with the members",
+      "fixedTitle": "Fixed order",
+      "fixedHint": "The admin sets the order manually",
+      "summaryTitle": "Summary",
+      "summaryName": "Name",
+      "summaryMode": "Mode",
+      "summaryAmount": "Contribution",
+      "summaryPeriodicity": "Schedule",
+      "summaryRotation": "Rotation order",
+      "modeRotative": "Rotative",
+      "modeLoan": "Internal loans",
+      "modeMixed": "Mixed",
+      "periodicityDays_one": "Every {{count}} day",
+      "periodicityDays_other": "Every {{count}} days",
+      "createButton": "Create the group",
+      "creating": "Creating…",
+      "createError": "Couldn't create the group right now. Check your connection and try again."
     }
   }
 }
