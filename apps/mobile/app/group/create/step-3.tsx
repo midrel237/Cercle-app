@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppButton } from '../../../src/components/AppButton';
-import { groupsApi } from '../../../src/services/endpoints/groups';
 import { colors, fonts, radii, spacing } from '../../../src/theme';
 
 // Aligné sur CreateGroupDto.rotationOrderType (énumération backend).
@@ -37,14 +36,10 @@ interface Step3Params {
   periodicityDays?: string;
 }
 
-interface CreatedGroup {
-  id: string;
-}
-
 /**
- * Écran 25 — Create Group (step 3) : ordre de rotation + récapitulatif,
- * puis envoi réel POST /groups avec toutes les données collectées depuis
- * l'étape 1. Redirige vers le détail du groupe créé (écran 31).
+ * Écran 25 — Create Group (step 3) : ordre de rotation + récapitulatif.
+ * Aucun appel réseau ici : le POST /groups définitif (avec les options
+ * avancées de l'écran 26) part de group/create/rules, étape suivante.
  */
 export default function CreateGroupStep3Screen() {
   const { t } = useTranslation();
@@ -52,8 +47,6 @@ export default function CreateGroupStep3Screen() {
   const params = useLocalSearchParams<Step3Params>();
 
   const [rotation, setRotation] = useState<RotationOrderType>('DRAW');
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState(false);
 
   // Garde-fou : étape ouverte directement sans les paramètres des étapes
   // précédentes (relance du process, deep link…) → retour à l'étape 1.
@@ -75,25 +68,21 @@ export default function CreateGroupStep3Screen() {
     }
   };
 
-  const handleCreate = async () => {
-    if (!hasAllParams || submitting) return;
-    setError(false);
-    setSubmitting(true);
-    try {
-      const { data } = await groupsApi.create({
+  const handleContinue = () => {
+    if (!hasAllParams) {
+      router.replace('/group/create/step-1');
+      return;
+    }
+    router.push({
+      pathname: '/group/create/rules',
+      params: {
         name: params.name,
         mode: params.mode,
-        contributionAmount: Number(params.contributionAmount),
-        periodicityDays: Number(params.periodicityDays),
-        rotationOrderType: rotation,
-      });
-      // La réponse est le groupe créé — redirection vers son détail.
-      router.replace(`/group/${(data as CreatedGroup).id}`);
-    } catch {
-      setError(true);
-    } finally {
-      setSubmitting(false);
-    }
+        contributionAmount: params.contributionAmount,
+        periodicityDays: params.periodicityDays,
+        rotation,
+      },
+    });
   };
 
   if (!hasAllParams) {
@@ -158,29 +147,20 @@ export default function CreateGroupStep3Screen() {
 
         <Text style={styles.summaryTitle}>{t('createGroup.step3.summaryTitle')}</Text>
         <View style={styles.summaryCard}>
-          {summaryRows.map((row, i) => (
+          {summaryRows.map((row) => (
             <View
               key={row.label}
-              style={[styles.summaryRow, i < summaryRows.length - 1 && styles.summaryRowBorder]}
+              style={[styles.summaryRow, row !== summaryRows[summaryRows.length - 1] && styles.summaryRowBorder]}
             >
               <Text style={styles.summaryLabel}>{row.label}</Text>
               <Text style={styles.summaryValue}>{row.value}</Text>
             </View>
           ))}
         </View>
-
-        {error ? <Text style={styles.errorText}>{t('createGroup.step3.createError')}</Text> : null}
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
-        {submitting ? (
-          <View style={styles.submittingRow}>
-            <ActivityIndicator color={colors.navyDark} />
-            <Text style={styles.submittingText}>{t('createGroup.step3.creating')}</Text>
-          </View>
-        ) : (
-          <AppButton label={t('createGroup.step3.createButton')} onPress={handleCreate} />
-        )}
+        <AppButton label={t('common.continue')} onPress={handleContinue} />
       </View>
     </View>
   );
@@ -298,7 +278,7 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontFamily: fonts.inter.regular,
-    fontSize: 12.5,
+    fontsize: 12.5,
     color: colors.inkSoft,
   },
   summaryValue: {
@@ -306,26 +286,7 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     color: colors.navyDark,
   },
-  errorText: {
-    fontFamily: fonts.inter.medium,
-    fontSize: 11.5,
-    color: colors.danger,
-    textAlign: 'center',
-    marginTop: spacing.md,
-  },
   footer: {
     paddingHorizontal: spacing.md + 2,
-  },
-  submittingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.md - 2,
-  },
-  submittingText: {
-    fontFamily: fonts.inter.medium,
-    fontSize: 14,
-    color: colors.navyDark,
   },
 });
