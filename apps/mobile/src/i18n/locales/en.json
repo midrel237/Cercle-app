@@ -204,6 +204,23 @@
       "mixedTitle": "Mixed",
       "mixedHint": "Pot rotation combined with internal loans",
       "continueButton": "Continue"
+    },
+    "step2": {
+      "stepLabel": "Step 2 of 3",
+      "title": "Create a group",
+      "subtitle": "Set the contribution amount and its schedule.",
+      "amountLabel": "Contribution amount",
+      "amountSuffix": "FCFA / member",
+      "amountPlaceholder": "e.g. 5000",
+      "amountError": "Invalid amount — enter a whole number greater than 0.",
+      "periodicityLabel": "Contribution schedule",
+      "weekly": "Every week",
+      "weeklyHint": "Every 7 days",
+      "biweekly": "Every 2 weeks",
+      "biweeklyHint": "Every 14 days",
+      "monthly": "Every month",
+      "monthlyHint": "Every 30 days",
+      "continueButton": "Continue"
     }
   }
 }
