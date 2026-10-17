@@ -1,12 +1,14 @@
-import React from 'react';
-import { ScreenPlaceholder } from '../../src/components/ScreenPlaceholder';
+import React, { useEffect } from 'react';
+import { useRouter } from 'expo-router';
 
+// Écrans 8-12 remplacés par le flux hébergé Didit : la capture des pièces
+// (recto/verso, selfie, revue, infos) est gérée par notre partenaire.
+// Ces routes restent déclarées pour compatibilité deep link / navigation
+// résiduelle mais redirigent immédiatement vers l'entrée du flux Didit.
 export default function Screen() {
-  return (
-    <ScreenPlaceholder
-      screenNumber={8}
-      title="Capture recto"
-      description="Photo du recto de la pièce d'identité."
-    />
-  );
+  const router = useRouter();
+  useEffect(() => {
+    router.replace('/(kyc)/document-choice');
+  }, [router]);
+  return null;
 }
