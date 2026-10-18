@@ -9,6 +9,13 @@ import { ContributeEventDto } from './dto/contribute-event.dto';
  * librement pour le bénéficiaire de l'évènement ; comme pour les cotisations
  * de cycle, les fonds transitent vers le compte de dépôt du caissier qui
  * reverse ensuite au bénéficiaire (Option A, cf. cahier des charges §7).
+ *
+ * Design traçabilité : la ligne EventContribution est créée/lidée dès la
+ * PRÉPARATION du paiement (prepareContribution, module payments) avec son
+ * transactionId. Elle ne compte comme « collectée » qu'une fois la
+ * transaction CONFIRMED par le webhook agrégateur — les lectures filtrent
+ * sur transaction.status (cf. findForGroup/findOne). Une transaction FAILED
+ * laisse la ligne remplaçable au prochain essai (upsert).
  */
 @Injectable()
 export class EventsService {
@@ -44,10 +51,9 @@ export class EventsService {
   }
 
   /**
-   * Écran 54 — évènements du groupe, avec pour chaque cagnotte le total
-   * collecté, le nombre de contributeurs et le nombre de membres restants
-   * (membres actifs du groupe n'ayant pas encore cotisé). Les évènements
-   * OPEN sont listés en tête, les CLOSED en dessous (maquette 54).
+   * Écran 54 — évènements du groupe : pour chaque cagnotte, total collecté,
+   * contributeurs, membres restants (actifs n'ayant pas encore cotisé).
+   * Les OPEN en tête, les CLOSED en dessous (maquette 54).
    */
   async findForGroup(groupId: string) {
     const events = await this.prisma.groupEvent.findMany({
@@ -142,12 +148,12 @@ export class EventsService {
   }
 
   /**
-   * Enregistre la cotisation d'un membre à l'évènement (écran 56).
-   * Le montant et le paiement Mobile Money sont orchestrés par le module
-   * payments via prepareContribution({eventId}) : une transaction PENDING
-   * de type EVENT_CONTRIBUTION est créée dans le ledger, puis le webhook
-   * de l'agrégateur appelle confirmEventContribution ci-dessous pour
-   * tracer la ligne EventContribution — jamais avant la confirmation.
+   * Écran 56 — déclarer sa cotisation à l'évènement SANS paiement immédiat
+   * (montant libre, écrase une précédente tentative non confirmée). Le flux
+   * nominal passe par POST /payments/prepare avec eventId (module
+   * payments), qui crée la transaction PENDING + la ligne EventContribution
+   * liée ; ce endpoint reste utile pour ajuster un montant déclaré avant
+   * de payer. Jamais de ligne comptabilisée avant confirmation webhook.
    */
   async contribute(eventId: string, userId: string, dto: ContributeEventDto) {
     const event = await this.prisma.groupEvent.findUnique({ where: { id: eventId } });
@@ -163,50 +169,18 @@ export class EventsService {
       throw new ForbiddenException('Vous n’êtes pas membre de ce groupe.');
     }
 
-    // L'upsert est intentionnel : un membre peut ajuster son montant tant
-    // que la transaction n'est pas confirmée (statut PENDING → remplaçable).
+    // Un montant déjà CONFIRMED ne peut pas être écrasé (append-only).
+    const confirmed = await this.prisma.eventContribution.findFirst({
+      where: { eventId, userId, transaction: { status: 'CONFIRMED' } },
+    });
+    if (confirmed) {
+      throw new BadRequestException('Votre cotisation à cet évènement est déjà confirmée.');
+    }
+
     return this.prisma.eventContribution.upsert({
       where: { eventId_userId: { eventId, userId } },
       create: { eventId, userId, amount: dto.amount },
       update: { amount: dto.amount },
-    });
-  }
-
-  /**
-   * Appelé par le webhook de paiement (PaymentsService.handleWebhook) quand
-   * une transaction de type EVENT_CONTRIBUTION est CONFIRMED : trace/lie
-   * la ligne EventContribution correspondante. Idempotent : si la
-   * contribution existe déjà (réception de webhook dupliquée), elle est
-   * simplement liée à la transaction.
-   */
-  async confirmEventContribution(transactionId: string) {
-    const transaction = await this.prisma.ledgerTransaction.findUnique({
-      where: { id: transactionId },
-    });
-    if (!transaction) throw new NotFoundException('Transaction introuvable.');
-    if (transaction.type !== 'EVENT_CONTRIBUTION') {
-      throw new BadRequestException('Cette transaction n’est pas une cotisation d’évènement.');
-    }
-
-    // L'eventId est stocké via la relation eventContribution de la
-    // transaction (prepareContribution, Phase 3). On la retrouve par l'user
-    // concerné : une seule contribution active par (event, user).
-    const existing = await this.prisma.eventContribution.findFirst({
-      where: { userId: transaction.userId, transactionId: null },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    if (!existing) {
-      // Contribution absente (préparation directe sans contribute appelé
-      // avant) : impossible de connaître l'eventId — l'API ne stocke pas
-      // eventId sur LedgerTransaction. On ignore silencieusement ; la
-      // contribution reste tracée par le ledger lui-même.
-      return null;
-    }
-
-    return this.prisma.eventContribution.update({
-      where: { id: existing.id },
-      data: { amount: transaction.amount, transactionId: transaction.id },
     });
   }
 
