@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { loansApi } from '../../src/services/endpoints/loans';
+import { FadeIn, Stagger, CountUp } from '../../src/components/motion';
 import { colors, fonts, radii, spacing } from '../../src/theme';
 
 interface LoanRow {
@@ -28,6 +29,9 @@ interface LoanRow {
  * Écran 57 — Mes prêts : RESTE À REMBOURSER global, prêts actifs
  * (prochaine échéance) et prêts soldés. Navigation vers détail (64),
  * vote (59) et demande (58).
+ *
+ * Micro-animations : le montant global compte de 0 à sa valeur ; les
+ * cartes de prêts apparaissent en cascade (Stagger).
  */
 export default function LoansScreen() {
   const { t } = useTranslation();
@@ -70,7 +74,6 @@ export default function LoansScreen() {
 
   const card = (l: LoanRow, activeStyle = false) => (
     <Pressable
-      key={l.id}
       style={[styles.loanCard, activeStyle && styles.loanCardActive]}
       onPress={() => router.push(`/loan/${l.id}`)}
     >
@@ -118,7 +121,9 @@ export default function LoansScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={load} tintColor={colors.goldDark} />
         }
       >
-        <Text style={styles.title}>{t('loansScreen.title')}</Text>
+        <FadeIn dy={10}>
+          <Text style={styles.title}>{t('loansScreen.title')}</Text>
+        </FadeIn>
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
@@ -126,12 +131,10 @@ export default function LoansScreen() {
           <ActivityIndicator size="large" color={colors.goldDark} style={styles.spinner} />
         ) : (
           <>
-            {/* Reste à rembourser — maquette écran 57. */}
+            {/* Reste à rembourser — maquette écran 57, compteur animé. */}
             <View style={styles.potCard}>
               <Text style={styles.potLabel}>{t('loansScreen.remainingTitle')}</Text>
-              <Text style={styles.potValue}>
-                {remainingTotal.toLocaleString('fr-FR')} FCFA
-              </Text>
+              <CountUp value={remainingTotal} suffix=" FCFA" style={styles.potValue} />
               <Text style={styles.potDetail}>
                 {t('loansScreen.activeCount', {
                   count: active.filter((l) => l.status === 'ACTIVE').length,
@@ -145,7 +148,9 @@ export default function LoansScreen() {
                 <Text style={styles.sectionTitle}>
                   {t('loansScreen.activeSection', { count: active.length })}
                 </Text>
-                {active.map((l) => card(l, true))}
+                <Stagger>
+                  {active.map((l) => card(l, true))}
+                </Stagger>
               </View>
             ) : (
               <Text style={styles.emptyText}>{t('loansScreen.noActiveLoans')}</Text>
@@ -154,7 +159,9 @@ export default function LoansScreen() {
             {rejected.length > 0 ? (
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>{t('loansScreen.rejectedSection')}</Text>
-                {rejected.map((l) => card(l))}
+                <Stagger>
+                  {rejected.map((l) => card(l))}
+                </Stagger>
               </View>
             ) : null}
 
@@ -163,7 +170,9 @@ export default function LoansScreen() {
                 <Text style={styles.sectionTitle}>
                   {t('loansScreen.repaidSection', { count: repaid.length })}
                 </Text>
-                {repaid.map((l) => card(l))}
+                <Stagger>
+                  {repaid.map((l) => card(l))}
+                </Stagger>
               </View>
             ) : null}
           </>
@@ -190,7 +199,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.cream, padding: spacing.md, alignItems: 'center', marginBottom: spacing.lg,
   },
   potLabel: { fontFamily: fonts.inter.medium, fontSize: 10.5, color: colors.goldDark, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 2 },
-  potValue: { fontFamily: fonts.mono.semiBold, fontSize: 24, color: colors.navyDark, marginBottom: 2 },
+  potValue: { fontSize: 24, color: colors.navyDark, marginBottom: 2 },
   potDetail: { fontFamily: fonts.inter.regular, fontSize: 11.5, color: colors.inkSoft },
   section: { marginBottom: spacing.lg },
   sectionTitle: { fontFamily: fonts.fraunces.semiBold, fontSize: 15, color: colors.navyDark, marginBottom: spacing.sm },
