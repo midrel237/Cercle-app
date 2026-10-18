@@ -11,7 +11,7 @@ export class UsersController {
 
   @Get('me')
   me(@CurrentUser() user: JwtPayload) {
-    return this.usersService.findById(user.sub);
+    return this.usersService.findProfile(user.sub);
   }
 
   @Patch('me')

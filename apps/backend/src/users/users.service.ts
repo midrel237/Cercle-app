@@ -11,6 +11,48 @@ export class UsersService {
     return user;
   }
 
+  /**
+   * Ecran 72 - Profil & fiabilite : nom, KYC verifie, numero, score de
+   * fiabilite, moyens de paiement et compte de groupes actifs. Toutes les
+   * donnees derivent du ledger / des tables existantes - jamais en dur.
+   */
+  async findProfile(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        _count: { select: { groups: { where: { isActive: true } } } },
+      },
+    });
+    if (!user) throw new NotFoundException('Utilisateur introuvable.');
+
+    const paymentMethods = await this.prisma.paymentMethod.findMany({
+      where: { userId },
+      select: { id: true, type: true, provider: true },
+    });
+
+    // Cotisations payees a temps : confirmedAt <= dueDate du cycle rattache.
+    const contributions = await this.prisma.ledgerTransaction.findMany({
+      where: { userId, type: 'CONTRIBUTION', status: 'CONFIRMED' },
+      include: { cycle: { select: { dueDate: true } } },
+    });
+    const onTime = contributions.filter(
+      (c) => c.cycle && c.confirmedAt && c.confirmedAt <= c.cycle.dueDate,
+    ).length;
+
+    return {
+      id: user.id,
+      phoneNumber: user.phoneNumber,
+      fullName: user.fullName,
+      kycStatus: user.kycStatus,
+      trustScore: user.trustScore,
+      language: user.language,
+      activeGroups: user._count.groups,
+      paymentMethods,
+      contributionsPaid: contributions.length,
+      contributionsOnTime: onTime,
+    };
+  }
+
   async updateProfile(userId: string, data: { fullName?: string; language?: 'FR' | 'EN' }) {
     return this.prisma.user.update({ where: { id: userId }, data });
   }
