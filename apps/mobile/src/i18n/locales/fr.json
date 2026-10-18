@@ -262,5 +262,54 @@
       "creating": "Création en cours…",
       "createError": "Impossible de créer le groupe pour l'instant. Vérifiez votre connexion et réessayez."
     }
+  },
+  "joinGroup": {
+    "title": "Rejoindre avec un code",
+    "subtitle": "Saisissez le code d'invitation que l'administrateur du groupe vous a transmis.",
+    "codeLabel": "Code",
+    "codePlaceholder": "Ex. NJ7·42K",
+    "searchButton": "Rechercher",
+    "foundBadge": "Groupe trouvé",
+    "membersTargeted_one": "{{count}} membre visé",
+    "membersTargeted_other": "{{count}} membres visés",
+    "membersJoined_one": "{{count}} déjà inscrit",
+    "membersJoined_other": "{{count}} déjà inscrits",
+    "periodicityDays_one": "jour",
+    "periodicityDays_other": "tous les {{count}} jours",
+    "modeRotative": "Rotative",
+    "modeLoan": "Prêts internes",
+    "modeMixed": "Rotative + Prêts",
+    "diasporaOpen": "Ouvert à la diaspora",
+    "joinButton": "Demander à rejoindre",
+    "joining": "Envoi de la demande…",
+    "notFoundError": "Aucun groupe ne correspond à ce code. Vérifiez et réessayez.",
+    "joinError": "Impossible d'envoyer la demande pour l'instant. Réessayez."
+  },
+  "joinPending": {
+    "title": "Demande envoyée",
+    "subtitle": "Votre demande d'adhésion à « {{group}} » a été transmise à l'administrateur du groupe.",
+    "statusLabel": "Statut",
+    "statusPending": "En attente",
+    "homeButton": "Retour à l'accueil"
+  },
+  "drawOrder": {
+    "title": "Ordre de rotation",
+    "membersCount_one": "{{count}} membre",
+    "membersCount_other": "{{count}} membres",
+    "unnamed": "Membre",
+    "manualHint": "L'ordre peut aussi être fixé manuellement par l'administrateur.",
+    "redrawButton": "Relancer le tirage au sort",
+    "drawing": "Tirage en cours…",
+    "confirmButton": "Valider cet ordre",
+    "drawError": "Impossible de tirer l'ordre pour l'instant. Vérifiez votre connexion et réessayez."
+  },
+  "drawResult": {
+    "title": "Ordre de rotation confirmé",
+    "subtitle": "Le tirage a été validé et ne peut plus être modifié.",
+    "unnamed": "Membre",
+    "startButton": "Démarrer le cycle 1",
+    "starting": "Démarrage…",
+    "loadError": "Impossible de charger l'ordre confirmé pour l'instant.",
+    "startError": "Impossible de démarrer le cycle pour l'instant. Réessayez."
   }
 }

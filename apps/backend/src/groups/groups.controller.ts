@@ -5,6 +5,7 @@ import { JwtPayload } from '../auth/strategies/jwt.strategy';
 import { GroupsService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { JoinGroupDto } from './dto/join-group.dto';
+import { DecideJoinDto } from './dto/decide-join.dto';
 import { AssignCashierDto } from './dto/assign-cashier.dto';
 import { RegisterDepositAccountDto } from './dto/register-deposit-account.dto';
 import { RequestGroupExitDto } from './dto/request-exit.dto';
@@ -30,9 +31,46 @@ export class GroupsController {
     return this.groupsService.findOne(id);
   }
 
+  // Aperçu public minimal d'un groupe par code d'invitation — écran 27
+  // (« GROUPE TROUVÉ ») : nom, jauge membres, cotisation, périodicité,
+  // mode. Aucune donnée personnelle des membres n'est exposée.
+  @Post('preview')
+  previewByInviteCode(@Body() dto: JoinGroupDto) {
+    return this.groupsService.previewByInviteCode(dto.inviteCode);
+  }
+
+  // Adhésion par code : crée le membre en PENDING (inactif) — écran 28.
   @Post('join')
   join(@CurrentUser() user: JwtPayload, @Body() dto: JoinGroupDto) {
     return this.groupsService.joinByInviteCode(user.sub, dto);
+  }
+
+  // Décision de l'admin sur une demande d'adhésion en attente.
+  @Post(':id/join-decision')
+  decideJoin(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') id: string,
+    @Body() dto: DecideJoinDto,
+  ) {
+    return this.groupsService.decideJoin(id, user.sub, dto);
+  }
+
+  // Tirage au sort de l'ordre de rotation — écran 29.
+  @Post(':id/rotation/draw')
+  drawRotation(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.groupsService.drawRotation(id, user.sub);
+  }
+
+  // Validation de l'ordre tiré — écran 30.
+  @Post(':id/rotation/confirm')
+  confirmRotation(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.groupsService.confirmRotation(id, user.sub);
+  }
+
+  // Démarrage du cycle 1 — écran 30 (« Démarrer le cycle 1 »).
+  @Post(':id/cycles/start')
+  startCycles(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.groupsService.startCycles(id, user.sub);
   }
 
   // Désignation du caissier (admin) — Option A, cf. cahier des charges §7.

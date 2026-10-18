@@ -260,5 +260,54 @@
       "creating": "Creating…",
       "createError": "Couldn't create the group right now. Check your connection and try again."
     }
+  },
+  "joinGroup": {
+    "title": "Join with a code",
+    "subtitle": "Enter the invite code the group's admin shared with you.",
+    "codeLabel": "Code",
+    "codePlaceholder": "e.g. NJ7·42K",
+    "searchButton": "Search",
+    "foundBadge": "GROUP FOUND",
+    "membersTargeted_one": "{{count}} member targeted",
+    "membersTargeted_other": "{{count}} members targeted",
+    "membersJoined_one": "{{count}} already joined",
+    "membersJoined_other": "{{count}} already joined",
+    "periodicityDays_one": "day",
+    "periodicityDays_other": "every {{count}} days",
+    "modeRotative": "Rotative",
+    "modeLoan": "Internal loans",
+    "modeMixed": "Rotative + Loans",
+    "diasporaOpen": "Open to diaspora",
+    "joinButton": "Request to join",
+    "joining": "Sending request…",
+    "notFoundError": "No group matches this code. Check and try again.",
+    "joinError": "Couldn't send the request right now. Please try again."
+  },
+  "joinPending": {
+    "title": "Request sent",
+    "subtitle": "Your membership request for “{{group}}” has been forwarded to the group's admin.",
+    "statusLabel": "Status",
+    "statusPending": "Pending",
+    "homeButton": "Back to home"
+  },
+  "drawOrder": {
+    "title": "Rotation order",
+    "membersCount_one": "{{count}} member",
+    "membersCount_other": "{{count}} members",
+    "unnamed": "Member",
+    "manualHint": "The order can also be set manually by the admin.",
+    "redrawButton": "Redraw the order",
+    "drawing": "Drawing…",
+    "confirmButton": "Confirm this order",
+    "drawError": "Couldn't draw the order right now. Check your connection and try again."
+  },
+  "drawResult": {
+    "title": "Rotation order confirmed",
+    "subtitle": "The draw has been confirmed and can no longer be changed.",
+    "unnamed": "Member",
+    "startButton": "Start cycle 1",
+    "starting": "Starting…",
+    "loadError": "Couldn't load the confirmed order right now.",
+    "startError": "Couldn't start the cycle right now. Please try again."
   }
 }
