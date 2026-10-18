@@ -10,17 +10,19 @@ Monorepo du MVP, conforme au *Cahier des charges Tontine App* (stack §6.1) et
 | Application mobile | React Native + Expo, Expo Router |
 | Backend | Node.js / NestJS, API REST |
 | Base de données | PostgreSQL (Prisma ORM) |
+| Vérification d'identité (KYC) | Didit eKYC (flux hébergé + webhook signé) |
 | Paiement Mobile Money | Agrégateur (CinetPay/Maviance) — Option A "facilitateur technique" |
-| Notifications | Expo Notifications + SMS de secours |
-| Authentification | JWT + Expo Secure Store + biométrie (Expo Local Authentication) |
+| Notifications | Expo Notifications + SMS |
+| SMS (OTP & notifications) | Africa's Talking (abstraction `SmsProvider`, `console` en dev) |
+| Authentification | JWT + Expo Secure Store + biométrie (Expo Local Authentication) + OTP SMS |
 
 ## Structure du monorepo
 
 ```
 tontine-app/
 ├── apps/
-│   ├── mobile/        # App Expo Router (80 écrans de la maquette, en placeholders)
-│   └── backend/       # API NestJS (auth, users, groups, transactions/ledger, loans, payments, notifications)
+│   ├── mobile/        # App Expo Router (80 écrans de la maquette — voir l'état d'implémentation ci-dessous)
+│   └── backend/       # API NestJS (auth, users, kyc, groups, transactions/ledger, loans, events, payments, notifications, common/sms)
 ├── packages/
 │   └── shared/        # Types TypeScript partagés (User, Group, LedgerTransaction, Loan...)
 ├── package.json        # Workspaces npm racine
@@ -119,7 +121,15 @@ npm run backend                   # démarre l'API sur http://localhost:3000/api
 npm run mobile                    # démarre Expo (scanner le QR code avec Expo Go)
 ```
 
-## État actuel (étape "structure du projet")
+Variables d'environnement notables (voir `.env.example`) :
+- `SMS_PROVIDER=console` par défaut en dev (les SMS sont journalisés côté
+  serveur) ; passer à `africas-talking` avec `AFRICASTALKING_USERNAME` /
+  `AFRICASTALKING_API_KEY` / `AFRICASTALKING_SENDER_ID` pour de vrais SMS OTP.
+- `DIDIT_CLIENT_ID` / `DIDIT_CLIENT_SECRET` / `DIDIT_WEBHOOK_SECRET` pour
+  le flux eKYC Didit hébergé ; `MOBILE_SCHEME=cercle` pour le deep link de
+  retour vers l'app.
+
+## État actuel
 
 - ✅ Monorepo npm workspaces (`apps/*`, `packages/*`)
 - ✅ Types partagés mobile/backend (`@tontine/shared`)
@@ -128,15 +138,27 @@ npm run mobile                    # démarre Expo (scanner le QR code avec Expo 
   `events` (cagnottes deuil/anniversaire/naissance/mariage/maladie), `payments` (abstraction
   agrégateur Mobile Money + webhook), `notifications` — squelettes fonctionnels avec DTOs
   validés, à brancher sur la logique métier réelle.
+- ✅ **eKYC Didit** : module backend `kyc` complet (`DiditService` wrapper de l'API Didit v2,
+  `kyc.controller` session/statut, `kyc-webhook.controller` avec vérification de signature) ;
+  migration Prisma `didit_ekyc` (colonnes `diditSessionId`, `diditDecision`, `verifiedAt` sur
+  `kyc_documents`).
+- ✅ **SMS OTP** : module backend `common/sms` avec abstraction `SmsProvider`
+  (fournisseurs `africas-talking` et `console`) ; `AuthService` envoie l'OTP
+  par SMS réel (code à 6 chiffres, hashé, expirant après 5 min, verrouillage
+  anti brute-force).
 - ✅ Schéma PostgreSQL complet (`prisma/schema.prisma`) reflétant le ledger central et les prêts.
 - ✅ Mobile Expo Router : arborescence de routes pour les 80 écrans de la maquette,
   regroupés par flux (`(auth)`, `(kyc)`, `(onboarding)`, `(tabs)`, `group/`, `loan/`, `payment/`,
-  `settings/`). Écrans 1 à 5 (`splash`, `language`, `welcome`, `login`, `otp`), 79
-  (`country-picker`) et 80 (`create-account`) implémentés fidèlement à
-  la maquette ; les autres restent en écran placeholder en attendant leur tour (voir
+  `settings/`). Écrans implémentés fidèlement à la maquette : 1 à 5
+  (`splash`, `language`, `welcome`, `login`, `otp`), 6-7 (`intro`, `document-choice`),
+  13-15 (`processing`, `success`, `rejected`), 23-26 (création de groupe `step-1` à `step-3`
+  et `rules`), 79 (`country-picker`) et 80 (`create-account`). Les écrans 8-12
+  (capture recto/verso, selfie, revue, infos) sont redirigés vers le flux
+  eKYC hébergé Didit (les routes restent déclarées pour la compatibilité
+  deep link). Les autres restent en écran placeholder en attendant leur tour (voir
   `docs/screens-map.md`).
 - ✅ Thème (couleurs, typographies Fraunces/Inter/IBM Plex Mono) extrait de la maquette.
-- ✅ i18n FR/EN de base.
+- ✅ i18n FR/EN de base (clés du parcours auth, KYC, création de groupe).
 
 ## Audit de cohérence (juillet 2026) — corrections apportées
 
@@ -234,7 +256,7 @@ moteur de schéma) n'est pas joignable depuis ce sandbox. Ce n'est pas un
 défaut du projet : sur votre machine ou en CI avec un accès réseau normal,
 `npx prisma generate` s'exécute sans problème. Le backend a été vérifié
 (`tsc --noEmit` + `nest build`, sans erreur) à l'aide d'un client Prisma
-factice local non livré dans ce dépôt, le temps de la vérification, puis
+fictice local non livré dans ce dépôt, le temps de la vérification, puis
 supprimé — pensez à lancer `npx prisma generate` après `npm install` avant
 de démarrer l'API.
 
@@ -244,16 +266,18 @@ main sur celles listées dans `node_modules/expo/bundledNativeModules.json`
 pour le SDK 57. Un `npx expo install --check` chez vous confirmera que
 tout est cohérent.
 
+## Étapes suivantes
 
-
-1. Créer dans la maquette (ou directement en React Native) les 7 écrans identifiés
-   par l'audit (`docs/screens-map.md`), puis implémenter fidèlement chaque écran des
-   71 + 7, en commençant par le parcours d'authentification et de KYC.
-2. ✅ Hash du PIN (bcrypt) et vérification OTP réelle (code à 6 chiffres, hashé, expirant
-   après 5 min, verrouillage anti brute-force) — fait. Reste à brancher un vrai fournisseur
-   SMS (Twilio/Vonage/agrégateur local) : le code est pour l'instant journalisé côté serveur
-   et renvoyé en clair uniquement hors production (`devCode`), pour permettre de tester le
-   parcours sans SMS réel.
+1. Implémenter fidèlement chaque écran encore en placeholder (voir
+   `docs/screens-map.md`), en priorité le parcours d'onboarding (16-20),
+   la vie quotidienne du groupe (27-53) et les prêts internes (57-66).
+   Note : les écrans KYC 8-12 (capture des pièces) sont désormais gérés
+   par le flux hébergé Didit et ne seront pas implémentés en React Native.
+2. ✅ Hash du PIN (bcrypt) et vérification OTP réelle — fait, y compris
+   l'envoi SMS réel via Africa's Talking (fournisseur `SmsProvider`
+   configurable). Reste : renseigner les identifiants Africa's Talking de
+   production (`AFRICASTALKING_*`) et Didit (`DIDIT_*`) dans les
+   variables d'environnement.
 3. Intégrer l'agrégateur Mobile Money retenu (comparatif CinetPay / Maviance) ainsi
    qu'un PSP carte bancaire pour les paiements diaspora.
 4. Implémenter le job périodique de détection des retards de cotisation
