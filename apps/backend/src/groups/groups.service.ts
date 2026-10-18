@@ -1,9 +1,13 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
+import { SmsService } from '../common/sms/sms.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { JoinGroupDto } from './dto/join-group.dto';
 import { DecideJoinDto } from './dto/decide-join.dto';
 import { SendGroupMessageDto } from './dto/send-group-message.dto';
+import { MemberReminderDto } from './dto/member-reminder.dto';
+import { RemoveMemberDto } from './dto/remove-member.dto';
 import { AssignCashierDto } from './dto/assign-cashier.dto';
 import { RegisterDepositAccountDto } from './dto/register-deposit-account.dto';
 import { RequestGroupExitDto } from './dto/request-exit.dto';
@@ -11,7 +15,10 @@ import { DecideGroupExitDto } from './dto/decide-exit.dto';
 
 @Injectable()
 export class GroupsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly smsService: SmsService,
+  ) {}
 
   async create(userId: string, dto: CreateGroupDto) {
     const inviteCode = this.generateInviteCode();
@@ -73,8 +80,7 @@ export class GroupsService {
    * Adhésion par code d'invitation — écran 27/28. Le membre est créé en
    * statut PENDING et inactif : il devient actif (et visible dans « Mes
    * groupes », les tirages…) uniquement après validation de l'admin
-   * (decideJoin). Remplace l'adhésion directe du MVP initial, conformément
-   * à la maquette « JOIN REQUEST PENDING ».
+   * (decideJoin).
    */
   async joinByInviteCode(userId: string, dto: JoinGroupDto) {
     const group = await this.prisma.group.findUnique({
@@ -111,8 +117,6 @@ export class GroupsService {
 
   /**
    * Décision de l'admin sur une demande d'adhésion (écran 28 côté admin).
-   * Approve → membre activé (joinStatus APPROVED, isActive true). Sinon →
-   * REJECTED, le membre reste inactif et peut redemander plus tard.
    */
   async decideJoin(groupId: string, adminId: string, dto: DecideJoinDto) {
     await this.assertIsAdmin(groupId, adminId);
@@ -134,10 +138,8 @@ export class GroupsService {
   }
 
   /**
-   * Tirage au sort de l'ordre de rotation — écran 29. Admin uniquement,
-   * uniquement en mode DRAW, uniquement avant tout cycle démarré. Attribue
-   * rotationPosition 1..N par un mélange de Fisher-Yates ; rejouable tant
-   * que l'ordre n'est pas confirmé (via le démarrage des cycles).
+   * Tirage au sort de l'ordre de rotation — écran 29. Fisher-Yates
+   * rejouable tant que les cycles ne sont pas démarrés.
    */
   async drawRotation(groupId: string, requesterId: string) {
     await this.assertIsAdmin(groupId, requesterId);
@@ -162,7 +164,6 @@ export class GroupsService {
       throw new BadRequestException('Il faut au moins 2 membres actifs pour tirer l’ordre de rotation.');
     }
 
-    // Fisher-Yates : chaque permutation a une probabilité identique.
     const positions = members.map((_, i) => i + 1);
     for (let i = positions.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -191,10 +192,7 @@ export class GroupsService {
   }
 
   /**
-   * Validation de l'ordre tiré — écran 30. Une fois les cycles démarrés
-   * (startCycles), l'ordre est verrouillé (drawRotation refuse si des
-   * cycles existent). Ici on valide la complétude de l'ordre avant le
-   * démarrage.
+   * Validation de l'ordre tiré — écran 30.
    */
   async confirmRotation(groupId: string, requesterId: string) {
     await this.assertIsAdmin(groupId, requesterId);
@@ -224,10 +222,7 @@ export class GroupsService {
   }
 
   /**
-   * Démarrage des cycles — écran 30 « Démarrer le cycle 1 ». Crée les N
-   * cycles (cycleNumber 1..N) à partir de l'ordre confirmé : chaque cycle
-   * a pour bénéficiaire le membre à la position correspondante, et une
-   * date d'échéance échelonnée selon la périodicité du groupe.
+   * Démarrage des cycles — écran 30 « Démarrer le cycle 1 ».
    */
   async startCycles(groupId: string, requesterId: string) {
     await this.assertIsAdmin(groupId, requesterId);
@@ -263,7 +258,6 @@ export class GroupsService {
       })),
     });
 
-    // Cycle 1 actif dès le démarrage.
     await this.prisma.cycle.updateMany({
       where: { groupId, cycleNumber: 1 },
       data: { status: 'ACTIVE' },
@@ -276,11 +270,7 @@ export class GroupsService {
   }
 
   /**
-   * Statut de cotisation du cycle actif — écran 31. Pour chaque membre
-   * actif : Payé / En attente / En retard (retard = échéance dépassée),
-   * plus le bénéficiaire du tour et le montant théorique. Réservé aux
-   * membres du groupe (une transaction CONFIRMED sur le cycle actif =
-   * cotisation payée).
+   * Statut de cotisation du cycle actif — écran 31.
    */
   async getCycleStatus(groupId: string, requesterId: string) {
     await this.assertIsMember(groupId, requesterId);
@@ -342,9 +332,7 @@ export class GroupsService {
   }
 
   /**
-   * Discussion du groupe — écran 41. Renvoie les `take` derniers
-   * messages (100 par défaut), antérieurs à `before` pour la pagination.
-   * Réservé aux membres actifs du groupe.
+   * Discussion du groupe — écran 41.
    */
   async listMessages(
     groupId: string,
@@ -368,10 +356,6 @@ export class GroupsService {
     });
   }
 
-  /**
-   * Envoi d'un message dans la discussion du groupe — écran 41.
-   * Réservé aux membres actifs du groupe.
-   */
   async sendMessage(groupId: string, requesterId: string, dto: SendGroupMessageDto) {
     await this.assertIsMember(groupId, requesterId);
 
@@ -384,11 +368,301 @@ export class GroupsService {
     });
   }
 
+  // -------------------------------------------------------------------------
+  // Phase 4 — Membres & administration (écrans 42-53)
+  // -------------------------------------------------------------------------
+
   /**
-   * Désigne le caissier du groupe (Option A, §7). Le caissier reste un
-   * membre cotisant à part entière — sa désignation ne change que sa
-   * responsabilité de collecte/reversement, pas sa participation au cycle.
-   * Réservé à l'administrateur du groupe.
+   * Écran 42 — Gestion des membres. Vue structurée : membres actifs (rôles,
+   * score de fiabilité, statut de cotisation du cycle actif, jours de
+   * retard), demandes d'adhésion PENDING et demandes de sortie REQUESTED.
+   * Les sections demandes ne sont renvoyées qu'à l'admin.
+   */
+  async listMembers(groupId: string, requesterId: string) {
+    const caller = await this.assertIsMember(groupId, requesterId);
+    const isAdmin = caller.role === 'ADMIN';
+
+    const group = await this.prisma.group.findUnique({
+      where: { id: groupId },
+      include: {
+        cycles: { where: { status: 'ACTIVE' }, take: 1 },
+        members: {
+          include: { user: { select: { id: true, fullName: true, trustScore: true } } },
+          orderBy: { joinedAt: 'asc' },
+        },
+      },
+    });
+    if (!group) throw new NotFoundException('Groupe introuvable.');
+
+    const cycle = group.cycles[0] ?? null;
+    const paidUserIds = new Set<string>();
+    if (cycle) {
+      const contributions = await this.prisma.ledgerTransaction.findMany({
+        where: { cycleId: cycle.id, type: 'CONTRIBUTION', status: 'CONFIRMED' },
+        select: { userId: true },
+      });
+      contributions.forEach((c) => paidUserIds.add(c.userId));
+    }
+    const now = new Date();
+
+    const members = group.members
+      .filter((m) => m.isActive)
+      .map((m) => {
+        const isLate = cycle && !paidUserIds.has(m.userId) && cycle.dueDate < now;
+        return {
+          id: m.id,
+          userId: m.userId,
+          fullName: m.user.fullName,
+          role: m.role,
+          rotationPosition: m.rotationPosition,
+          trustScore: m.user.trustScore,
+          isBeneficiary: cycle ? m.userId === cycle.beneficiaryUserId : false,
+          contributionStatus: cycle
+            ? paidUserIds.has(m.userId)
+              ? ('PAID' as const)
+              : isLate
+                ? ('LATE' as const)
+                : ('PENDING' as const)
+            : null,
+          daysLate: isLate
+            ? Math.floor((now.getTime() - cycle.dueDate.getTime()) / 86400000)
+            : 0,
+          joinedAt: m.joinedAt,
+          exitStatus: m.exitStatus,
+        };
+      });
+
+    const pendingJoinRequests = isAdmin
+      ? group.members
+          .filter((m) => !m.isActive && m.joinStatus === 'PENDING')
+          .map((m) => ({
+            id: m.id,
+            userId: m.userId,
+            fullName: m.user.fullName,
+            requestedAt: m.joinStatusChangedAt,
+          }))
+      : [];
+
+    const exitRequests = isAdmin
+      ? group.members
+          .filter((m) => m.isActive && m.exitStatus === 'REQUESTED')
+          .map((m) => ({ id: m.id, userId: m.userId, fullName: m.user.fullName }))
+      : [];
+
+    return {
+      isAdmin,
+      inviteCode: isAdmin ? group.inviteCode : null,
+      memberCount: members.length,
+      members,
+      pendingJoinRequests,
+      exitRequests,
+    };
+  }
+
+  /**
+   * Écran 46 — Profil d'un membre : score de fiabilité + métriques
+   * calculées depuis le ledger (cotisations à temps, prêts remboursés,
+   * tour reçu). Jamais de stats stockées en dur — traçabilité §6.2.
+   */
+  async getMemberProfile(groupId: string, requesterId: string, memberId: string) {
+    await this.assertIsMember(groupId, requesterId);
+
+    const member = await this.prisma.groupMember.findFirst({
+      where: { id: memberId, groupId },
+      include: { user: { select: { id: true, fullName: true, trustScore: true } } },
+    });
+    if (!member) throw new NotFoundException('Membre introuvable dans ce groupe.');
+
+    const contributions = await this.prisma.ledgerTransaction.findMany({
+      where: { groupId, userId: member.userId, type: 'CONTRIBUTION', status: 'CONFIRMED' },
+      include: { cycle: { select: { cycleNumber: true, dueDate: true, status: true } } },
+      orderBy: { createdAt: 'asc' },
+    });
+    const paidOnTime = contributions.filter(
+      (c) => c.cycle && c.confirmedAt && c.confirmedAt <= c.cycle.dueDate,
+    ).length;
+    const totalCycles = await this.prisma.cycle.count({ where: { groupId } });
+
+    const receivedRotation = await this.prisma.cycle.findFirst({
+      where: { groupId, beneficiaryUserId: member.userId, status: 'COMPLETED' },
+      select: { cycleNumber: true },
+    });
+
+    const loansTotal = await this.prisma.loan.count({
+      where: { groupId, borrowerId: member.userId, status: { in: ['REPAID', 'DEFAULTED'] } },
+    });
+    const loansRepaid = await this.prisma.loan.count({
+      where: { groupId, borrowerId: member.userId, status: 'REPAID' },
+    });
+
+    return {
+      id: member.id,
+      userId: member.userId,
+      fullName: member.user.fullName,
+      trustScore: member.user.trustScore,
+      role: member.role,
+      joinedAt: member.joinedAt,
+      rotationPosition: member.rotationPosition,
+      outstandingDebt: member.outstandingDebt,
+      exitStatus: member.exitStatus,
+      contributionsPaid: contributions.length,
+      contributionsPaidOnTime: paidOnTime,
+      totalCycles,
+      receivedRotation: receivedRotation?.cycleNumber ?? null,
+      loansTotal,
+      loansRepaid,
+    };
+  }
+
+  /**
+   * Écran 47 — Rappel manuel à un membre en retard : Notification
+   * LATE_PAYMENT_ALERT + SMS optionnel via le SmsProvider (console en dev).
+   */
+  async sendContributionReminder(
+    groupId: string,
+    requesterId: string,
+    memberId: string,
+    dto: MemberReminderDto,
+  ) {
+    await this.assertIsAdmin(groupId, requesterId);
+
+    const member = await this.prisma.groupMember.findFirst({
+      where: { id: memberId, groupId, isActive: true },
+      include: {
+        group: { select: { name: true, contributionAmount: true } },
+        user: { select: { id: true, fullName: true, phoneNumber: true } },
+      },
+    });
+    if (!member) throw new NotFoundException('Membre introuvable dans ce groupe.');
+
+    const firstName = (member.user.fullName ?? 'Membre').split(' ')[0];
+    const message =
+      dto.message?.trim() ||
+      `Bonjour ${firstName}, ta cotisation de ${Number(
+        member.group.contributionAmount,
+      ).toLocaleString('fr-FR')} FCFA pour le groupe ${member.group.name} est en retard. Merci de régulariser rapidement.`;
+
+    await this.prisma.notification.create({
+      data: {
+        userId: member.userId,
+        type: 'LATE_PAYMENT_ALERT',
+        title: 'Rappel de cotisation',
+        body: message,
+      },
+    });
+
+    if (dto.alsoSms && member.user.phoneNumber) {
+      await this.smsService.send(member.user.phoneNumber, message);
+    }
+
+    return { sent: true, channel: dto.alsoSms ? 'NOTIFICATION+SMS' : 'NOTIFICATION' };
+  }
+
+  /**
+   * Écran 45 — Retrait d'un membre PAR L'ADMIN (distinct de la sortie
+   * volontaire decideExit). Le membre est désactivé — l'historique reste
+   * visible (traçabilité). Garde : pas d'auto-retrait, pas de retrait
+   * d'un autre admin.
+   */
+  async removeMember(groupId: string, adminId: string, dto: RemoveMemberDto) {
+    await this.assertIsAdmin(groupId, adminId);
+
+    const member = await this.prisma.groupMember.findFirst({
+      where: { id: dto.memberId, groupId },
+    });
+    if (!member) throw new NotFoundException('Membre introuvable dans ce groupe.');
+    if (!member.isActive) {
+      throw new BadRequestException('Ce membre a déjà quitté le groupe.');
+    }
+    if (member.userId === adminId) {
+      throw new BadRequestException(
+        'Un administrateur ne peut pas se retirer lui-même : utilisez la sortie volontaire.',
+      );
+    }
+    if (member.role === 'ADMIN') {
+      throw new BadRequestException('Impossible de retirer un autre administrateur.');
+    }
+
+    return this.prisma.groupMember.update({
+      where: { id: member.id },
+      data: { isActive: false, exitStatus: 'APPROVED', exitDecidedAt: new Date() },
+    });
+  }
+
+  /**
+   * Écran 50 — Aperçu de sortie volontaire : montants calculés serveur
+   * (mêmes règles que decideExit — jamais côté client).
+   */
+  async exitPreview(groupId: string, requesterId: string) {
+    const member = await this.prisma.groupMember.findUnique({
+      where: { groupId_userId: { groupId, userId: requesterId } },
+    });
+    if (!member || !member.isActive) {
+      throw new NotFoundException('Membre introuvable dans ce groupe.');
+    }
+
+    const ownCycle = await this.prisma.cycle.findFirst({
+      where: { groupId, beneficiaryUserId: requesterId },
+      orderBy: { cycleNumber: 'desc' },
+    });
+    const rotationReceived = ownCycle?.status === 'COMPLETED';
+
+    const contributionsPaid = await this.prisma.ledgerTransaction.aggregate({
+      where: { groupId, userId: requesterId, type: 'CONTRIBUTION', status: 'CONFIRMED' },
+      _sum: { amountXaf: true },
+    });
+
+    return {
+      rotationReceived,
+      rotationCycleNumber: ownCycle?.cycleNumber ?? null,
+      contributionsPaid: contributionsPaid._sum.amountXaf ?? 0,
+      outstandingDebt: member.outstandingDebt,
+      amountToRefund: rotationReceived ? 0 : (contributionsPaid._sum.amountXaf ?? 0),
+      amountToSettle: rotationReceived ? member.outstandingDebt : 0,
+    };
+  }
+
+  /**
+   * Écran 52 — Demandes de sortie en attente avec montants (admin).
+   */
+  async listExitRequests(groupId: string, requesterId: string) {
+    await this.assertIsAdmin(groupId, requesterId);
+
+    const members = await this.prisma.groupMember.findMany({
+      where: { groupId, isActive: true, exitStatus: 'REQUESTED' },
+      include: { user: { select: { id: true, fullName: true } } },
+      orderBy: { exitRequestedAt: 'asc' },
+    });
+
+    const result = [];
+    for (const m of members) {
+      const ownCycle = await this.prisma.cycle.findFirst({
+        where: { groupId, beneficiaryUserId: m.userId },
+        orderBy: { cycleNumber: 'desc' },
+      });
+      const rotationReceived = ownCycle?.status === 'COMPLETED';
+
+      const paid = await this.prisma.ledgerTransaction.aggregate({
+        where: { groupId, userId: m.userId, type: 'CONTRIBUTION', status: 'CONFIRMED' },
+        _sum: { amountXaf: true },
+      });
+
+      result.push({
+        memberId: m.id,
+        userId: m.userId,
+        fullName: m.user.fullName,
+        requestedAt: m.exitRequestedAt,
+        reason: m.exitReason,
+        rotationReceived,
+        amountToRefund: rotationReceived ? 0 : (paid._sum.amountXaf ?? 0),
+        amountToSettle: rotationReceived ? m.outstandingDebt : 0,
+      });
+    }
+    return result;
+  }
+
+  /**
+   * Désigne le caissier du groupe (Option A, §7) — écran 48.
    */
   async assignCashier(groupId: string, requesterId: string, dto: AssignCashierDto) {
     await this.assertIsAdmin(groupId, requesterId);
@@ -411,10 +685,8 @@ export class GroupsService {
   }
 
   /**
-   * Enregistre le compte Mobile Money du caissier comme compte de dépôt du
-   * groupe : c'est là que les membres versent leur cotisation avant que le
-   * caissier ne reverse au bénéficiaire. Seul le caissier peut enregistrer
-   * son propre compte.
+   * Enregistre le compte Mobile Money du caissier comme compte de dépôt —
+   * écran 49. Seul le caissier peut enregistrer son propre compte.
    */
   async registerDepositAccount(groupId: string, requesterId: string, dto: RegisterDepositAccountDto) {
     const group = await this.prisma.group.findUnique({ where: { id: groupId } });
@@ -441,10 +713,7 @@ export class GroupsService {
   }
 
   /**
-   * Demande de sortie volontaire d'un membre (distinct d'une exclusion par
-   * l'admin). Toujours soumise à validation — cf. decideExit pour la règle
-   * de remboursement/dette appliquée selon que le tour du membre est déjà
-   * passé ou non.
+   * Demande de sortie volontaire — écran 50.
    */
   async requestExit(groupId: string, userId: string, dto: RequestGroupExitDto) {
     const member = await this.prisma.groupMember.findUnique({
@@ -464,19 +733,10 @@ export class GroupsService {
   }
 
   /**
-   * Décision de l'admin sur une demande de sortie volontaire.
-   *
-   * Règle métier (cf. cadrage du projet) :
-   * - Si le tour de rotation du membre n'est pas encore passé : ses
-   *   cotisations déjà versées et confirmées lui sont remboursées
-   *   (transaction MEMBER_EXIT_SETTLEMENT au crédit du membre).
-   * - Si son tour est déjà passé (il a reçu sa cagnotte) : le solde
-   *   qu'il doit encore au groupe (`outstandingDebt`) doit être réglé
-   *   avant la sortie effective.
-   *
-   * Les transactions créées ici sont en statut PENDING : leur exécution
-   * réelle (versement/prélèvement Mobile Money) reste à brancher sur
-   * l'agrégateur, comme le reste du module payments.
+   * Décision de l'admin sur une demande de sortie volontaire — écran 52.
+   * Règle métier : tour non passé → remboursement des cotisations
+   * (MEMBER_EXIT_SETTLEMENT au crédit) ; tour déjà reçu → règlement du
+   * solde restant dû (outstandingDebt) avant sortie effective.
    */
   async decideExit(groupId: string, adminId: string, dto: DecideGroupExitDto) {
     await this.assertIsAdmin(groupId, adminId);
