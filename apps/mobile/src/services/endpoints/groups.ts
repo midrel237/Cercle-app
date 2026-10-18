@@ -24,4 +24,17 @@ export const groupsApi = {
 
   /** Démarrage du cycle 1 — écran 30. */
   startCycles: (groupId: string) => apiClient.post(`/groups/${groupId}/cycles/start`),
+
+  /** Statut de cotisation du cycle actif — écran 31 (détail du groupe). */
+  getCycleStatus: (groupId: string) => apiClient.get(`/groups/${groupId}/cycle-status`),
+
+  /** Discussion du groupe — écran 41. Les `take` derniers messages. */
+  listMessages: (groupId: string, take?: number, before?: string) =>
+    apiClient.get(`/groups/${groupId}/messages`, {
+      params: { take, before },
+    }),
+
+  /** Envoi d'un message dans la discussion — écran 41. */
+  sendMessage: (groupId: string, body: string) =>
+    apiClient.post(`/groups/${groupId}/messages`, { body }),
 };
