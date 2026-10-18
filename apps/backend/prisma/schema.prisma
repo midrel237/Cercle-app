@@ -68,6 +68,7 @@ model User {
   eventsCreated       GroupEvent[]         @relation("EventCreator")
   eventsAsBeneficiary GroupEvent[]         @relation("EventBeneficiary")
   eventContributions  EventContribution[]
+  groupMessages       GroupMessage[]      @relation("GroupMessages")
 
   @@map("users")
 }
@@ -161,6 +162,7 @@ model Group {
   transactions LedgerTransaction[]
   loans        Loan[]
   events       GroupEvent[]
+  messages     GroupMessage[]
 
   @@map("groups")
 }
@@ -263,8 +265,28 @@ model Cycle {
 
   createdAt        DateTime    @default(now())
 
+  /// Cotisations rattachées à ce cycle (écran 31 : statut Payé / En
+  /// attente / En retard par membre pour le cycle actif).
+  transactions     LedgerTransaction[] @relation("CycleTransactions")
+
   @@unique([groupId, cycleNumber])
   @@map("cycles")
+}
+
+/// Message de la discussion du groupe (écran 41). MVP : stockage simple +
+/// polling côté mobile (les 100 derniers messages) ; une couche temps réel
+/// (WebSocket/SSE) pourra être ajoutée sans changer ce modèle.
+model GroupMessage {
+  id        String   @id @default(uuid())
+  groupId   String
+  group     Group    @relation(fields: [groupId], references: [id])
+  userId    String
+  user      User     @relation("GroupMessages", fields: [userId], references: [id])
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([groupId, createdAt])
+  @@map("group_messages")
 }
 
 enum GroupEventType {
@@ -363,6 +385,12 @@ model LedgerTransaction {
   userId             String
   user               User                @relation(fields: [userId], references: [id])
   type               TransactionType
+  /// Cycle auquel se rapporte la cotisation (écran 31 : statut de
+  /// cotisation par membre pour le cycle actif). Nullable : les
+  /// transactions hors cycle (frais, règlements de sortie…) ne sont
+  /// liées à aucun cycle.
+  cycleId            String?
+  cycle              Cycle?              @relation("CycleTransactions", fields: [cycleId], references: [id])
   /// Montant dans la devise d'origine de la transaction (cf. `currency`).
   amount             Decimal             @db.Decimal(14, 2)
   /// Devise d'origine (XAF pour un paiement Mobile Money local ; EUR/USD/...
@@ -387,6 +415,7 @@ model LedgerTransaction {
 
   @@index([groupId, createdAt])
   @@index([userId, createdAt])
+  @@index([cycleId])
   @@map("ledger_transactions")
 }
 
