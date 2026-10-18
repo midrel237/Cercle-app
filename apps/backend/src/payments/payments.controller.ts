@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Headers, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpCode, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/strategies/jwt.strategy';
@@ -43,12 +44,35 @@ export class PaymentsController {
     );
   }
 
-  /** Webhook public (authentifié par signature, pas par JWT utilisateur). */
+  /**
+   * Webhook CinetPay (public : authentifié par HMAC, pas par JWT).
+   * La signature se calcule sur le CORPS BRUT (rawBody: true dans main.ts)
+   * avec l'en-tête `x-token`. Format CinetPay :
+   * { transaction_id, payment_token, status: 'ACCEPTED' | 'REFUSED', … }
+   * On renvoie 200 à CinetPay même sans transaction connue (idempotence).
+   */
   @Post('webhook')
-  webhook(
-    @Headers('x-signature') signature: string,
-    @Body() body: { transactionId: string; externalReference: string; status: 'confirmed' | 'failed' },
+  @HttpCode(200)
+  async webhook(
+    @Req() req: Request & { rawBody?: Buffer },
+    @Headers('x-token') token: string,
+    @Body() payload: {
+      transaction_id: string;
+      payment_token: string;
+      status: string;
+    },
   ) {
-    return this.paymentsService.handleWebhook(JSON.stringify(body), signature, body);
+    const raw = req.rawBody?.toString('utf8') ?? JSON.stringify(payload);
+    const confirmed = payload.status === 'ACCEPTED';
+    try {
+      return await this.paymentsService.handleWebhook(raw, token, {
+        transactionId: payload.transaction_id,
+        externalReference: payload.payment_token,
+        status: confirmed ? 'confirmed' : 'failed',
+      });
+    } catch {
+      // CinetPay exige un acquittement 200 ; on log l'erreur côté service.
+      return { received: true };
+    }
   }
 }
