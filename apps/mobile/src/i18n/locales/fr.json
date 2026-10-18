@@ -311,5 +311,34 @@
     "starting": "Démarrage…",
     "loadError": "Impossible de charger l'ordre confirmé pour l'instant.",
     "startError": "Impossible de démarrer le cycle pour l'instant. Réessayez."
+  },
+  "groupDetail": {
+    "cycleOf": "Cycle {{current}} sur {{total}}",
+    "noActiveCycle": "Aucun cycle actif pour le moment",
+    "currentPot": "Tour actuel",
+    "beneficiary": "Bénéficiaire du tour",
+    "daysLeft_one": "dans {{count}} jour",
+    "daysLeft_other": "dans {{count}} jours",
+    "membersSection": "Cotisations du cycle",
+    "statusPaid": "Payé",
+    "statusPending": "En attente",
+    "statusLate": "En retard",
+    "roleAdmin": "Admin",
+    "roleCashier": "Caissier",
+    "beneficiaryTag": "bénéficiaire",
+    "youSuffix": " (vous)",
+    "unnamed": "Membre",
+    "openChat": "Discussion du groupe",
+    "payContribution": "Payer ma cotisation · {{amount}} FCFA",
+    "loadError": "Impossible de charger le groupe pour l'instant. Tirez pour réessayer."
+  },
+  "groupChat": {
+    "title": "Discussion",
+    "unnamed": "Membre",
+    "empty": "Aucun message pour l'instant. Lancez la discussion !",
+    "placeholder": "Écrivez un message…",
+    "send": "Envoyer",
+    "loadError": "Impossible de charger la discussion pour l'instant.",
+    "sendError": "Impossible d'envoyer le message pour l'instant. Réessayez."
   }
 }

@@ -309,5 +309,34 @@
     "starting": "Starting…",
     "loadError": "Couldn't load the confirmed order right now.",
     "startError": "Couldn't start the cycle right now. Please try again."
+  },
+  "groupDetail": {
+    "cycleOf": "Cycle {{current}} of {{total}}",
+    "noActiveCycle": "No active cycle yet",
+    "currentPot": "Current turn",
+    "beneficiary": "Turn beneficiary",
+    "daysLeft_one": "in {{count}} day",
+    "daysLeft_other": "in {{count}} days",
+    "membersSection": "Cycle contributions",
+    "statusPaid": "Paid",
+    "statusPending": "Pending",
+    "statusLate": "Late",
+    "roleAdmin": "Admin",
+    "roleCashier": "Cashier",
+    "beneficiaryTag": "beneficiary",
+    "youSuffix": " (you)",
+    "unnamed": "Member",
+    "openChat": "Group discussion",
+    "payContribution": "Pay my contribution · {{amount}} FCFA",
+    "loadError": "Couldn't load the group right now. Pull to refresh."
+  },
+  "groupChat": {
+    "title": "Discussion",
+    "unnamed": "Member",
+    "empty": "No messages yet. Start the conversation!",
+    "placeholder": "Write a message…",
+    "send": "Send",
+    "loadError": "Couldn't load the discussion right now.",
+    "sendError": "Couldn't send the message right now. Please try again."
   }
 }
