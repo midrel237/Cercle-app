@@ -340,5 +340,71 @@
     "send": "Envoyer",
     "loadError": "Impossible de charger la discussion pour l'instant.",
     "sendError": "Impossible d'envoyer le message pour l'instant. Réessayez."
+  },
+  "payment": {
+    "pin": {
+      "title": "Confirmez le paiement",
+      "subtitle": "Entrez votre code secret Mobile Money pour confirmer le paiement de {{amount}} FCFA à CERCLE.",
+      "pinLabel": "Code secret opérateur",
+      "hint": "Le code reste entre vous et votre opérateur — Cercle ne le stocke jamais. Vous confirmerez aussi sur votre téléphone.",
+      "confirmButton": "Valider",
+      "loadError": "Impossible de charger le montant de la cotisation.",
+      "prepareError": "Impossible de préparer le paiement pour l'instant. Réessayez."
+    },
+    "processing": {
+      "title": "Confirmation en cours…",
+      "subtitle": "En attente de la validation {{provider}}. Ne fermez pas l'application.",
+      "hint": "Validez la transaction sur votre téléphone via le code envoyé par votre opérateur.",
+      "timeout": "La confirmation prend plus de temps que prévu. Vous pouvez garder l'application ouverte — la transaction sera confirmée automatiquement.",
+      "refWaiting": "Réf. transaction en attente…"
+    },
+    "methods": {
+      "title": "Comptes liés",
+      "defaultLabel": "Par défaut",
+      "cardLabel": "Carte bancaire",
+      "transferLabel": "Virement bancaire",
+      "empty": "Aucun moyen de paiement lié pour l'instant.",
+      "addButton": "+ Ajouter un moyen de paiement",
+      "securityNote": "Vos identifiants Mobile Money ne sont jamais stockés par Cercle.",
+      "loadError": "Impossible de charger vos moyens de paiement."
+    },
+    "addMethod": {
+      "tabMobileMoney": "Mobile Money",
+      "tabCard": "Carte",
+      "tabTransfer": "Virement",
+      "operatorLabel": "Opérateur",
+      "phoneLabel": "Numéro associé au compte",
+      "cardDiasporaNote": "🌍 Cotisez depuis l'étranger pour ce groupe ouvert à la diaspora.",
+      "cardTypeLabel": "Type de carte",
+      "cardNumberLabel": "Numéro de carte",
+      "expiryLabel": "Expiration",
+      "transferDiasporaNote": "🌍 Virement depuis votre banque à l'étranger.",
+      "bankCountryLabel": "Pays de la banque",
+      "bankNameLabel": "Nom de la banque",
+      "transferDelay": "Délai habituel : 1 à 3 jours ouvrés · Conversion EUR → FCFA au taux du jour.",
+      "saveButton": "Enregistrer",
+      "saving": "Enregistrement…",
+      "phoneError": "Numéro invalide — saisissez au moins 8 chiffres.",
+      "cardError": "Données de carte invalides — vérifiez le numéro et le CVV.",
+      "transferError": "Coordonnées bancaires incomplètes.",
+      "saveError": "Impossible d'enregistrer ce moyen de paiement pour l'instant. Réessayez."
+    },
+    "failed": {
+      "title": "Le paiement n'a pas abouti",
+      "subtitle": "Solde insuffisant sur le compte {{provider}} utilisé. Aucun montant n'a été débité.",
+      "amountLabel": "Montant",
+      "refLabel": "Référence",
+      "codeLabel": "Code erreur",
+      "changeMethodButton": "Changer de moyen",
+      "retryButton": "Réessayer"
+    },
+    "receipt": {
+      "title": "Paiement réussi",
+      "operatorLabel": "Opérateur",
+      "refLabel": "Référence",
+      "dateLabel": "Date",
+      "shareButton": "Partager le reçu",
+      "doneButton": "Terminer"
+    }
   }
 }
