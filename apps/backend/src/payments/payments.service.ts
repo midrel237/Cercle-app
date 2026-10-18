@@ -17,9 +17,7 @@ export class PaymentsService {
   /**
    * Écran "Ajouter un moyen de paiement" (35). BANK_CARD / BANK_TRANSFER ne
    * sont acceptés que si l'utilisateur appartient à au moins un groupe
-   * `openToDiaspora = true` — à valider ici avant persistance (TODO :
-   * brancher le contrôle réel une fois la logique d'appartenance groupe
-   * disponible côté service).
+   * `openToDiaspora = true` — validé ici avant persistance.
    */
   async addPaymentMethod(userId: string, dto: AddPaymentMethodDto) {
     if (dto.type === 'BANK_CARD' || dto.type === 'BANK_TRANSFER') {
@@ -74,11 +72,8 @@ export class PaymentsService {
    * le webhook confirme. Si eventId est fourni, la cotisation est versée
    * pour une cagnotte d'évènement au lieu du cycle (écran 56, Phase 5).
    *
-   * Garde-fous : membre actif du groupe uniquement ; montant repris du
-   * groupe (jamais envoyé par le client — pas de falsification possible) ;
-   * pas de doublon : refuse si une cotisation CONFIRMED existe déjà pour
-   * ce membre/cycle (le bouton de l'écran 31 se désactive en amont, mais
-   * le backend reste la barrière).
+   * Garde-fous : membre actif du groupe uniquement ; montant du cycle
+   * repris du groupe (jamais envoyé par le client) ; anti-doublon.
    */
   async prepareContribution(userId: string, dto: PrepareContributionDto) {
     const member = await this.prisma.groupMember.findUnique({
@@ -96,33 +91,45 @@ export class PaymentsService {
 
     const provider = dto.provider ?? 'MTN_MOMO';
 
-    // Cas cagnotte d'évènement (Phase 5) : même ledger, autre type.
+    // Cas cagnotte d'évènement (Phase 5, écran 56) : même ledger, autre
+    // type. Montant libre (la maquette montre des montants différents par
+    // contributeur : 5 000 / 2 000...) — plafonné à un minimum de 100 XAF
+    // pour éviter les cotisations nulles ; suggestion = suggestedAmount.
     if (dto.eventId) {
       const event = await this.prisma.groupEvent.findFirst({
         where: { id: dto.eventId, groupId: dto.groupId, status: 'OPEN' },
       });
       if (!event) throw new NotFoundException('Évènement introuvable ou clôturé.');
 
-      const existingEvent = await this.prisma.ledgerTransaction.findFirst({
-        where: {
-          groupId: dto.groupId,
-          userId,
-          type: 'EVENT_CONTRIBUTION',
-          status: { in: ['PENDING', 'CONFIRMED'] },
-          eventContribution: { eventId: dto.eventId },
-        },
+      const confirmedContribution = await this.prisma.eventContribution.findFirst({
+        where: { eventId: dto.eventId, userId, transaction: { status: 'CONFIRMED' } },
       });
-      if (existingEvent) {
-        throw new BadRequestException('Une cotisation à cet évènement est déjà en cours ou versée.');
+      if (confirmedContribution) {
+        throw new BadRequestException('Votre cotisation à cet évènement est déjà versée.');
       }
 
-      const amount = event.suggestedAmount ?? group.contributionAmount;
-      return this.transactionsService.createPending(userId, {
+      const suggested = Number(event.suggestedAmount ?? group.contributionAmount);
+      const amount = dto.amount !== undefined ? Math.max(Number(dto.amount), 100) : suggested;
+
+      const transaction = await this.transactionsService.createPending(userId, {
         groupId: dto.groupId,
         type: 'EVENT_CONTRIBUTION',
-        amount: Number(amount),
+        amount,
         provider,
       });
+
+      // Trace la ligne EventContribution liée à la transaction dès la
+      // préparation : elle ne comptera comme « collectée » qu'une fois la
+      // transaction CONFIRMED (filtre des lectures, cf. EventsService). Un
+      // échec de paiement laisse la ligne remplaçable (transactionId
+      // unique + upsert eventId/userId) au prochain essai.
+      await this.prisma.eventContribution.upsert({
+        where: { eventId_userId: { eventId: event.id, userId } },
+        create: { eventId: event.id, userId, amount, transactionId: transaction.id },
+        update: { amount, transactionId: transaction.id },
+      });
+
+      return transaction;
     }
 
     // Cas nominal : cotisation au cycle actif.

@@ -3,12 +3,18 @@ import { apiClient } from '../api-client';
 export type MobileMoneyProvider = 'MTN_MOMO' | 'ORANGE_MONEY';
 
 export const paymentsApi = {
-  /** Prépare la cotisation du cycle actif (écran 31→32) : transaction PENDING. */
+  /**
+   * Prépare la cotisation (écran 31→32) : transaction PENDING.
+   * - Cycle actif : montant fixé par le groupe (serveur), jamais envoyé.
+   * - Cagnotte d'évènement (eventId, écran 56) : montant libre optionnel —
+   *   la suggestion de l'évènement reste le défaut côté UI.
+   */
   prepareContribution: (
     groupId: string,
     provider: MobileMoneyProvider,
     eventId?: string,
-  ) => apiClient.post('/payments/prepare', { groupId, provider, eventId }),
+    amount?: number,
+  ) => apiClient.post('/payments/prepare', { groupId, provider, eventId, amount }),
 
   /** Déclenche la collecte Mobile Money auprès de l'agrégateur (écran 32→33). */
   initiate: (

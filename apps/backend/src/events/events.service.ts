@@ -9,6 +9,13 @@ import { ContributeEventDto } from './dto/contribute-event.dto';
  * librement pour le bénéficiaire de l'évènement ; comme pour les cotisations
  * de cycle, les fonds transitent vers le compte de dépôt du caissier qui
  * reverse ensuite au bénéficiaire (Option A, cf. cahier des charges §7).
+ *
+ * Design traçabilité : la ligne EventContribution est créée/lidée dès la
+ * PRÉPARATION du paiement (prepareContribution, module payments) avec son
+ * transactionId. Elle ne compte comme « collectée » qu'une fois la
+ * transaction CONFIRMED par le webhook agrégateur — les lectures filtrent
+ * sur transaction.status (cf. findForGroup/findOne). Une transaction FAILED
+ * laisse la ligne remplaçable au prochain essai (upsert).
  */
 @Injectable()
 export class EventsService {
@@ -43,28 +50,110 @@ export class EventsService {
     });
   }
 
+  /**
+   * Écran 54 — évènements du groupe : pour chaque cagnotte, total collecté,
+   * contributeurs, membres restants (actifs n'ayant pas encore cotisé).
+   * Les OPEN en tête, les CLOSED en dessous (maquette 54).
+   */
   async findForGroup(groupId: string) {
-    return this.prisma.groupEvent.findMany({
+    const events = await this.prisma.groupEvent.findMany({
       where: { groupId },
-      include: { beneficiary: true, contributions: true },
-      orderBy: { createdAt: 'desc' },
+      include: {
+        beneficiary: { select: { id: true, fullName: true } },
+        createdBy: { select: { id: true, fullName: true } },
+        contributions: {
+          where: { transaction: { status: 'CONFIRMED' } },
+          include: { user: { select: { id: true, fullName: true } } },
+        },
+      },
+      orderBy: [{ status: 'asc' }, { createdAt: 'desc' }],
     });
-  }
 
-  async findOne(eventId: string) {
-    const event = await this.prisma.groupEvent.findUnique({
-      where: { id: eventId },
-      include: { beneficiary: true, contributions: { include: { user: true } } },
+    const activeMembers = await this.prisma.groupMember.count({
+      where: { groupId, isActive: true },
     });
-    if (!event) throw new NotFoundException('Évènement introuvable.');
-    return event;
+
+    return {
+      activeMembers,
+      events: events.map((e) => ({
+        id: e.id,
+        type: e.type,
+        customLabel: e.customLabel,
+        description: e.description,
+        suggestedAmount: e.suggestedAmount,
+        status: e.status,
+        createdAt: e.createdAt,
+        closedAt: e.closedAt,
+        beneficiary: e.beneficiary,
+        createdBy: e.createdBy,
+        collectedAmount: e.contributions.reduce((sum, c) => sum + Number(c.amount), 0),
+        contributorsCount: e.contributions.length,
+        remainingMembers: Math.max(activeMembers - e.contributions.length, 0),
+        contributions: e.contributions.map((c) => ({
+          userId: c.userId,
+          fullName: c.user.fullName,
+          amount: c.amount,
+        })),
+      })),
+    };
   }
 
   /**
-   * Enregistre la cotisation d'un membre à l'évènement. Le paiement Mobile
-   * Money lui-même (vers le compte de dépôt du caissier) est orchestré par
-   * le module payments ; cette méthode trace la cotisation côté évènement
-   * une fois le paiement confirmé.
+   * Écran 56 — détail d'une cagnotte : collecté, contributeurs (montants)
+   * et membres en attente (actifs du groupe n'ayant pas encore cotisé).
+   */
+  async findOne(eventId: string) {
+    const event = await this.prisma.groupEvent.findUnique({
+      where: { id: eventId },
+      include: {
+        beneficiary: { select: { id: true, fullName: true } },
+        createdBy: { select: { id: true, fullName: true } },
+        contributions: {
+          where: { transaction: { status: 'CONFIRMED' } },
+          include: { user: { select: { id: true, fullName: true } } },
+        },
+      },
+    });
+    if (!event) throw new NotFoundException('Évènement introuvable.');
+
+    const activeMembers = await this.prisma.groupMember.findMany({
+      where: { groupId: event.groupId, isActive: true },
+      include: { user: { select: { id: true, fullName: true } } },
+      orderBy: { joinedAt: 'asc' },
+    });
+    const contributorsUserIds = new Set(event.contributions.map((c) => c.userId));
+
+    return {
+      id: event.id,
+      groupId: event.groupId,
+      type: event.type,
+      customLabel: event.customLabel,
+      description: event.description,
+      suggestedAmount: event.suggestedAmount,
+      status: event.status,
+      createdAt: event.createdAt,
+      closedAt: event.closedAt,
+      beneficiary: event.beneficiary,
+      createdBy: event.createdBy,
+      collectedAmount: event.contributions.reduce((sum, c) => sum + Number(c.amount), 0),
+      contributions: event.contributions.map((c) => ({
+        userId: c.userId,
+        fullName: c.user.fullName,
+        amount: c.amount,
+      })),
+      waitingMembers: activeMembers
+        .filter((m) => !contributorsUserIds.has(m.userId))
+        .map((m) => ({ userId: m.userId, fullName: m.user.fullName })),
+    };
+  }
+
+  /**
+   * Écran 56 — déclarer sa cotisation à l'évènement SANS paiement immédiat
+   * (montant libre, écrase une précédente tentative non confirmée). Le flux
+   * nominal passe par POST /payments/prepare avec eventId (module
+   * payments), qui crée la transaction PENDING + la ligne EventContribution
+   * liée ; ce endpoint reste utile pour ajuster un montant déclaré avant
+   * de payer. Jamais de ligne comptabilisée avant confirmation webhook.
    */
   async contribute(eventId: string, userId: string, dto: ContributeEventDto) {
     const event = await this.prisma.groupEvent.findUnique({ where: { id: eventId } });
@@ -78,6 +167,14 @@ export class EventsService {
     });
     if (!membership || !membership.isActive) {
       throw new ForbiddenException('Vous n’êtes pas membre de ce groupe.');
+    }
+
+    // Un montant déjà CONFIRMED ne peut pas être écrasé (append-only).
+    const confirmed = await this.prisma.eventContribution.findFirst({
+      where: { eventId, userId, transaction: { status: 'CONFIRMED' } },
+    });
+    if (confirmed) {
+      throw new BadRequestException('Votre cotisation à cet évènement est déjà confirmée.');
     }
 
     return this.prisma.eventContribution.upsert({
