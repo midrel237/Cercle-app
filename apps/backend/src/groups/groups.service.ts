@@ -3,6 +3,7 @@ import { PrismaService } from '../database/prisma.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { JoinGroupDto } from './dto/join-group.dto';
 import { DecideJoinDto } from './dto/decide-join.dto';
+import { SendGroupMessageDto } from './dto/send-group-message.dto';
 import { AssignCashierDto } from './dto/assign-cashier.dto';
 import { RegisterDepositAccountDto } from './dto/register-deposit-account.dto';
 import { RequestGroupExitDto } from './dto/request-exit.dto';
@@ -275,6 +276,115 @@ export class GroupsService {
   }
 
   /**
+   * Statut de cotisation du cycle actif — écran 31. Pour chaque membre
+   * actif : Payé / En attente / En retard (retard = échéance dépassée),
+   * plus le bénéficiaire du tour et le montant théorique. Réservé aux
+   * membres du groupe (une transaction CONFIRMED sur le cycle actif =
+   * cotisation payée).
+   */
+  async getCycleStatus(groupId: string, requesterId: string) {
+    await this.assertIsMember(groupId, requesterId);
+
+    const group = await this.prisma.group.findUnique({
+      where: { id: groupId },
+      include: {
+        cycles: { where: { status: 'ACTIVE' }, take: 1 },
+        members: {
+          where: { isActive: true },
+          include: { user: { select: { id: true, fullName: true } } },
+        },
+      },
+    });
+    if (!group) throw new NotFoundException('Groupe introuvable.');
+
+    const cycle = group.cycles[0] ?? null;
+    if (!cycle) {
+      return { cycle: null, contributionAmount: group.contributionAmount, members: [] };
+    }
+
+    const contributions = await this.prisma.ledgerTransaction.findMany({
+      where: {
+        cycleId: cycle.id,
+        type: 'CONTRIBUTION',
+        status: { in: ['CONFIRMED', 'PROCESSING'] },
+      },
+      select: { userId: true, status: true },
+    });
+    const paidUserIds = new Set(
+      contributions.filter((c) => c.status === 'CONFIRMED').map((c) => c.userId),
+    );
+    const now = new Date();
+
+    const members = group.members.map((m) => ({
+      id: m.id,
+      userId: m.userId,
+      fullName: m.user.fullName,
+      role: m.role,
+      isBeneficiary: m.userId === cycle.beneficiaryUserId,
+      contributionStatus: paidUserIds.has(m.userId)
+        ? ('PAID' as const)
+        : cycle.dueDate < now
+          ? ('LATE' as const)
+          : ('PENDING' as const),
+    }));
+
+    return {
+      cycle: {
+        id: cycle.id,
+        cycleNumber: cycle.cycleNumber,
+        dueDate: cycle.dueDate,
+        expectedAmount: cycle.expectedAmount,
+        beneficiaryUserId: cycle.beneficiaryUserId,
+      },
+      contributionAmount: group.contributionAmount,
+      members,
+    };
+  }
+
+  /**
+   * Discussion du groupe — écran 41. Renvoie les `take` derniers
+   * messages (100 par défaut), antérieurs à `before` pour la pagination.
+   * Réservé aux membres actifs du groupe.
+   */
+  async listMessages(
+    groupId: string,
+    requesterId: string,
+    opts: { take?: number; before?: Date } = {},
+  ) {
+    await this.assertIsMember(groupId, requesterId);
+
+    const take = Math.min(Math.max(opts.take ?? 100, 1), 200);
+
+    return this.prisma.groupMessage.findMany({
+      where: {
+        groupId,
+        ...(opts.before && !Number.isNaN(opts.before.getTime())
+          ? { createdAt: { lt: opts.before } }
+          : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+      take,
+      include: { user: { select: { id: true, fullName: true } } },
+    });
+  }
+
+  /**
+   * Envoi d'un message dans la discussion du groupe — écran 41.
+   * Réservé aux membres actifs du groupe.
+   */
+  async sendMessage(groupId: string, requesterId: string, dto: SendGroupMessageDto) {
+    await this.assertIsMember(groupId, requesterId);
+
+    const body = dto.body.trim();
+    if (!body) throw new BadRequestException('Le message ne peut pas être vide.');
+
+    return this.prisma.groupMessage.create({
+      data: { groupId, userId: requesterId, body },
+      include: { user: { select: { id: true, fullName: true } } },
+    });
+  }
+
+  /**
    * Désigne le caissier du groupe (Option A, §7). Le caissier reste un
    * membre cotisant à part entière — sa désignation ne change que sa
    * responsabilité de collecte/reversement, pas sa participation au cycle.
@@ -435,6 +545,17 @@ export class GroupsService {
     });
     if (!member || member.role !== 'ADMIN') {
       throw new ForbiddenException('Action réservée à l’administrateur du groupe.');
+    }
+    return member;
+  }
+
+  /** Vérifie que l'utilisateur est un membre actif du groupe. */
+  private async assertIsMember(groupId: string, userId: string) {
+    const member = await this.prisma.groupMember.findUnique({
+      where: { groupId_userId: { groupId, userId } },
+    });
+    if (!member || !member.isActive) {
+      throw new ForbiddenException('Action réservée aux membres du groupe.');
     }
     return member;
   }
