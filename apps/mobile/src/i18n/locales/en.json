@@ -338,5 +338,71 @@
     "send": "Send",
     "loadError": "Couldn't load the discussion right now.",
     "sendError": "Couldn't send the message right now. Please try again."
+  },
+  "payment": {
+    "pin": {
+      "title": "Confirm the payment",
+      "subtitle": "Enter your Mobile Money secret code to confirm the payment of {{amount}} FCFA to CERCLE.",
+      "pinLabel": "Operator secret code",
+      "hint": "The code stays between you and your operator — Cercle never stores it. You'll also confirm on your phone.",
+      "confirmButton": "Validate",
+      "loadError": "Couldn't load the contribution amount.",
+      "prepareError": "Couldn't prepare the payment right now. Please try again."
+    },
+    "processing": {
+      "title": "Confirming…",
+      "subtitle": "Waiting for {{provider}} validation. Please keep the app open.",
+      "hint": "Validate the transaction on your phone via the code sent by your operator.",
+      "timeout": "The confirmation is taking longer than expected. You can keep the app open — the transaction will be confirmed automatically.",
+      "refWaiting": "Transaction ref. pending…"
+    },
+    "methods": {
+      "title": "Linked accounts",
+      "defaultLabel": "Default",
+      "cardLabel": "Bank card",
+      "transferLabel": "Wire transfer",
+      "empty": "No payment method linked yet.",
+      "addButton": "+ Add a payment method",
+      "securityNote": "Your Mobile Money credentials are never stored by Cercle.",
+      "loadError": "Couldn't load your payment methods."
+    },
+    "addMethod": {
+      "tabMobileMoney": "Mobile Money",
+      "tabCard": "Card",
+      "tabTransfer": "Wire",
+      "operatorLabel": "Operator",
+      "phoneLabel": "Phone number linked to the account",
+      "cardDiasporaNote": "🌍 Contribute from abroad for this group open to the diaspora.",
+      "cardTypeLabel": "Card type",
+      "cardNumberLabel": "Card number",
+      "expiryLabel": "Expiry",
+      "transferDiasporaNote": "🌍 Wire transfer from your bank abroad.",
+      "bankCountryLabel": "Bank's country",
+      "bankNameLabel": "Bank name",
+      "transferDelay": "Usual delay: 1 to 3 business days · EUR → FCFA conversion at the daily rate.",
+      "saveButton": "Save",
+      "saving": "Saving…",
+      "phoneError": "Invalid number — enter at least 8 digits.",
+      "cardError": "Invalid card details — check the number and CVV.",
+      "transferError": "Incomplete banking details.",
+      "saveError": "Couldn't save this payment method right now. Please try again."
+    },
+    "failed": {
+      "title": "The payment didn't go through",
+      "subtitle": "Insufficient balance on the {{provider}} account used. No amount was debited.",
+      "amountLabel": "Amount",
+      "refLabel": "Reference",
+      "codeLabel": "Error code",
+      "changeMethodButton": "Change method",
+      "retryButton": "Retry"
+    },
+    "receipt": {
+      "title": "Payment successful",
+      "operatorLabel": "Operator",
+      "refLabel": "Reference",
+      "dateLabel": "Date",
+      "shareButton": "Share the receipt",
+      "doneButton": "Done"
+    }
   }
 }
