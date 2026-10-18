@@ -7,6 +7,7 @@ import {
   transactionsApi,
   HistoryFilter,
 } from '../../src/services/endpoints/account';
+import { FadeIn } from '../../src/components/motion';
 import { colors, fonts, radii, spacing } from '../../src/theme';
 
 interface TxRow {
@@ -49,6 +50,7 @@ const FILTERS: { key: HistoryFilter; label: string }[] = [
  * Écran 67 — Historique : transactions groupées par jour, filtres
  * Tout / Cotisations / Prêts, montants signés (+ crédit / − débit),
  * référence opérateur. Appui → détail (écran 68).
+ * Micro-animations : chaque groupe de jour apparaît en fondu décalé.
  */
 export default function HistoryScreen() {
   const { t } = useTranslation();
@@ -121,7 +123,9 @@ export default function HistoryScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={load} tintColor={colors.goldDark} />
         }
       >
-        <Text style={styles.title}>{t('historyScreen.title')}</Text>
+        <FadeIn dy={10}>
+          <Text style={styles.title}>{t('historyScreen.title')}</Text>
+        </FadeIn>
 
         {/* Filtres — maquette 67 : Tout / Cotisations / Prêts. */}
         <View style={styles.filterRow}>
@@ -148,11 +152,13 @@ export default function HistoryScreen() {
         ) : days.length === 0 ? (
           <Text style={styles.emptyText}>{t('historyScreen.empty')}</Text>
         ) : (
-          days.map((day) => (
-            <View key={day.date} style={styles.daySection}>
-              <Text style={styles.dayTitle}>{dayLabel(day.date)}</Text>
-              <View style={styles.dayCard}>{day.items.map(row)}</View>
-            </View>
+          days.map((day, i) => (
+            <FadeIn key={day.date} delay={i * 90} dy={12}>
+              <View style={styles.daySection}>
+                <Text style={styles.dayTitle}>{dayLabel(day.date)}</Text>
+                <View style={styles.dayCard}>{day.items.map(row)}</View>
+              </View>
+            </FadeIn>
           ))
         )}
       </ScrollView>

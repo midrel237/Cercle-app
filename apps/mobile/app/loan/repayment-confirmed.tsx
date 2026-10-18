@@ -4,12 +4,13 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppButton } from '../../src/components/AppButton';
+import { FadeIn, PopIn } from '../../src/components/motion';
 import { colors, fonts, radii, spacing } from '../../src/theme';
 
 /**
  * Écran 66 — Remboursement confirmé : montant transféré, échéances
  * restantes. Atteint après le polling de l'écran 33 (webhook confirmé →
- * échéance PAID côté serveur).
+ * échéance PAID côté serveur). Badge de succès en ressort (PopIn).
  */
 export default function LoanRepaymentConfirmedScreen() {
   const { t } = useTranslation();
@@ -26,16 +27,20 @@ export default function LoanRepaymentConfirmedScreen() {
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.content}>
-        <View style={styles.badge}>
-          <Text style={styles.badgeIcon}>✓</Text>
-        </View>
-        <Text style={styles.title}>{t('loansScreen.repaymentConfirmedTitle')}</Text>
-        <Text style={styles.subtitle}>
-          {t('loansScreen.repaymentConfirmedSubtitle', {
-            amount: amountNum.toLocaleString('fr-FR'),
-            remaining: remainingNum,
-          })}
-        </Text>
+        <PopIn scale={0.4}>
+          <View style={styles.badge}>
+            <Text style={styles.badgeIcon}>✓</Text>
+          </View>
+        </PopIn>
+        <FadeIn delay={180}>
+          <Text style={styles.title}>{t('loansScreen.repaymentConfirmedTitle')}</Text>
+          <Text style={styles.subtitle}>
+            {t('loansScreen.repaymentConfirmedSubtitle', {
+              amount: amountNum.toLocaleString('fr-FR'),
+              remaining: remainingNum,
+            })}
+          </Text>
+        </FadeIn>
       </View>
 
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>

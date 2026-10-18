@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppButton } from '../../../../../src/components/AppButton';
+import { FadeIn, PopIn, CountUp, GlowPulse } from '../../../../../src/components/motion';
 import { eventsApi, GroupEventType } from '../../../../../src/services/endpoints/events';
 import { paymentsApi, MobileMoneyProvider } from '../../../../../src/services/endpoints/payments';
 import { useAuthStore } from '../../../../../src/store/auth.store';
@@ -38,6 +39,9 @@ interface EventDetail {
  * libres, membres en attente. « Cotiser » prépare la transaction
  * EVENT_CONTRIBUTION (POST /payments/prepare avec eventId + montant saisi)
  * puis enchaîne sur le flux Mobile Money existant (écrans 32→33→40, Phase 3).
+ *
+ * Micro-animations : le COLLECTÉ compte de 0 à sa valeur (CountUp) dans une
+ * carte à halo pulsé (GlowPulse) ; les contributions arrivent en cascade.
  */
 export default function EventContributeScreen() {
   const { t } = useTranslation();
@@ -123,27 +127,33 @@ export default function EventContributeScreen() {
           <Text style={styles.errorText}>{error}</Text>
         ) : event ? (
           <>
-            <Text style={styles.type}>{TYPE_LABEL[event.type]}</Text>
-            <Text style={styles.title}>
-              {event.customLabel ?? event.beneficiary?.fullName ?? t('eventsScreen.unnamedBeneficiary')}
-            </Text>
-            <Text style={styles.byline}>
-              {t('eventsScreen.openedByLabel', {
-                name: event.createdBy?.fullName ?? '',
-                count: event.contributions.length + event.waitingMembers.length,
-              })}
-            </Text>
-
-            <View style={styles.potCard}>
-              <Text style={styles.potLabel}>{t('eventsScreen.collectedTitle')}</Text>
-              <Text style={styles.potValue}>
-                {event.collectedAmount.toLocaleString('fr-FR')} FCFA
+            <FadeIn dy={10}>
+              <Text style={styles.type}>{TYPE_LABEL[event.type]}</Text>
+              <Text style={styles.title}>
+                {event.customLabel ?? event.beneficiary?.fullName ?? t('eventsScreen.unnamedBeneficiary')}
               </Text>
-            </View>
+              <Text style={styles.byline}>
+                {t('eventsScreen.openedByLabel', {
+                  name: event.createdBy?.fullName ?? '',
+                  count: event.contributions.length + event.waitingMembers.length,
+                })}
+              </Text>
+            </FadeIn>
+
+            <GlowPulse delay={300}>
+              <View style={styles.potCard}>
+                <Text style={styles.potLabel}>{t('eventsScreen.collectedTitle')}</Text>
+                <CountUp
+                  value={event.collectedAmount}
+                  suffix=" FCFA"
+                  style={styles.potValue}
+                />
+              </View>
+            </GlowPulse>
 
             {/* Montant libre — la suggestion pré-remplit le champ. */}
             {!isClosed && !alreadyContributed && !isBeneficiary ? (
-              <>
+              <FadeIn delay={200} dy={8}>
                 <Text style={styles.label}>{t('eventsScreen.yourContributionLabel')}</Text>
                 <TextInput
                   style={styles.amountInput}
@@ -154,31 +164,39 @@ export default function EventContributeScreen() {
                   placeholderTextColor={colors.inkSoft}
                 />
                 <Text style={styles.hint}>{t('eventsScreen.amountHint')}</Text>
-              </>
+              </FadeIn>
             ) : null}
             {isBeneficiary ? (
-              <Text style={styles.infoText}>{t('eventsScreen.beneficiaryNoSelfContribution')}</Text>
+              <PopIn>
+                <Text style={styles.infoText}>{t('eventsScreen.beneficiaryNoSelfContribution')}</Text>
+              </PopIn>
             ) : null}
             {alreadyContributed ? (
-              <Text style={styles.infoText}>{t('eventsScreen.alreadyContributed')}</Text>
+              <PopIn>
+                <Text style={styles.infoText}>{t('eventsScreen.alreadyContributed')}</Text>
+              </PopIn>
             ) : null}
 
-            {/* Contributions : montants libres par membre (maquette 56). */}
+            {/* Contributions : cascade (Stagger-like via FadeIn décalé). */}
             <Text style={styles.sectionTitle}>{t('eventsScreen.contributionsSection')}</Text>
             <View style={styles.contribCard}>
               {event.contributions.map((c, i) => (
-                <View key={c.userId} style={[styles.contribRow, i > 0 && styles.contribRowBorder]}>
-                  <Text style={styles.contribName}>{c.fullName ?? t('eventsScreen.unnamedBeneficiary')}</Text>
-                  <Text style={styles.contribAmount}>
-                    {Number(c.amount).toLocaleString('fr-FR')} FCFA
-                  </Text>
-                </View>
+                <FadeIn key={c.userId} delay={280 + i * 60}>
+                  <View style={[styles.contribRow, i > 0 && styles.contribRowBorder]}>
+                    <Text style={styles.contribName}>{c.fullName ?? t('eventsScreen.unnamedBeneficiary')}</Text>
+                    <Text style={styles.contribAmount}>
+                      {Number(c.amount).toLocaleString('fr-FR')} FCFA
+                    </Text>
+                  </View>
+                </FadeIn>
               ))}
-              {event.waitingMembers.map((m) => (
-                <View key={m.userId} style={[styles.contribRow, styles.contribRowBorder]}>
-                  <Text style={styles.contribName}>{m.fullName ?? t('eventsScreen.unnamedBeneficiary')}</Text>
-                  <Text style={styles.contribWaiting}>{t('eventsScreen.waitingLabel')}</Text>
-                </View>
+              {event.waitingMembers.map((m, i) => (
+                <FadeIn key={m.userId} delay={280 + (event.contributions.length + i) * 60}>
+                  <View style={[styles.contribRow, styles.contribRowBorder]}>
+                    <Text style={styles.contribName}>{m.fullName ?? t('eventsScreen.unnamedBeneficiary')}</Text>
+                    <Text style={styles.contribWaiting}>{t('eventsScreen.waitingLabel')}</Text>
+                  </View>
+                </FadeIn>
               ))}
             </View>
 
@@ -218,7 +236,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.cream, padding: spacing.md, alignItems: 'center', marginBottom: spacing.lg,
   },
   potLabel: { fontFamily: fonts.inter.medium, fontSize: 10.5, color: colors.goldDark, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: spacing.xs },
-  potValue: { fontFamily: fonts.mono.semiBold, fontSize: 24, color: colors.navyDark },
+  potValue: { fontSize: 24, color: colors.navyDark },
   label: { fontFamily: fonts.inter.medium, fontSize: 12.5, color: colors.navy, marginBottom: spacing.xs + 2 },
   amountInput: {
     fontFamily: fonts.mono.semiBold, fontSize: 18, color: colors.navyDark,

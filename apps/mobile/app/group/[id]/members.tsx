@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppButton } from '../../../src/components/AppButton';
+import { FadeIn, Stagger } from '../../../src/components/motion';
 import { groupsApi } from '../../../src/services/endpoints/groups';
 import { useAuthStore } from '../../../src/store/auth.store';
 import { colors, fonts, radii, spacing } from '../../../src/theme';
@@ -42,6 +43,7 @@ interface MembersResponse {
  * Écran 42 — Gestion des membres. Liste (rôles, score de fiabilité, statut
  * de cotisation, jours de retard), recherche, demandes d'adhésion en
  * attente (admin : approuver/refuser via join-decision), lien écran 43.
+ * Micro-animations : demandes et membres apparaissent en cascade.
  */
 export default function MembersScreen() {
   const { t } = useTranslation();
@@ -117,10 +119,12 @@ export default function MembersScreen() {
           <Text style={styles.backText}>‹ {t('common.back')}</Text>
         </Pressable>
 
-        <Text style={styles.title}>{t('membersScreen.title')}</Text>
-        <Text style={styles.subtitle}>
-          {t('membersScreen.memberCount', { count: data?.memberCount ?? 0 })}
-        </Text>
+        <FadeIn dy={10}>
+          <Text style={styles.title}>{t('membersScreen.title')}</Text>
+          <Text style={styles.subtitle}>
+            {t('membersScreen.memberCount', { count: data?.memberCount ?? 0 })}
+          </Text>
+        </FadeIn>
 
         {/* Recherche — maquette écran 42. */}
         <TextInput
@@ -134,30 +138,32 @@ export default function MembersScreen() {
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-        {/* Demandes d'adhésion en attente (admin) — maquette écran 28 côté admin. */}
+        {/* Demandes d'adhésion en attente (admin) — cascade. */}
         {data?.isAdmin && data.pendingJoinRequests.length > 0 ? (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>
               {t('membersScreen.pendingJoinSection', { count: data.pendingJoinRequests.length })}
             </Text>
-            {data.pendingJoinRequests.map((p) => (
-              <View key={p.id} style={styles.pendingCard}>
-                <Text style={styles.pendingName}>{p.fullName ?? t('membersScreen.unnamed')}</Text>
-                <View style={styles.pendingActions}>
-                  <Pressable onPress={() => handleJoinDecision(p.id, false)} style={styles.rejectBtn}>
-                    <Text style={styles.rejectText}>{t('membersScreen.reject')}</Text>
-                  </Pressable>
-                  <Pressable onPress={() => handleJoinDecision(p.id, true)} style={styles.approveBtn}>
-                    <Text style={styles.approveText}>{t('membersScreen.approve')}</Text>
-                  </Pressable>
+            <Stagger>
+              {data.pendingJoinRequests.map((p) => (
+                <View key={p.id} style={styles.pendingCard}>
+                  <Text style={styles.pendingName}>{p.fullName ?? t('membersScreen.unnamed')}</Text>
+                  <View style={styles.pendingActions}>
+                    <Pressable onPress={() => handleJoinDecision(p.id, false)} style={styles.rejectBtn}>
+                      <Text style={styles.rejectText}>{t('membersScreen.reject')}</Text>
+                    </Pressable>
+                    <Pressable onPress={() => handleJoinDecision(p.id, true)} style={styles.approveBtn}>
+                      <Text style={styles.approveText}>{t('membersScreen.approve')}</Text>
+                    </Pressable>
+                  </View>
                 </View>
-              </View>
-            ))}
+              ))}
+            </Stagger>
           </View>
         ) : null}
 
-        {/* Liste des membres — maquette écran 42 : rôles, Retard, scores. */}
-        <View style={styles.list}>
+        {/* Liste des membres — cascade (Stagger). */}
+        <Stagger style={styles.list}>
           {filtered?.map((m) => (
             <Pressable
               key={m.id}
@@ -194,7 +200,7 @@ export default function MembersScreen() {
               ) : null}
             </Pressable>
           ))}
-        </View>
+        </Stagger>
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
