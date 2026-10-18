@@ -97,13 +97,19 @@ model KycDocument {
   id           String   @id @default(uuid())
   userId       String
   user         User     @relation(fields: [userId], references: [id])
-  documentType String // carte_identite, passeport, etc.
-  rectoUrl     String
+  documentType String? // carte_identite, passeport, etc. (optionnel : flux hébergé Didit)
+  rectoUrl     String?
   versoUrl     String?
-  selfieUrl    String
+  selfieUrl    String?
   status       KycStatus @default(PENDING)
   rejectionReason String?
   createdAt    DateTime @default(now())
+
+  /// Flux eKYC Didit (developers.didit.com) : identifiant de session du
+  /// flux hébergé, décision du fournisseur et horodatage de vérification.
+  diditSessionId  String?   @unique @map("didit_session_id")
+  diditDecision   String?   @map("didit_decision")
+  verifiedAt      DateTime? @map("verified_at")
 
   @@map("kyc_documents")
 }
@@ -165,6 +171,17 @@ enum GroupMemberRole {
   MEMBER
 }
 
+/// Statut de la demande d'adhésion d'un membre (maquette 28 « Demande
+/// envoyée ») : une adhésion par code d'invitation est soumise à la
+/// validation de l'administrateur avant activation. APPROVED par défaut :
+/// les membres fondateurs (créateur admin) et les lignes existantes sont
+/// rétroactivement considérés comme admis.
+enum GroupMemberJoinStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 /// Statut de la demande de sortie volontaire d'un membre en cours de cycle
 /// (distinct d'une exclusion par l'admin, cf. Member Actions / Remove Member).
 enum GroupMemberExitStatus {
@@ -184,6 +201,12 @@ model GroupMember {
   rotationPosition Int?
   isActive         Boolean         @default(true)
   joinedAt         DateTime        @default(now())
+
+  /// Statut d'adhésion (cf. GroupMemberJoinStatus). Un membre PENDING est
+  /// créé inactif : il n'apparaît dans « Mes groupes » et dans les tirages
+  /// qu'une fois approuvé par l'admin (decideJoin → isActive = true).
+  joinStatus          GroupMemberJoinStatus @default(APPROVED)
+  joinStatusChangedAt DateTime?
 
   /// Sortie volontaire du membre, toujours soumise à validation de l'admin.
   /// Règle métier (cf. cadrage) :
@@ -423,7 +446,7 @@ model LoanRepaymentSchedule {
   loan              Loan            @relation(fields: [loanId], references: [id])
   installmentNumber Int
   dueDate           DateTime
-  amount            Decimal         @db.Decimal(14, 2)
+  amount            Decimal          @db.Decimal(14, 2)
   paidAt            DateTime?
   status            RepaymentStatus @default(PENDING)
 
@@ -500,7 +523,7 @@ model Notification {
   type      NotificationType
   title     String
   body      String
-  isRead    Boolean          @default(false)
+  isRead     Boolean          @default(false)
   createdAt DateTime         @default(now())
 
   @@map("notifications")
