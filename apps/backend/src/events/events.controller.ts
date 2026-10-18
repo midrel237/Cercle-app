@@ -26,6 +26,10 @@ export class EventsController {
     return this.eventsService.findOne(id);
   }
 
+  /**
+   * Écran 56 — déclarer sa cotisation à une cagnotte (le paiement Mobile
+   * Money est initié via POST /payments/prepare avec eventId, Phase 3).
+   */
   @Post(':id/contribute')
   contribute(
     @CurrentUser() user: JwtPayload,
@@ -33,6 +37,12 @@ export class EventsController {
     @Body() dto: ContributeEventDto,
   ) {
     return this.eventsService.contribute(id, user.sub, dto);
+  }
+
+  /** Confirmation interne appelée après le webhook agrégateur. */
+  @Post('confirm-contribution')
+  confirmContribution(@Body() dto: { transactionId: string }) {
+    return this.eventsService.confirmEventContribution(dto.transactionId);
   }
 
   @Post(':id/close')
