@@ -45,11 +45,11 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: package-lock.json
       - name: Install (racine, workspaces)
-        run: npm ci
+        run: npm install
         working-directory: .
 
       - name: Lint
