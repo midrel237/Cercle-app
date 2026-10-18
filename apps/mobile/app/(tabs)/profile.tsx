@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usersApi } from '../../src/services/endpoints/account';
-import { useAuthStore } from '../../src/store/auth.store';
+import { FadeIn, PopIn, CountUp, Stagger } from '../../src/components/motion';
 import { colors, fonts, radii, spacing } from '../../src/theme';
 
 interface Profile {
@@ -21,14 +21,13 @@ interface Profile {
 }
 
 /**
- * Écran 72 — Profil & fiabilité : identité vérifiée, SCORE DE FIABILITÉ,
- * cotisations sans retard, moyens de paiement, groupes actifs, langue,
- * notifications + liens Sécurité & PIN / Modifier / Paramètres / Support.
+ * Écran 72 — Profil & fiabilité : identité vérifiée, SCORE DE FIABILITÉ
+ * (ressort + compteur), cotisations sans retard, moyens de paiement,
+ * groupes actifs, langue, notifications + liens.
  */
 export default function ProfileScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const logout = useAuthStore((s) => s.logout);
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -70,7 +69,9 @@ export default function ProfileScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={load} tintColor={colors.goldDark} />
         }
       >
-        <Text style={styles.title}>{t('profileScreen.title')}</Text>
+        <FadeIn dy={10}>
+          <Text style={styles.title}>{t('profileScreen.title')}</Text>
+        </FadeIn>
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
@@ -78,57 +79,68 @@ export default function ProfileScreen() {
           <ActivityIndicator size="large" color={colors.goldDark} style={styles.spinner} />
         ) : profile ? (
           <>
-            <Text style={styles.name}>{profile.fullName ?? t('profileScreen.unnamed')}</Text>
-            <Text style={styles.kycLine}>
-              {profile.kycStatus === 'VERIFIED'
-                ? `✓ ${t('profileScreen.identityVerified')}`
-                : t('profileScreen.identityPending')}{' '}
-              · {profile.phoneNumber}
-            </Text>
-
-            {/* Score de fiabilité — maquette 72. */}
-            <View style={styles.scoreCard}>
-              <Text style={styles.scoreLabel}>{t('profileScreen.trustScoreLabel')}</Text>
-              <Text style={[styles.scoreValue, { color: scoreColor(profile.trustScore) }]}>
-                {profile.trustScore}/100
+            <FadeIn dy={8}>
+              <Text style={styles.name}>{profile.fullName ?? t('profileScreen.unnamed')}</Text>
+              <Text style={styles.kycLine}>
+                {profile.kycStatus === 'VERIFIED'
+                  ? `✓ ${t('profileScreen.identityVerified')}`
+                  : t('profileScreen.identityPending')}{' '}
+                · {profile.phoneNumber}
               </Text>
-              <Text style={styles.scoreDetail}>
-                {t('profileScreen.onTimeLine', {
-                  onTime: profile.contributionsOnTime,
-                  total: profile.contributionsPaid,
-                })}
-              </Text>
-            </View>
+            </FadeIn>
 
-            <View style={styles.infoCard}>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>{t('profileScreen.paymentMethodsLabel')}</Text>
-                <Text style={styles.infoValue}>
-                  {profile.paymentMethods
-                    .map((m) => (m.type === 'MOBILE_MONEY' ? 'MoMo' : m.type === 'BANK_CARD' ? 'Carte' : 'Virement'))
-                    .join(', ') || '—'}
+            {/* Score de fiabilité — ressort + compteur. */}
+            <PopIn delay={180}>
+              <View style={styles.scoreCard}>
+                <Text style={styles.scoreLabel}>{t('profileScreen.trustScoreLabel')}</Text>
+                <CountUp
+                  value={profile.trustScore}
+                  suffix="/100"
+                  duration={1100}
+                  style={[styles.scoreValue, { color: scoreColor(profile.trustScore) }]}
+                />
+                <Text style={styles.scoreDetail}>
+                  {t('profileScreen.onTimeLine', {
+                    onTime: profile.contributionsOnTime,
+                    total: profile.contributionsPaid,
+                  })}
                 </Text>
               </View>
-              <View style={[styles.infoRow, styles.infoRowBorder]}>
-                <Text style={styles.infoLabel}>{t('profileScreen.groupsLabel')}</Text>
-                <Text style={styles.infoValue}>{profile.activeGroups}</Text>
-              </View>
-              <View style={[styles.infoRow, styles.infoRowBorder]}>
-                <Text style={styles.infoLabel}>{t('profileScreen.languageLabel')}</Text>
-                <Text style={styles.infoValue}>
-                  {profile.language === 'EN' ? 'English' : 'Français'}
-                </Text>
-              </View>
-              <View style={[styles.infoRow, styles.infoRowBorder]}>
-                <Text style={styles.infoLabel}>{t('profileScreen.notificationsLabel')}</Text>
-                <Text style={styles.infoValue}>{t('profileScreen.notificationsEnabled')}</Text>
-              </View>
-            </View>
+            </PopIn>
 
-            {link(t('profileScreen.securityLink'), () => {})}
-            {link(t('profileScreen.editLink'), () => router.push('/settings/edit-profile'))}
-            {link(t('profileScreen.settingsLink'), () => router.push('/settings'))}
-            {link(t('profileScreen.helpLink'), () => router.push('/settings/help'))}
+            <FadeIn delay={320} dy={12}>
+              <View style={styles.infoCard}>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>{t('profileScreen.paymentMethodsLabel')}</Text>
+                  <Text style={styles.infoValue}>
+                    {profile.paymentMethods
+                      .map((m) => (m.type === 'MOBILE_MONEY' ? 'MoMo' : m.type === 'BANK_CARD' ? 'Carte' : 'Virement'))
+                      .join(', ') || '—'}
+                  </Text>
+                </View>
+                <View style={[styles.infoRow, styles.infoRowBorder]}>
+                  <Text style={styles.infoLabel}>{t('profileScreen.groupsLabel')}</Text>
+                  <Text style={styles.infoValue}>{profile.activeGroups}</Text>
+                </View>
+                <View style={[styles.infoRow, styles.infoRowBorder]}>
+                  <Text style={styles.infoLabel}>{t('profileScreen.languageLabel')}</Text>
+                  <Text style={styles.infoValue}>
+                    {profile.language === 'EN' ? 'English' : 'Français'}
+                  </Text>
+                </View>
+                <View style={[styles.infoRow, styles.infoRowBorder]}>
+                  <Text style={styles.infoLabel}>{t('profileScreen.notificationsLabel')}</Text>
+                  <Text style={styles.infoValue}>{t('profileScreen.notificationsEnabled')}</Text>
+                </View>
+              </View>
+            </FadeIn>
+
+            <Stagger step={70}>
+              {link(t('profileScreen.securityLink'), () => {})}
+              {link(t('profileScreen.editLink'), () => router.push('/settings/edit-profile'))}
+              {link(t('profileScreen.settingsLink'), () => router.push('/settings'))}
+              {link(t('profileScreen.helpLink'), () => router.push('/settings/help'))}
+            </Stagger>
           </>
         ) : null}
       </ScrollView>
@@ -155,7 +167,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.cream, padding: spacing.md, alignItems: 'center', marginBottom: spacing.lg,
   },
   scoreLabel: { fontFamily: fonts.inter.medium, fontSize: 10.5, color: colors.goldDark, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 2 },
-  scoreValue: { fontFamily: fonts.mono.semiBold, fontSize: 26, marginBottom: 2 },
+  scoreValue: { fontSize: 26, marginBottom: 2 },
   scoreDetail: { fontFamily: fonts.inter.regular, fontSize: 11.5, color: colors.inkSoft },
   infoCard: {
     borderWidth: 1, borderColor: colors.sand, borderRadius: radii.md,
