@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 
@@ -47,14 +47,110 @@ export class TransactionsService {
     });
   }
 
-  async historyForUser(userId: string) {
-    return this.prisma.ledgerTransaction.findMany({
-      where: { userId },
+  /**
+   * Écran 67 — Historique de l'utilisateur, groupé par jour (maquette :
+   * « Aujourd'hui », « 12 juillet »...) avec filtre Tout / Cotisations /
+   * Prêts. Types exclus par filtre :
+   * - Cotisations : CONTRIBUTION + EVENT_CONTRIBUTION
+   * - Prêts : LOAN_DISBURSEMENT + LOAN_REPAYMENT
+   */
+  async historyForUser(
+    userId: string,
+    opts: { filter?: 'ALL' | 'CONTRIBUTIONS' | 'LOANS' } = {},
+  ) {
+    const where =
+      opts.filter === 'CONTRIBUTIONS'
+        ? { userId, type: { in: ['CONTRIBUTION', 'EVENT_CONTRIBUTION'] as const } }
+        : opts.filter === 'LOANS'
+          ? { userId, type: { in: ['LOAN_DISBURSEMENT', 'LOAN_REPAYMENT'] as const } }
+          : { userId };
+
+    const transactions = await this.prisma.ledgerTransaction.findMany({
+      where,
       orderBy: { createdAt: 'desc' },
+      take: 200,
+      include: {
+        group: { select: { id: true, name: true } },
+        cycle: { select: { cycleNumber: true } },
+      },
     });
+
+    // Groupement par jour (clé ISO locale).
+    const days: { date: string; items: unknown[] }[] = [];
+    const byDay = new Map<string, unknown[]>();
+    for (const tx of transactions) {
+      const key = new Date(tx.createdAt).toISOString().slice(0, 10);
+      if (!byDay.has(key)) {
+        byDay.set(key, []);
+        days.push({ date: key, items: byDay.get(key)! });
+      }
+      byDay.get(key)!.push(this.serializeTransaction(tx));
+    }
+    return days;
+  }
+
+  /**
+   * Écran 68 — Détail d'une transaction : montant signé (+ crédit / − débit),
+   * type, statut, date, moyen de paiement, référence opérateur, groupe et
+   * cycle éventuel. Vue sécurisée : l'utilisateur ne voit que ses propres
+   * transactions.
+   */
+  async findOneForUser(id: string, userId: string) {
+    const tx = await this.prisma.ledgerTransaction.findFirst({
+      where: { id, userId },
+      include: {
+        group: { select: { id: true, name: true } },
+        cycle: { select: { cycleNumber: true } },
+      },
+    });
+    if (!tx) throw new NotFoundException('Transaction introuvable.');
+    return this.serializeTransaction(tx);
   }
 
   async findOne(id: string) {
     return this.prisma.ledgerTransaction.findUnique({ where: { id } });
+  }
+
+  private serializeTransaction(tx: {
+    id: string;
+    groupId: string | null;
+    cycleId: string | null;
+    type: string;
+    status: string;
+    amount: { toString(): string };
+    currency: string;
+    externalReference: string | null;
+    provider: string | null;
+    createdAt: Date;
+    confirmedAt: Date | null;
+    group?: { id: string; name: string } | null;
+    cycle?: { cycleNumber: number } | null;
+  }) {
+    // Sens de l'opération pour l'utilisateur courant — écran 67/68 :
+    // cotisations et remboursements sont des débits (−), les versements de
+    // tour et décaissements de prêt sont des crédits (+).
+    const CREDIT_TYPES = [
+      'ROTATION_PAYOUT',
+      'LOAN_DISBURSEMENT',
+      'MEMBER_EXIT_SETTLEMENT',
+      'EVENT_PAYOUT',
+    ];
+    const isCredit = CREDIT_TYPES.includes(tx.type);
+    return {
+      id: tx.id,
+      groupId: tx.groupId,
+      groupName: tx.group?.name ?? null,
+      cycleId: tx.cycleId,
+      cycleNumber: tx.cycle?.cycleNumber ?? null,
+      type: tx.type,
+      status: tx.status,
+      amount: tx.amount.toString(),
+      currency: tx.currency,
+      isCredit,
+      externalReference: tx.externalReference,
+      provider: tx.provider,
+      createdAt: tx.createdAt,
+      confirmedAt: tx.confirmedAt,
+    };
   }
 }

@@ -9,9 +9,13 @@ import { TransactionsService } from './transactions.service';
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
+  /** Ecran 67 - historique groupe par jour, filtre Tout/Cotisations/Prets. */
   @Get('me')
-  myHistory(@CurrentUser() user: JwtPayload) {
-    return this.transactionsService.historyForUser(user.sub);
+  myHistory(
+    @CurrentUser() user: JwtPayload,
+    @Query('filter') filter?: 'ALL' | 'CONTRIBUTIONS' | 'LOANS',
+  ) {
+    return this.transactionsService.historyForUser(user.sub, { filter });
   }
 
   @Get('group/:groupId')
@@ -19,8 +23,9 @@ export class TransactionsController {
     return this.transactionsService.historyForGroup(groupId);
   }
 
+  /** Ecran 68 - detail d'une de SES transactions (vue securisee). */
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.transactionsService.findOne(id);
+  findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.transactionsService.findOneForUser(id, user.sub);
   }
 }
