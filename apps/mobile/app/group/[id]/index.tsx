@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppButton } from '../../../src/components/AppButton';
+import { FadeIn, Stagger, CountUp, GlowPulse } from '../../../src/components/motion';
 import { groupsApi } from '../../../src/services/endpoints/groups';
 import { eventsApi, GroupEventType } from '../../../src/services/endpoints/events';
 import { useAuthStore } from '../../../src/store/auth.store';
@@ -62,6 +63,10 @@ const TYPE_LABEL: Record<GroupEventType, string> = {
  * (GET /events/group/:id — Phase 5, maquette : « Évènements — 1 cagnotte
  * ouverte · Deuil, Naissance »). « Payer ma cotisation » mène au flux
  * paiement (écran 32, Phase 3).
+ *
+ * Micro-animations : le montant du TOUR ACTUEL compte de 0 à sa valeur
+ * (CountUp) au sein d'une carte à halo pulsé (GlowPulse — motif roue),
+ * la liste des cotisations apparaît en cascade (Stagger).
  */
 export default function GroupDetailScreen() {
   const { t } = useTranslation();
@@ -145,58 +150,66 @@ export default function GroupDetailScreen() {
           <Text style={styles.backText}>‹ {t('common.back')}</Text>
         </Pressable>
 
-        <Text style={styles.groupName}>{group?.name}</Text>
-        {status?.cycle ? (
-          <Text style={styles.cycleLine}>
-            {t('groupDetail.cycleOf', {
-              current: status.cycle.cycleNumber,
-              total: status.members.length,
-            })}
-          </Text>
-        ) : (
-          <Text style={styles.cycleLine}>{t('groupDetail.noActiveCycle')}</Text>
-        )}
+        <FadeIn dy={10}>
+          <Text style={styles.groupName}>{group?.name}</Text>
+          {status?.cycle ? (
+            <Text style={styles.cycleLine}>
+              {t('groupDetail.cycleOf', {
+                current: status.cycle.cycleNumber,
+                total: status.members.length,
+              })}
+            </Text>
+          ) : (
+            <Text style={styles.cycleLine}>{t('groupDetail.noActiveCycle')}</Text>
+          )}
+        </FadeIn>
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         {status?.cycle ? (
-          <View style={styles.potCard}>
-            <Text style={styles.potLabel}>{t('groupDetail.currentPot')}</Text>
-            <Text style={styles.potAmount}>
-              {Number(status.cycle.expectedAmount ?? 0).toLocaleString('fr-FR')} FCFA
-            </Text>
-            {beneficiary ? (
-              <Text style={styles.beneficiaryLine}>
-                {t('groupDetail.beneficiary')}: {beneficiary.fullName ?? t('groupDetail.unnamed')}
-                {daysLeft !== null ? ` · ${t('groupDetail.daysLeft', { count: daysLeft })}` : ''}
-              </Text>
-            ) : null}
-          </View>
+          <GlowPulse>
+            <View style={styles.potCard}>
+              <Text style={styles.potLabel}>{t('groupDetail.currentPot')}</Text>
+              <CountUp
+                value={Number(status.cycle.expectedAmount ?? 0)}
+                suffix=" FCFA"
+                style={styles.potAmount}
+              />
+              {beneficiary ? (
+                <Text style={styles.beneficiaryLine}>
+                  {t('groupDetail.beneficiary')}: {beneficiary.fullName ?? t('groupDetail.unnamed')}
+                  {daysLeft !== null ? ` · ${t('groupDetail.daysLeft', { count: daysLeft })}` : ''}
+                </Text>
+              ) : null}
+            </View>
+          </GlowPulse>
         ) : null}
 
         {/* Évènements — maquette écran 31 : « 1 cagnotte ouverte · Deuil,
             Naissance » (Phase 5). */}
-        <Pressable
-          style={styles.eventsLink}
-          onPress={() => router.push(`/group/${id}/events`)}
-        >
-          <Text style={styles.eventsLinkTitle}>
-            {t('groupDetail.eventsSectionTitle')} ·{' '}
-            {t('groupDetail.openEventsCount', { count: openEvents.length })}
-          </Text>
-          {openEvents.length > 0 ? (
-            <Text style={styles.eventsLinkTypes} numberOfLines={1}>
-              {openEvents
-                .map((e) => TYPE_LABEL[e.type] ?? e.customLabel ?? '')
-                .filter(Boolean)
-                .join(' · ')}
+        <FadeIn delay={140} dy={10}>
+          <Pressable
+            style={styles.eventsLink}
+            onPress={() => router.push(`/group/${id}/events`)}
+          >
+            <Text style={styles.eventsLinkTitle}>
+              {t('groupDetail.eventsSectionTitle')} ·{' '}
+              {t('groupDetail.openEventsCount', { count: openEvents.length })}
             </Text>
-          ) : null}
-        </Pressable>
+            {openEvents.length > 0 ? (
+              <Text style={styles.eventsLinkTypes} numberOfLines={1}>
+                {openEvents
+                  .map((e) => TYPE_LABEL[e.type] ?? e.customLabel ?? '')
+                  .filter(Boolean)
+                  .join(' · ')}
+              </Text>
+            ) : null}
+          </Pressable>
+        </FadeIn>
 
-        {/* Statut de cotisation par membre — maquette écran 31. */}
+        {/* Statut de cotisation par membre — cascade (Stagger). */}
         <Text style={styles.sectionTitle}>{t('groupDetail.membersSection')}</Text>
-        <View style={styles.memberList}>
+        <Stagger style={styles.memberList}>
           {status?.members.map((m) => (
             <View key={m.id} style={styles.memberRow}>
               <View style={[styles.statusDot, { backgroundColor: statusDot(m.contributionStatus) }]} />
@@ -209,7 +222,7 @@ export default function GroupDetailScreen() {
               <Text style={styles.memberStatus}>{statusLabel(m.contributionStatus)}</Text>
             </View>
           ))}
-        </View>
+        </Stagger>
 
         <Pressable onPress={() => router.push(`/group/${id}/chat`)} style={styles.chatLink}>
           <Text style={styles.chatLinkText}>{t('groupDetail.openChat')} ›</Text>
@@ -243,7 +256,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.cream, padding: spacing.md, marginBottom: spacing.md,
   },
   potLabel: { fontFamily: fonts.inter.medium, fontSize: 10.5, color: colors.goldDark, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 2 },
-  potAmount: { fontFamily: fonts.mono.semiBold, fontSize: 24, color: colors.navyDark, marginBottom: 2 },
+  potAmount: { fontSize: 24, color: colors.navyDark, marginBottom: 2 },
   beneficiaryLine: { fontFamily: fonts.inter.regular, fontSize: 12, color: colors.inkSoft },
   eventsLink: {
     borderWidth: 1, borderColor: colors.gold, borderRadius: radii.md,
