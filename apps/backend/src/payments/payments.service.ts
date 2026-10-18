@@ -1,6 +1,7 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { TransactionsService } from '../transactions/transactions.service';
+import { LoansService } from '../loans/loans.service';
 import { AddPaymentMethodDto } from './dto/add-payment-method.dto';
 import { InitiatePaymentDto } from './dto/initiate-payment.dto';
 import { PrepareContributionDto } from './dto/prepare-contribution.dto';
@@ -11,6 +12,7 @@ export class PaymentsService {
   constructor(
     @Inject('MOBILE_MONEY_AGGREGATOR') private readonly aggregator: MobileMoneyAggregator,
     private readonly transactionsService: TransactionsService,
+    private readonly loansService: LoansService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -176,7 +178,12 @@ export class PaymentsService {
     return result;
   }
 
-  /** Endpoint appelé par l'agrégateur Mobile Money (webhook de confirmation). */
+  /**
+   * Webhook de l'agrégateur Mobile Money. À la confirmation, selon le type
+   * de la transaction : cotisation/évènement → ledger uniquement ;
+   * LOAN_REPAYMENT → marque en plus l'échéance correspondante PAID (et le
+   * prêt REPAID à la dernière échéance, cf. LoansService.confirmRepayment).
+   */
   async handleWebhook(rawBody: string, signature: string, payload: {
     transactionId: string;
     externalReference: string;
@@ -186,7 +193,14 @@ export class PaymentsService {
       throw new Error('Signature de webhook invalide.');
     }
     if (payload.status === 'confirmed') {
-      return this.transactionsService.confirm(payload.transactionId, payload.externalReference);
+      const confirmed = await this.transactionsService.confirm(
+        payload.transactionId,
+        payload.externalReference,
+      );
+      if (confirmed?.type === 'LOAN_REPAYMENT') {
+        await this.loansService.confirmRepayment(payload.transactionId);
+      }
+      return confirmed;
     }
     return this.transactionsService.markFailed(payload.transactionId);
   }

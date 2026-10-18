@@ -1,12 +1,21 @@
-import React from 'react';
-import { ScreenPlaceholder } from '../../src/components/ScreenPlaceholder';
+import React, { useEffect } from 'react';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 
+// Écran 62 (signature électronique) : intégré dans /loan/[id]/contract
+// (case d'acceptation + signature PIN). Cette route reste déclarée pour la
+// compatibilité deep link et redirige immédiatement.
 export default function Screen() {
-  return (
-    <ScreenPlaceholder
-      screenNumber={51}
-      title="Signature électronique"
-      description="Signature du contrat numérique."
-    />
-  );
+  const router = useRouter();
+  const params = useLocalSearchParams<{ id?: string; loanId?: string }>();
+
+  useEffect(() => {
+    const loanId = params.id ?? params.loanId;
+    if (loanId) {
+      router.replace(`/loan/${loanId}/contract`);
+    } else {
+      router.replace('/(tabs)/loans');
+    }
+  }, [router, params.id, params.loanId]);
+
+  return null;
 }
