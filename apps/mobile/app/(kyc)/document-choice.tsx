@@ -1,10 +1,12 @@
-import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import * as WebBrowser from 'expo-web-browser';
 import { AppButton } from '../../src/components/AppButton';
 import { KycProgressHeader } from '../../src/components/KycProgressHeader';
 import { KycDocumentType, useKycStore } from '../../src/store/kyc.store';
+import { kycApi } from '../../src/services/endpoints/kyc';
 import { colors, fonts, radii, spacing } from '../../src/theme';
 
 const OPTIONS: { type: KycDocumentType; icon: string; labelKey: string; hintKey: string }[] = [
@@ -14,13 +16,33 @@ const OPTIONS: { type: KycDocumentType; icon: string; labelKey: string; hintKey:
 ];
 
 // Écran 7 — Choix du type de document d'identité.
-// Le choix est stocké dans useKycStore et conditionnera les écrans de
-// capture suivants (8-9, pas encore construits) : passeport ne demande
-// qu'une page, CNI/permis demandent recto + verso.
+// Le choix local sert d'indication de préférence ; la collecte des pièces
+// est déléguée au flux hébergé Didit : « Continuer » appelle
+// POST /kyc/me/session puis ouvre sessionUrl dans le navigateur système
+// (WebBrowser auth session). Le retour s'effectue via le deep link
+// cercle://kyc/return géré sur processing.tsx.
 export default function KycDocumentChoiceScreen() {
   const { t } = useTranslation();
   const documentType = useKycStore((s) => s.documentType);
   const setDocumentType = useKycStore((s) => s.setDocumentType);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleContinue = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      const { data } = await kycApi.createSession();
+      // Auth session : aucun cookie partagé avec le navigateur de l'OS,
+      // et le retour deep link ferme la fenêtre automatiquement.
+      await WebBrowser.openAuthSessionAsync(data.sessionUrl, 'cercle://kyc/return');
+      router.replace('/(kyc)/processing');
+    } catch (err) {
+      setError(t('kyc.documentChoice.sessionError'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -47,13 +69,16 @@ export default function KycDocumentChoiceScreen() {
             </Pressable>
           );
         })}
+
+        {error && <Text style={styles.errorText}>{error}</Text>}
       </ScrollView>
 
       <View style={styles.footer}>
-        <AppButton
-          label={t('common.continue')}
-          onPress={() => router.push('/(kyc)/capture-recto')}
-        />
+        {loading ? (
+          <ActivityIndicator size="large" color={colors.goldDark} />
+        ) : (
+          <AppButton label={t('common.continue')} onPress={handleContinue} />
+        )}
       </View>
     </View>
   );
@@ -127,6 +152,12 @@ const styles = StyleSheet.create({
   },
   radioDotOn: {
     borderColor: colors.goldDark,
+  },
+  errorText: {
+    fontFamily: fonts.inter.medium,
+    fontSize: 10.5,
+    color: colors.danger,
+    marginTop: spacing.sm,
   },
   footer: {
     paddingHorizontal: spacing.md + 2,

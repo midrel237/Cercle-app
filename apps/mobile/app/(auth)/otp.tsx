@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { AppButton } from '../../src/components/AppButton';
 import { authApi } from '../../src/services/endpoints/auth';
 import { setStoredAccessToken } from '../../src/services/api-client';
+import { useAuthStore } from '../../src/store/auth.store';
 import { colors, fonts, radii, spacing } from '../../src/theme';
 
 const CODE_LENGTH = 6;
@@ -17,14 +18,16 @@ const RESEND_SECONDS = 45;
 // automatiquement dès que les 6 chiffres sont saisis (comme sur la plupart
 // des apps mobiles), sans attendre un appui sur « Vérifier ».
 //
-// ⚠ Historique : le serveur (POST /auth/otp/verify) a longtemps été un
-// stub qui acceptait tout code — voir §7/§8 du document de compréhension.
-// Il vérifie désormais un vrai code à 6 chiffres, hashé et expirant après
-// 5 minutes (voir auth.service.ts côté backend), et renvoie un jeton JWT
-// stocké ici dès la vérification réussie.
+// Le serveur (POST /auth/otp/verify) vérifie un vrai code à 6 chiffres,
+// hashé et expirant après 5 minutes (voir auth.service.ts côté backend),
+// et renvoie un jeton JWT stocké ici dès la vérification réussie. Le
+// numéro est aussi mémorisé dans useAuthStore : il sera requis par
+// POST /auth/pin/create à l'étape onboarding (écran 17), alors que les
+// paramètres de navigation de cet écran auront disparu depuis longtemps.
 export default function OtpScreen() {
   const { t } = useTranslation();
   const { phoneNumber } = useLocalSearchParams<{ phoneNumber?: string }>();
+  const setPhoneNumber = useAuthStore((s) => s.setPhoneNumber);
   const inputRef = useRef<TextInput>(null);
   const [code, setCode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
@@ -46,6 +49,7 @@ export default function OtpScreen() {
       if (data?.accessToken) {
         await setStoredAccessToken(data.accessToken);
       }
+      setPhoneNumber(phoneNumber);
       router.replace('/(kyc)/intro');
     } catch {
       setError(t('auth.otp.verifyError'));

@@ -1,12 +1,11 @@
-import React from 'react';
-import { ScreenPlaceholder } from '../../src/components/ScreenPlaceholder';
+import React, { useEffect } from 'react';
+import { useRouter } from 'expo-router';
 
+// Écrans 8-12 remplacés par le flux hébergé Didit — voir capture-recto.tsx.
 export default function Screen() {
-  return (
-    <ScreenPlaceholder
-      screenNumber={9}
-      title="Capture verso"
-      description="Photo du verso de la pièce d'identité."
-    />
-  );
+  const router = useRouter();
+  useEffect(() => {
+    router.replace('/(kyc)/document-choice');
+  }, [router]);
+  return null;
 }

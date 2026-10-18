@@ -70,9 +70,197 @@
       "verifyError": "Code incorrect. Vérifiez et réessayez."
     }
   },
+  "kyc": {
+    "intro": {
+      "stepLabel": "Étape 1 sur 2 · Vérification d'identité",
+      "title": "Vérifions votre identité",
+      "description": "Une vérification d'identité sécurisée protège votre groupe et débloque l'accès complet à Cercle.",
+      "step1": "Choisissez votre document",
+      "step1Hint": "CNI, passeport ou permis de conduire",
+      "step2": "Vérification sécurisée",
+      "step2Hint": "Guidé par notre partenaire, en quelques minutes",
+      "step3": "Validation immédiate",
+      "step3Hint": "La plupart des vérifications sont traitées sous 2 minutes",
+      "consentLabel": "J'accepte le traitement de mes données",
+      "consentSub": "Documents collectés uniquement pour la vérification d'identité",
+      "startButton": "Commencer la vérification",
+      "consentRequiredError": "Merci d'accepter le traitement de vos données pour continuer."
+    },
+    "documentChoice": {
+      "stepLabel": "Étape 2 sur 2 · Votre document",
+      "title": "Quel document allez-vous vérifier ?",
+      "subtitle": "Vous serez redirigé vers une vérification sécurisée. Gardez votre document à portée de main.",
+      "cni": "Carte nationale d'identité",
+      "cniHint": "Le plus courant au Cameroun",
+      "passport": "Passeport",
+      "passportHint": "Valable partout dans le monde",
+      "license": "Permis de conduire",
+      "licenseHint": "Avec photo et en cours de validité",
+      "sessionError": "Impossible de démarrer la vérification pour l'instant. Réessayez."
+    },
+    "processing": {
+      "title": "Vérification en cours…",
+      "subtitle": "Nous confirmons votre identité. Cela ne prend généralement que quelques instants, ne fermez pas l'application."
+    },
+    "success": {
+      "title": "Identité vérifiée !",
+      "subtitle": "Votre identité a été confirmée avec succès. Votre compte Cercle est désormais sécurisé et complet.",
+      "continueButton": "Continuer"
+    },
+    "rejected": {
+      "title": "Vérification refusée",
+      "subtitle": "Votre document n'a pas pu être validé cette fois. Vous pouvez réessayer avec un autre document ou un meilleur éclairage.",
+      "retryButton": "Réessayer"
+    }
+  },
+  "onboarding": {
+    "createPin": {
+      "stepLabel": "Sécurisez votre compte",
+      "title": "Créez votre code PIN",
+      "subtitle": "Ce code à 4 chiffres protégera l'accès à votre compte Cercle. Ne le partagez avec personne."
+    },
+    "pinConfirm": {
+      "stepLabel": "Sécurisez votre compte",
+      "title": "Confirmez votre code PIN",
+      "subtitle": "Ressaisissez le même code pour valider.",
+      "mismatchError": "Les codes ne correspondent pas. Retour à la saisie…",
+      "missingPhoneError": "Numéro introuvable. Veuillez vérifier votre téléphone à nouveau.",
+      "serverError": "Impossible d'enregistrer le code pour l'instant. Réessayez."
+    },
+    "biometric": {
+      "stepLabel": "Sécurisez votre compte",
+      "title": "Ouverture plus rapide",
+      "subtitle": "Activez la biométrie pour ouvrir Cercle sans ressaisir votre code à chaque fois.",
+      "fingerprintLabel": "Empreinte digitale",
+      "faceIdLabel": "Reconnaissance faciale",
+      "hint": "Vos données biométriques restent sur votre appareil",
+      "unavailableTitle": "Biométrie indisponible",
+      "unavailableSubtitle": "Votre appareil ne propose pas de déverrouillage biométrique (ou aucune empreinte n'est enregistrée). Votre code PIN reste votre protection."
+    },
+    "notifications": {
+      "stepLabel": "Sécurisez votre compte",
+      "title": "Rester au courant de votre cercle",
+      "subtitle": "Les notifications vous préviennent des moments clés de votre tontine.",
+      "row1Title": "Rappels de cotisation",
+      "row1Hint": "Avant chaque tour de cotisation",
+      "row2Title": "Mouvements du groupe",
+      "row2Hint": "Paiements reçus et décaissements",
+      "row3Title": "Demandes de prêt",
+      "row3Hint": "Quand un membre sollicite le groupe",
+      "allowButton": "Activer les notifications",
+      "skipButton": "Plus tard"
+    },
+    "security": {
+      "stepLabel": "Sécurisez votre compte",
+      "title": "Votre compte est protégé",
+      "subtitle": "Récapitulatif des protections activées. Vous pouvez tout modifier plus tard dans les paramètres.",
+      "rowKycLabel": "Identité vérifiée",
+      "rowKycHint": "Vérification d'identité confirmée",
+      "rowPinLabel": "Code PIN actif",
+      "rowPinHint": "Requis à l'ouverture de l'application",
+      "rowBiometricLabel": "Biométrie",
+      "rowBiometricHintOn": "Ouverture rapide activée",
+      "rowBiometricHintOff": "Non activée — disponible dans les paramètres",
+      "startButton": "Découvrir Cercle"
+    }
+  },
   "home": {
+    "greeting": "Bonjour, {{name}} 👋",
     "myGroups": "Mes groupes",
     "createGroup": "Créer un groupe",
-    "joinGroup": "Rejoindre un groupe"
+    "joinGroup": "Rejoindre un groupe",
+    "loading": "Chargement…",
+    "loadError": "Impossible de charger vos groupes pour l'instant.",
+    "retry": "Réessayer",
+    "empty": {
+      "title": "Bienvenue dans Cercle",
+      "subtitle": "Créez votre premier groupe de tontine ou rejoignez celui d'un proche avec son code d'invitation.",
+      "cardOneTitle": "Créer un groupe",
+      "cardOneHint": "Définissez montant, périodicité et membres",
+      "cardTwoTitle": "Rejoindre un groupe",
+      "cardTwoHint": "Avec le code d'invitation de l'administrateur"
+    },
+    "group": {
+      "memberCount_one": "{{count}} membre",
+      "memberCount_other": "{{count}} membres",
+      "adminRole": "Admin",
+      "cashierRole": "Caissier",
+      "memberRole": "Membre"
+    }
+  },
+  "createGroup": {
+    "step1": {
+      "stepLabel": "Étape 1 sur 3",
+      "title": "Créer un groupe",
+      "subtitle": "Donnez un nom à votre tontine et choisissez son mode de fonctionnement.",
+      "nameLabel": "Nom du groupe",
+      "namePlaceholder": "Ex. Tontine du quartier",
+      "nameRequiredError": "Merci de renseigner un nom pour votre groupe.",
+      "modeLabel": "Mode du groupe",
+      "rotativeTitle": "Tontine rotative",
+      "rotativeHint": "Chaque membre reçoit la cagnotte à son tour",
+      "loanTitle": "Prêts internes",
+      "loanHint": "La cagnotte finance des prêts remboursables avec intérêts",
+      "mixedTitle": "Mixte",
+      "mixedHint": "Rotation de la cagnotte et prêts internes combinés",
+      "continueButton": "Continuer"
+    },
+    "step2": {
+      "stepLabel": "Étape 2 sur 3",
+      "title": "Créer un groupe",
+      "subtitle": "Définissez le montant de la cotisation et sa périodicité.",
+      "amountLabel": "Montant de la cotisation",
+      "amountSuffix": "FCFA / membre",
+      "amountPlaceholder": "Ex. 5000",
+      "amountError": "Montant invalide — saisissez un nombre entier supérieur à 0.",
+      "periodicityLabel": "Périodicité des cotisations",
+      "weekly": "Chaque semaine",
+      "weeklyHint": "Tous les 7 jours",
+      "biweekly": "Toutes les 2 semaines",
+      "biweeklyHint": "Tous les 14 jours",
+      "monthly": "Chaque mois",
+      "monthlyHint": "Tous les 30 jours",
+      "continueButton": "Continuer"
+    },
+    "step3": {
+      "stepLabel": "Étape 3 sur 3",
+      "title": "Ordre de rotation",
+      "subtitle": "Comment déterminer qui reçoit la cagnotte en premier ?",
+      "drawTitle": "Tirage au sort",
+      "drawHint": "Un tirage équitable organisé avec les membres",
+      "fixedTitle": "Ordre fixe",
+      "fixedHint": "L'administrateur définit l'ordre manuellement",
+      "summaryTitle": "Récapitulatif",
+      "summaryName": "Nom",
+      "summaryMode": "Mode",
+      "summaryAmount": "Cotisation",
+      "summaryPeriodicity": "Périodicité",
+      "summaryRotation": "Ordre de rotation",
+      "modeRotative": "Rotative",
+      "modeLoan": "Prêts internes",
+      "modeMixed": "Mixte",
+      "periodicityDays_one": "Tous les {{count}} jour",
+      "periodicityDays_other": "Tous les {{count}} jours",
+      "createButton": "Créer le groupe",
+      "creating": "Création en cours…",
+      "createError": "Impossible de créer le groupe pour l'instant. Vérifiez votre connexion et réessayez."
+    },
+    "rules": {
+      "stepLabel": "Étape finale",
+      "title": "Règles du groupe",
+      "subtitle": "Options avancées, modifiables ensuite dans les paramètres du groupe.",
+      "interestLabel": "Taux d'intérêt des prêts internes (%)",
+      "interestHint": "Appliqué aux prêts remboursables. Laissez vide ou 0 si inutile.",
+      "interestPlaceholder": "Ex. 5",
+      "interestError": "Taux invalide — saisissez un nombre entre 0 et 100.",
+      "penaltyLabel": "Règles de pénalité",
+      "penaltyPlaceholder": "Ex. Retard de cotisation : 500 FCFA de pénalité",
+      "penaltyHint": "Libre à vous — ces règles seront affichées aux membres.",
+      "diasporaLabel": "Ouvert à la diaspora",
+      "diasporaHint": "Les membres à l'étranger peuvent rejoindre et cotiser depuis l'étranger (carte bancaire, virement).",
+      "createButton": "Créer le groupe",
+      "creating": "Création en cours…",
+      "createError": "Impossible de créer le groupe pour l'instant. Vérifiez votre connexion et réessayez."
+    }
   }
 }

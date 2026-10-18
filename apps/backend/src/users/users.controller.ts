@@ -1,9 +1,8 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/strategies/jwt.strategy';
 import { UsersService } from './users.service';
-import { SubmitKycDto } from './dto/submit-kyc.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('users')
@@ -13,11 +12,6 @@ export class UsersController {
   @Get('me')
   me(@CurrentUser() user: JwtPayload) {
     return this.usersService.findById(user.sub);
-  }
-
-  @Post('me/kyc')
-  submitKyc(@CurrentUser() user: JwtPayload, @Body() dto: SubmitKycDto) {
-    return this.usersService.submitKyc(user.sub, dto);
   }
 
   @Patch('me')
