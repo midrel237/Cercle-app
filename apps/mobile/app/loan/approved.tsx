@@ -4,11 +4,13 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppButton } from '../../src/components/AppButton';
+import { FadeIn, PopIn } from '../../src/components/motion';
 import { colors, fonts, radii, spacing } from '../../src/theme';
 
 /**
  * Écran 60 — Demande de prêt approuvée : montant, prochaine étape =
- * signature du contrat (écrans 62-63).
+ * signature du contrat (écrans 62-63). Le badge de succès arrive en
+ * ressort (PopIn), les cartes en fondu décalé.
  */
 export default function LoanApprovedScreen() {
   const { t } = useTranslation();
@@ -18,28 +20,34 @@ export default function LoanApprovedScreen() {
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.content}>
-        <View style={styles.badge}>
-          <Text style={styles.badgeIcon}>✓</Text>
-        </View>
-        <Text style={styles.title}>{t('loansScreen.approvedTitle')}</Text>
-        <Text style={styles.subtitle}>
-          {t('loansScreen.approvedSubtitle', {
-            amount: Number(amount ?? 0).toLocaleString('fr-FR'),
-          })}
-        </Text>
+        <PopIn scale={0.4}>
+          <View style={styles.badge}>
+            <Text style={styles.badgeIcon}>✓</Text>
+          </View>
+        </PopIn>
+        <FadeIn delay={180}>
+          <Text style={styles.title}>{t('loansScreen.approvedTitle')}</Text>
+          <Text style={styles.subtitle}>
+            {t('loansScreen.approvedSubtitle', {
+              amount: Number(amount ?? 0).toLocaleString('fr-FR'),
+            })}
+          </Text>
+        </FadeIn>
 
-        <View style={styles.card}>
-          <View style={styles.cardRow}>
-            <Text style={styles.cardLabel}>{t('loansScreen.amountLabel')}</Text>
-            <Text style={styles.cardValue}>
-              {Number(amount ?? 0).toLocaleString('fr-FR')} FCFA
-            </Text>
+        <FadeIn delay={320} dy={12}>
+          <View style={styles.card}>
+            <View style={styles.cardRow}>
+              <Text style={styles.cardLabel}>{t('loansScreen.amountLabel')}</Text>
+              <Text style={styles.cardValue}>
+                {Number(amount ?? 0).toLocaleString('fr-FR')} FCFA
+              </Text>
+            </View>
+            <View style={[styles.cardRow, styles.cardRowBorder]}>
+              <Text style={styles.cardLabel}>{t('loansScreen.nextStepLabel')}</Text>
+              <Text style={styles.cardValue}>{t('loansScreen.contractSignatureStep')}</Text>
+            </View>
           </View>
-          <View style={[styles.cardRow, styles.cardRowBorder]}>
-            <Text style={styles.cardLabel}>{t('loansScreen.nextStepLabel')}</Text>
-            <Text style={styles.cardValue}>{t('loansScreen.contractSignatureStep')}</Text>
-          </View>
-        </View>
+        </FadeIn>
       </View>
 
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
