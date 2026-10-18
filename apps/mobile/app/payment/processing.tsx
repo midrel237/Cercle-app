@@ -17,19 +17,21 @@ const PROVIDER_LABEL: Record<string, string> = {
 /**
  * Écran 33 — Paiement en cours. Polling de GET /transactions/:id toutes
  * les 5 s : le webhook de l'agrégateur (POST /payments/webhook) fait
- * passer le statut à CONFIRMED (→ écran 40, reçu) ou FAILED (→ écran
- * 39, échec). L'utilisateur ne ferme pas l'app (message maquette).
+ * passer le statut à CONFIRMED ou FAILED. Selon le type de transaction :
+ * LOAN_REPAYMENT → écran 66 (remboursement confirmé) ; sinon → écran 40
+ * (reçu) ; FAILED → écran 39 (échec).
  */
 export default function PaymentProcessingScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { transactionId, amount, provider, groupId, eventId } =
+  const { transactionId, amount, provider, groupId, eventId, loanId } =
     useLocalSearchParams<{
       transactionId?: string;
       amount?: string;
       provider?: string;
       groupId?: string;
       eventId?: string;
+      loanId?: string;
     }>();
 
   const [timedOut, setTimedOut] = useState(false);
@@ -49,6 +51,15 @@ export default function PaymentProcessingScreen() {
         const { data } = await paymentsApi.getTransaction(transactionId);
         if (cancelled || !data) return;
         if (data.status === 'CONFIRMED') {
+          if (data.type === 'LOAN_REPAYMENT' && loanId) {
+            // Remboursement de prêt : écran 66 — les échéances restantes
+            // sont recalculées par le détail du prêt.
+            router.replace({
+              pathname: '/loan/repayment-confirmed',
+              params: { amount: amount ?? String(data.amount), loanId },
+            });
+            return;
+          }
           router.replace({
             pathname: '/payment/receipt',
             params: {
@@ -68,6 +79,7 @@ export default function PaymentProcessingScreen() {
               amount: amount ?? String(data.amount),
               provider: provider ?? data.provider ?? 'MTN_MOMO',
               ...(groupId ? { groupId } : {}),
+              ...(loanId ? { loanId } : {}),
             },
           });
           return;
@@ -83,7 +95,7 @@ export default function PaymentProcessingScreen() {
     return () => {
       cancelled = true;
     };
-  }, [transactionId, amount, provider, groupId]);
+  }, [transactionId, amount, provider, groupId, loanId]);
 
   const providerLabel = provider ? PROVIDER_LABEL[provider] ?? provider : '';
 
