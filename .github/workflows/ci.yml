@@ -14,35 +14,49 @@ jobs:
         working-directory: apps/backend
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: apps/backend/package-lock.json
-      - name: Install
+          cache-dependency-path: package-lock.json
+      - name: Install (racine, workspaces)
         run: npm ci
+        working-directory: .
+
+      - name: Prisma generate
+        run: npx prisma generate
+
       - name: Lint
         run: npm run lint --if-present
+
       - name: Build
         run: npm run build --if-present
+
       - name: Unit tests
         run: npm test --if-present -- --ci
 
   mobile:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/mobile
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: apps/mobile/package-lock.json
-      - name: Install
+          cache-dependency-path: package-lock.json
+      - name: Install (racine, workspaces)
         run: npm ci
+        working-directory: .
+
       - name: Lint
+        working-directory: apps/mobile
         run: npm run lint --if-present
+
       - name: Typecheck (tsc)
+        working-directory: apps/mobile
         run: npx tsc --noEmit
+
