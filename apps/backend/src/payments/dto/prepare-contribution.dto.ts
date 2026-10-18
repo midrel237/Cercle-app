@@ -1,19 +1,26 @@
-import { IsIn, IsOptional, IsUUID } from 'class-validator';
+import { IsIn, IsNumber, IsOptional, IsPositive, IsUUID } from 'class-validator';
 
 export class PrepareContributionDto {
-  /// Groupe pour lequel la cotisation est préparée.
   @IsUUID()
   groupId!: string;
 
-  /// Opérateur Mobile Money choisi par le membre (écran 32 : « Entrez
-  /// votre code secret MoMo »). Par défaut MTN MoMo si absent.
   @IsIn(['MTN_MOMO', 'ORANGE_MONEY'])
   @IsOptional()
   provider?: 'MTN_MOMO' | 'ORANGE_MONEY';
 
-  /// Cotisation versée pour un évènement (cagnotte) plutôt que pour le
-  /// cycle actif — écran 56 (Phase 5, évènements). Rend le DTO réutilisable.
+  /// Cotisation versée pour un évènement (cagnotte, écran 56, Phase 5)
+  /// plutôt que pour le cycle actif. Si présent, `amount` devient possible :
+  /// la cagnotte accepte des montants libres par contributeur (la
+  /// suggestion de l'évènement reste le défaut côté UI).
   @IsUUID()
   @IsOptional()
   eventId?: string;
+
+  /// Montant libre pour une cotisation d'évènement (jamais pour le cycle
+  /// actif, dont le montant est fixé par le groupe). Minimum appliqué
+  /// côté service (100 XAF).
+  @IsNumber()
+  @IsPositive()
+  @IsOptional()
+  amount?: number;
 }
