@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/strategies/jwt.strategy';
@@ -6,6 +6,7 @@ import { GroupsService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { JoinGroupDto } from './dto/join-group.dto';
 import { DecideJoinDto } from './dto/decide-join.dto';
+import { SendGroupMessageDto } from './dto/send-group-message.dto';
 import { AssignCashierDto } from './dto/assign-cashier.dto';
 import { RegisterDepositAccountDto } from './dto/register-deposit-account.dto';
 import { RequestGroupExitDto } from './dto/request-exit.dto';
@@ -71,6 +72,37 @@ export class GroupsController {
   @Post(':id/cycles/start')
   startCycles(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     return this.groupsService.startCycles(id, user.sub);
+  }
+
+  // Statut de cotisation de chaque membre pour le cycle actif — écran 31
+  // (Payé / En attente / En retard, bénéficiaire du tour, montant total).
+  @Get(':id/cycle-status')
+  getCycleStatus(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.groupsService.getCycleStatus(id, user.sub);
+  }
+
+  // Discussion du groupe — écran 41. Pagination simple : les N derniers
+  // messages, antérieurs à `before` si fourni.
+  @Get(':id/messages')
+  listMessages(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') id: string,
+    @Query('take') take?: string,
+    @Query('before') before?: string,
+  ) {
+    return this.groupsService.listMessages(id, user.sub, {
+      take: take ? Number(take) : undefined,
+      before: before ? new Date(before) : undefined,
+    });
+  }
+
+  @Post(':id/messages')
+  sendMessage(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') id: string,
+    @Body() dto: SendGroupMessageDto,
+  ) {
+    return this.groupsService.sendMessage(id, user.sub, dto);
   }
 
   // Désignation du caissier (admin) — Option A, cf. cahier des charges §7.
