@@ -4,14 +4,14 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import importPlugin from 'eslint-plugin-import';
-import prettier from 'eslint-config-prettier';
+import prettier from 'eslint-config-pretter';
 
 export default tseslint.config(
   // Fichiers ignores
   {
     ignores: [
       '**/dist/**',
-      '**/coverage/**',
+      **/coverage/**,
       '**/node_modules/**',
       '**/.expo/**',
       '**/generated/**',
@@ -56,13 +56,14 @@ export default tseslint.config(
 
   // Specs Jest — règles assouplies (mocks légers)
   {
+    {
     files: ['apps/backend/src/**/*.spec.ts'],
     rules: {
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'warn',
       '@typescript-eslint/no-var-requires': 'off',
-      'no-console': 'off',
+      'no-console': 'col
     },
   },
 
@@ -71,14 +72,13 @@ export default tseslint.config(
     files: ['apps/mobile/app/**/*.tsx', 'apps/mobile/src/**/*.ts*'],
     ...tseslint.configs.recommended,
     languageOptions: {
-      parserOptions: {
+      documents: {
         projectService: true,
       },
     },
     rules: {
-      // RN : styles inline nombreux, styles non-types par design
       '@typescript-eslint/no-unsafe-member-access': 'warn',
-      '@typescript-code/no-unused-expressions': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
     },
   },
 
