@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppButton } from '../../../src/components/AppButton';
 import { groupsApi } from '../../../src/services/endpoints/groups';
+import { eventsApi, GroupEventType } from '../../../src/services/endpoints/events';
 import { useAuthStore } from '../../../src/store/auth.store';
 import { colors, fonts, radii, spacing } from '../../../src/theme';
 
@@ -38,12 +39,29 @@ interface GroupInfo {
   depositAccountProvider: string | null;
 }
 
+interface OpenEventSummary {
+  id: string;
+  type: GroupEventType;
+  customLabel: string | null;
+  beneficiary: { id: string; fullName: string | null } | null;
+}
+
+const TYPE_LABEL: Record<GroupEventType, string> = {
+  DEUIL: 'Deuil',
+  ANNIVERSAIRE: 'Anniversaire',
+  NAISSANCE: 'Naissance',
+  MARIAGE: 'Mariage',
+  MALADIE: 'Maladie',
+  AUTRE: 'Autre',
+};
+
 /**
  * Écran 31 — Détail du groupe / Rotation. Charge le groupe
- * (GET /groups/:id) et le statut du cycle actif
- * (GET /groups/:id/cycle-status) : tour actuel, bénéficiaire, statut de
- * cotisation de chaque membre (Payé / En attente / En retard).
- * « Payer ma cotisation » mène au flux paiement (écran 32, Phase 3).
+ * (GET /groups/:id), le statut du cycle actif
+ * (GET /groups/:id/cycle-status) et les cagnottes ouvertes
+ * (GET /events/group/:id — Phase 5, maquette : « Évènements — 1 cagnotte
+ * ouverte · Deuil, Naissance »). « Payer ma cotisation » mène au flux
+ * paiement (écran 32, Phase 3).
  */
 export default function GroupDetailScreen() {
   const { t } = useTranslation();
@@ -53,6 +71,7 @@ export default function GroupDetailScreen() {
 
   const [group, setGroup] = useState<GroupInfo | null>(null);
   const [status, setStatus] = useState<CycleStatusResponse | null>(null);
+  const [openEvents, setOpenEvents] = useState<OpenEventSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,12 +79,16 @@ export default function GroupDetailScreen() {
   const load = useCallback(async () => {
     if (!id) return;
     try {
-      const [groupRes, statusRes] = await Promise.all([
+      const [groupRes, statusRes, eventsRes] = await Promise.all([
         groupsApi.getOne(id),
         groupsApi.getCycleStatus(id),
+        eventsApi.listForGroup(id).catch(() => null),
       ]);
       setGroup(groupRes.data);
       setStatus(statusRes.data);
+      setOpenEvents(
+        (eventsRes?.data?.events ?? []).filter((e: { status: string }) => e.status === 'OPEN'),
+      );
       setError(null);
     } catch {
       setError(t('groupDetail.loadError'));
@@ -151,6 +174,26 @@ export default function GroupDetailScreen() {
           </View>
         ) : null}
 
+        {/* Évènements — maquette écran 31 : « 1 cagnotte ouverte · Deuil,
+            Naissance » (Phase 5). */}
+        <Pressable
+          style={styles.eventsLink}
+          onPress={() => router.push(`/group/${id}/events`)}
+        >
+          <Text style={styles.eventsLinkTitle}>
+            {t('groupDetail.eventsSectionTitle')} ·{' '}
+            {t('groupDetail.openEventsCount', { count: openEvents.length })}
+          </Text>
+          {openEvents.length > 0 ? (
+            <Text style={styles.eventsLinkTypes} numberOfLines={1}>
+              {openEvents
+                .map((e) => TYPE_LABEL[e.type] ?? e.customLabel ?? '')
+                .filter(Boolean)
+                .join(' · ')}
+            </Text>
+          ) : null}
+        </Pressable>
+
         {/* Statut de cotisation par membre — maquette écran 31. */}
         <Text style={styles.sectionTitle}>{t('groupDetail.membersSection')}</Text>
         <View style={styles.memberList}>
@@ -187,120 +230,38 @@ export default function GroupDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.creamLight,
-  },
-  center: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  content: {
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.xl,
-  },
-  backRow: {
-    alignSelf: 'flex-start',
-    marginTop: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  backText: {
-    fontFamily: fonts.inter.medium,
-    fontSize: 13,
-    color: colors.navy,
-  },
-  groupName: {
-    fontFamily: fonts.fraunces.semiBold,
-    fontSize: 24,
-    color: colors.navyDark,
-    marginBottom: 2,
-  },
-  cycleLine: {
-    fontFamily: fonts.inter.regular,
-    fontSize: 12.5,
-    color: colors.inkSoft,
-    marginBottom: spacing.lg,
-  },
-  errorText: {
-    fontFamily: fonts.inter.medium,
-    fontSize: 11.5,
-    color: colors.danger,
-    marginBottom: spacing.sm,
-  },
+  container: { flex: 1, backgroundColor: colors.creamLight },
+  center: { alignItems: 'center', justifyContent: 'center' },
+  content: { paddingHorizontal: spacing.md, paddingBottom: spacing.xl },
+  backRow: { alignSelf: 'flex-start', marginTop: spacing.sm, marginBottom: spacing.md },
+  backText: { fontFamily: fonts.inter.medium, fontSize: 13, color: colors.navy },
+  groupName: { fontFamily: fonts.fraunces.semiBold, fontSize: 24, color: colors.navyDark, marginBottom: 2 },
+  cycleLine: { fontFamily: fonts.inter.regular, fontSize: 12.5, color: colors.inkSoft, marginBottom: spacing.lg },
+  errorText: { fontFamily: fonts.inter.medium, fontSize: 11.5, color: colors.danger, marginBottom: spacing.sm },
   potCard: {
-    borderWidth: 1.5,
-    borderColor: colors.goldDark,
-    borderRadius: radii.md,
-    backgroundColor: colors.cream,
-    padding: spacing.md,
-    marginBottom: spacing.xl,
+    borderWidth: 1.5, borderColor: colors.goldDark, borderRadius: radii.md,
+    backgroundColor: colors.cream, padding: spacing.md, marginBottom: spacing.md,
   },
-  potLabel: {
-    fontFamily: fonts.inter.medium,
-    fontSize: 10.5,
-    color: colors.goldDark,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 2,
+  potLabel: { fontFamily: fonts.inter.medium, fontSize: 10.5, color: colors.goldDark, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 2 },
+  potAmount: { fontFamily: fonts.mono.semiBold, fontSize: 24, color: colors.navyDark, marginBottom: 2 },
+  beneficiaryLine: { fontFamily: fonts.inter.regular, fontSize: 12, color: colors.inkSoft },
+  eventsLink: {
+    borderWidth: 1, borderColor: colors.gold, borderRadius: radii.md,
+    backgroundColor: colors.cream, padding: spacing.md, marginBottom: spacing.xl,
   },
-  potAmount: {
-    fontFamily: fonts.mono.semiBold,
-    fontSize: 24,
-    color: colors.navyDark,
-    marginBottom: 2,
-  },
-  beneficiaryLine: {
-    fontFamily: fonts.inter.regular,
-    fontSize: 12,
-    color: colors.inkSoft,
-  },
-  sectionTitle: {
-    fontFamily: fonts.fraunces.semiBold,
-    fontSize: 16,
-    color: colors.navyDark,
-    marginBottom: spacing.sm,
-  },
-  memberList: {
-    gap: spacing.xs + 2,
-    marginBottom: spacing.lg,
-  },
+  eventsLinkTitle: { fontFamily: fonts.inter.semiBold, fontSize: 13, color: colors.navyDark, marginBottom: 1 },
+  eventsLinkTypes: { fontFamily: fonts.inter.regular, fontSize: 11.5, color: colors.inkSoft },
+  sectionTitle: { fontFamily: fonts.fraunces.semiBold, fontSize: 16, color: colors.navyDark, marginBottom: spacing.sm },
+  memberList: { gap: spacing.xs + 2, marginBottom: spacing.lg },
   memberRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.sand,
-    borderRadius: radii.sm,
-    backgroundColor: colors.creamLight,
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: spacing.sm,
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    borderWidth: 1, borderColor: colors.sand, borderRadius: radii.sm,
+    backgroundColor: colors.creamLight, paddingHorizontal: spacing.sm + 2, paddingVertical: spacing.sm,
   },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  memberName: {
-    flex: 1,
-    fontFamily: fonts.inter.medium,
-    fontSize: 12.5,
-    color: colors.navyDark,
-  },
-  memberStatus: {
-    fontFamily: fonts.inter.medium,
-    fontSize: 11,
-    color: colors.inkSoft,
-  },
-  chatLink: {
-    alignSelf: 'center',
-    paddingVertical: spacing.xs,
-  },
-  chatLinkText: {
-    fontFamily: fonts.inter.semiBold,
-    fontSize: 12.5,
-    color: colors.goldDark,
-  },
-  footer: {
-    paddingHorizontal: spacing.md + 2,
-  },
+  statusDot: { width: 8, height: 8, borderRadius: 4 },
+  memberName: { flex: 1, fontFamily: fonts.inter.medium, fontSize: 12.5, color: colors.navyDark },
+  memberStatus: { fontFamily: fonts.inter.medium, fontSize: 11, color: colors.inkSoft },
+  chatLink: { alignSelf: 'center', paddingVertical: spacing.xs },
+  chatLinkText: { fontFamily: fonts.inter.semiBold, fontSize: 12.5, color: colors.goldDark },
+  footer: { paddingHorizontal: spacing.md + 2 },
 });
