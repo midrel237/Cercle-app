@@ -1,6 +1,36 @@
 import { apiClient } from '../api-client';
 
-/** Membre d'un groupe — liste (écran 42), rotation (écrans 29-30). */
+/** Membre sérialisé — miroir de GroupsService.listMembers (écran 42). */
+export interface GroupMemberRowDto {
+  id: string;
+  userId: string;
+  fullName: string | null;
+  role: 'ADMIN' | 'MEMBER' | string;
+  rotationPosition: number | null;
+  trustScore: number;
+  isBeneficiary: boolean;
+  contributionStatus: 'PAID' | 'LATE' | 'PENDING' | null;
+  daysLate: number;
+  joinedAt: string;
+  exitStatus: string | null;
+}
+
+/** Demande d'adhésion en attente (admin) — écran 42. */
+export interface PendingJoinRequestDto {
+  id: string;
+  userId: string;
+  fullName: string | null;
+  requestedAt: string;
+}
+
+/** Membre avec demande de sortie REQUESTED (admin) — écran 52. */
+export interface ExitRequestMemberDto {
+  id: string;
+  userId: string;
+  fullName: string | null;
+}
+
+/** Membre d'un groupe pour le tirage (écrans 29-30) — include user. */
 export interface GroupMemberLiteDto {
   id: string;
   userId: string;
@@ -32,6 +62,16 @@ export interface GroupDto {
   members: GroupMemberLiteDto[];
   cycles: { id: string; cycleNumber: number; status: string }[];
   createdAt: string;
+}
+
+/** Réponse de GET /groups/:id/members — écrans 42, 44. */
+export interface MembersListDto {
+  isAdmin: boolean;
+  inviteCode: string | null;
+  memberCount: number;
+  members: GroupMemberRowDto[];
+  pendingJoinRequests: PendingJoinRequestDto[];
+  exitRequests: ExitRequestMemberDto[];
 }
 
 /** Aperçu public par code d'invitation — écran 27. */
@@ -67,17 +107,20 @@ export interface GroupMessageDto {
 /** Écran 46 — profil d'un membre (score de fiabilité, métriques du ledger). */
 export interface MemberProfileDto {
   id: string;
+  userId: string;
   fullName: string | null;
   trustScore: number;
   role: string;
   joinedAt: string;
+  rotationPosition: number | null;
+  outstandingDebt: string;
+  exitStatus: string | null;
   contributionsPaid: number;
   contributionsPaidOnTime: number;
   totalCycles: number;
   receivedRotation: number | null;
   loansTotal: number;
   loansRepaid: number;
-  outstandingDebt: string;
 }
 
 /** Écran 47 — résultat du rappel (canaux utilisés). */
@@ -91,14 +134,6 @@ export interface ExitPreviewDto {
   contributionsPaid: string;
   shareOfFund: string;
   outstandingDebt: string;
-  netAmount: string;
-}
-
-/** Écran 52 — demande de sortie en attente avec montants. */
-export interface ExitRequestDto {
-  member: { id: string; userId: string; fullName: string | null };
-  reason: string | null;
-  requestedAt: string;
   netAmount: string;
 }
 
@@ -157,7 +192,7 @@ export const groupsApi = {
 
   /** Écran 42 — membres + demandes en attente (admin). */
   listMembers: (groupId: string) =>
-    apiClient.get<GroupMemberLiteDto[]>(`/groups/${groupId}/members`),
+    apiClient.get<MembersListDto>(`/groups/${groupId}/members`),
 
   /** Écran 46 — profil d'un membre (score de fiabilité, métriques). */
   getMemberProfile: (groupId: string, memberId: string) =>
@@ -180,7 +215,7 @@ export const groupsApi = {
 
   /** Écran 52 — demandes de sortie en attente (admin) + montants. */
   listExitRequests: (groupId: string) =>
-    apiClient.get<ExitRequestDto[]>(`/groups/${groupId}/exit-requests`),
+    apiClient.get<ExitRequestMemberDto[]>(`/groups/${groupId}/exit-requests`),
 
   /** Désignation du caissier (admin) — écran 48. */
   assignCashier: (groupId: string, memberId: string) =>
