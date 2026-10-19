@@ -47,15 +47,11 @@ describe('NotificationsService — cron des retards', () => {
     ]);
     (prisma.groupMember as { findMany: jest.Mock }).findMany.mockResolvedValue([
       {
-        id: 'm1',
-        userId: 'paid-user',
-        isActive: true,
+        id: 'm1', userId: 'paid-user', isActive: true,
         user: { id: 'paid-user', fullName: 'Paya', language: 'FR' },
       },
       {
-        id: 'm2',
-        userId: 'late-user',
-        isActive: true,
+        id: 'm2', userId: 'late-user', isActive: true,
         user: { id: 'late-user', fullName: 'Robert T.', language: 'FR' },
       },
     ]);
@@ -87,9 +83,7 @@ describe('NotificationsService — cron des retards', () => {
     (prisma.ledgerTransaction as { findMany: jest.Mock }).findMany.mockResolvedValue([]);
     (prisma.groupMember as { findMany: jest.Mock }).findMany.mockResolvedValue([
       {
-        id: 'm1',
-        userId: 'late-user',
-        isActive: true,
+        id: 'm1', userId: 'late-user', isActive: true,
         user: { id: 'late-user', fullName: 'Robert T.', language: 'FR' },
       },
     ]);
@@ -118,9 +112,7 @@ describe('NotificationsService — cron des retards', () => {
     (prisma.ledgerTransaction as { findMany: jest.Mock }).findMany.mockResolvedValue([]);
     (prisma.groupMember as { findMany: jest.Mock }).findMany.mockResolvedValue([
       {
-        id: 'm1',
-        userId: 'late-user',
-        isActive: true,
+        id: 'm1', userId: 'late-user', isActive: true,
         user: { id: 'late-user', fullName: 'Robert T.', language: 'EN' },
       },
     ]);
@@ -140,7 +132,7 @@ describe('NotificationsService — cron des retards', () => {
 
     await service.handleLateContributions();
 
-    expect(prisma.groupMember as { findMany: jest.Mock }).not.toHaveBeenCalled();
+    expect((prisma.groupMember as { findMany: jest.Mock }).findMany).not.toHaveBeenCalled();
     expect((prisma.notification as { create: jest.Mock }).create).not.toHaveBeenCalled();
   });
 });
