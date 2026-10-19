@@ -32,13 +32,13 @@ function escapePdf(text: string): string {
     .replace(/\\/g, '\\\\')
     .replace(/\(/g, '\\(')
     .replace(/\)/g, '\\)')
-    // Caractères hors Latin-1 (accents inclus sont en Latin-1 : OK en
-    // Helvetica standard avec WinAnsiEncoding) remplacés par '?'.
+    // Caractères hors Latin-1 remplacés par '?' (les accents français
+    // sont en Latin-1 : OK en Helvetica standard / WinAnsiEncoding).
     .replace(/[^\x20-\xFF]/g, '?');
 }
 
 /**
- * Construit un PDF monopage (ou multipage si les lignes débordent) à partir
+ * Construit un PDF (mono ou multipage selon le nombre de lignes) à partir
  * d'une liste de lignes de texte. Retourne le buffer PDF complet.
  */
 export function buildStatementPdf(lines: PdfLine[]): Buffer {
@@ -59,16 +59,11 @@ export function buildStatementPdf(lines: PdfLine[]): Buffer {
   }
   if (currentPage.length > 0) pages.push(currentPage);
 
-  // Objets du PDF : 1 catalogue, 2 pages-tree, 3 fontes (regular/bold),
-  // puis pour chaque page : contenu + annotations de page.
-  const objects: string[] = [];
-  const pageObjectIds: number[] = [];
-
-  // Contenu de chaque page → flux compressé.
+  // Contenu de chaque page → liste d'opérateurs texte (BT/Tf/Tm/Tj/ET).
   const contentStreams = pages.map((pageLines) => {
     let y = PAGE_HEIGHT - MARGIN;
     const ops: string[] = [];
-    for (line of pageLines) {
+    for (const line of pageLines) {
       const size = line.size ?? 10;
       y -= LINE_HEIGHT + (line.dy ?? 0);
       ops.push(
@@ -79,17 +74,14 @@ export function buildStatementPdf(lines: PdfLine[]): Buffer {
     return ops.join('\n');
   });
 
-  // Construction des objets numérotés (offsets calculés après).
-  // Format d'objet : "N 0 obj ... endobj".
-  // Les IDs: 1=catalogue, 2=pages, 3=Helvetica, 4=Helvetica-Bold,
-  // puis par page i (0-based): (5+2i)=page, (6+2i)=contenu.
+  // Corps du PDF : objets numérotés dans l'ordre.
+  // Les IDs : 1=catalogue, 2=pages-tree, 3=Helvetica, 4=Helvetica-Bold,
+  // puis par page i (0-based) : (5+2i)=page, (6+2i)=contenu.
   const body: string[] = [];
   const addObj = (content: string) => {
     body.push(content);
   };
 
-  // Placeholders remplis après coup pour les refs entre objets.
-  // Catalogue (1) : renvoie vers le pages-tree (2).
   addObj(`<< /Type /Catalog /Pages 2 0 R >>`);
   const pageRefs = pages.map((_, i) => `${5 + 2 * i} 0 R`).join(' ');
   addObj(`<< /Type /Pages /Kids [ ${pageRefs} ] /Count ${pages.length} >>`);
@@ -98,7 +90,6 @@ export function buildStatementPdf(lines: PdfLine[]): Buffer {
 
   contentStreams.forEach((stream, i) => {
     const compressed = deflateSync(Buffer.from(stream, 'latin1')).toString('binary');
-    const pageId = 5 + 2 * i;
     const contentId = 6 + 2 * i;
     addObj(
       `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PAGE_WIDTH.toFixed(2)} ${PAGE_HEIGHT.toFixed(2)}] ` +
@@ -121,7 +112,6 @@ export function buildStatementPdf(lines: PdfLine[]): Buffer {
     const buf = Buffer.from(serialized, 'latin1');
     chunks.push(buf);
     position += buf.length;
-    pageObjectIds.push(id);
   });
 
   const xrefStart = position;
