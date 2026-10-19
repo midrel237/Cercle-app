@@ -1,6 +1,7 @@
 import { apiClient } from '../api-client';
 
 export type GroupEventType = 'DEUIL' | 'ANNIVERSAIRE' | 'NAISSANCE' | 'MARIAGE' | 'MALADIE' | 'AUTRE';
+export type EventStatus = 'OPEN' | 'CLOSED';
 
 /** Contributeur d'une cagnotte (transaction CONFIRMED). */
 export interface EventContributionDto {
@@ -14,15 +15,17 @@ export interface EventContributionDto {
 export interface GroupEventDto {
   id: string;
   groupId: string;
-  type: GroupEventType | string;
+  type: GroupEventType;
   customLabel: string | null;
   description: string | null;
+  /** Decimal → string ; null si non définie. */
   suggestedAmount: string | null;
-  status: 'OPEN' | 'CLOSED' | string;
+  status: EventStatus;
   createdAt: string;
   closedAt: string | null;
   beneficiary: { id: string; fullName: string | null };
   createdBy: { id: string; fullName: string | null };
+  /** Somme serveur (reduce JS) → number. */
   collectedAmount: number;
   contributorsCount: number;
   remainingMembers: number;
@@ -45,7 +48,7 @@ export const eventsApi = {
   /** Écran 56 — détail d'une cagnotte (collecté, contributeurs, en attente). */
   getOne: (eventId: string) => apiClient.get<GroupEventDto>(`/events/${eventId}`),
 
-  /** Écran 55 — créer un évènement (GroupEvent Prisma brut). */
+  /** Écran 55 — créer un évènement (GroupEvent Prisma brut + beneficiary). */
   create: (data: {
     groupId: string;
     type: GroupEventType;
@@ -57,14 +60,15 @@ export const eventsApi = {
     apiClient.post<{
       id: string;
       groupId: string;
-      type: string;
+      type: GroupEventType;
       customLabel: string | null;
       description: string | null;
       suggestedAmount: string | null;
-      status: string;
+      status: EventStatus;
       beneficiaryUserId: string;
       createdById: string;
       createdAt: string;
+      beneficiary: { id: string; fullName: string | null };
     }>('/events', data),
 
   /** Écran 56 — déclarer/ajuster sa cotisation (le paiement passe par /payments/prepare). */
@@ -76,7 +80,7 @@ export const eventsApi = {
 
   /** Clôturer une cagnotte (bénéficiaire ou auteur uniquement). */
   close: (eventId: string) =>
-    apiClient.post<{ id: string; status: string; closedAt: string }>(
+    apiClient.post<{ id: string; status: EventStatus; closedAt: string }>(
       `/events/${eventId}/close`,
     ),
 };
