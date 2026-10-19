@@ -55,6 +55,7 @@ export class KycWebhookController {
       });
       if (kyc) {
         await applyKycDecision(
+          this.prisma,
           kyc.id,
           kyc.userId,
           mapped,
