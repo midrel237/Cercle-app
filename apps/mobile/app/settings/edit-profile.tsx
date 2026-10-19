@@ -13,7 +13,7 @@ import { colors, fonts, radii, spacing } from '../../src/theme';
  * langue. PATCH /users/me.
  */
 export default function EditProfileScreen() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 
   const [phone, setPhone] = useState('');
