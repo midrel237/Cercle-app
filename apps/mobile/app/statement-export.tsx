@@ -3,15 +3,19 @@ import { ActivityIndicator, Pressable, Share, StyleSheet, Text, View } from 'rea
 import { useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppButton } from '../../src/components/AppButton';
-import { groupsApi } from '../../src/services/endpoints/groups';
-import { transactionsApi } from '../../src/services/endpoints/account';
-import { colors, fonts, radii, spacing } from '../../src/theme';
+import { AppButton } from '../src/components/AppButton';
+import { groupsApi } from '../src/services/endpoints/groups';
+import { transactionsApi } from '../src/services/endpoints/account';
+import { colors, fonts, radii, spacing } from '../src/theme';
 
+// Ligne du relevé — alignée sur serializeTransaction du backend
+// (transactions.service.ts) : groupId et status inclus.
 interface TxRow {
   id: string;
+  groupId: string | null;
   groupName: string | null;
   type: string;
+  status: string;
   amount: string;
   isCredit: boolean;
   createdAt: string;
