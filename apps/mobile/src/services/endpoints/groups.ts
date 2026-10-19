@@ -86,12 +86,30 @@ export interface GroupPreviewDto {
   alreadyJoined: number;
 }
 
-/** Statut de cotisation du cycle actif — écran 31. */
+/**
+ * Membre du cycle actif — miroir de GroupsService.getCycleStatus
+ * (écran 31) : statut de cotisation calculé serveur.
+ */
+export interface CycleStatusMemberDto {
+  id: string;
+  userId: string;
+  fullName: string | null;
+  role: 'ADMIN' | 'CASHIER' | 'MEMBER' | string;
+  isBeneficiary: boolean;
+  contributionStatus: 'PAID' | 'PENDING' | 'LATE';
+}
+
+/** Réponse de GET /groups/:id/cycle-status — écran 31. */
 export interface CycleStatusDto {
-  cycle: { id: string; cycleNumber: number; dueDate: string } | null;
-  hasPaid: boolean;
-  pendingCount: number;
-  paidCount: number;
+  cycle: {
+    id: string;
+    cycleNumber: number;
+    dueDate: string;
+    expectedAmount: string | null;
+    beneficiaryUserId: string;
+  } | null;
+  contributionAmount: string;
+  members: CycleStatusMemberDto[];
 }
 
 /** Message de la discussion — écran 41. */
