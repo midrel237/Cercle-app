@@ -1,18 +1,28 @@
 import { apiClient } from '../api-client';
 
+/**
+ * Types miroirs des sérialiseurs backend (groups.service.ts) —
+ * Decimal Prisma → string en JSON, DateTime → ISO string.
+ */
+
+export type GroupMode = 'ROTATIVE' | 'INTERNAL_LOAN' | 'MIXED';
+export type GroupMemberRole = 'ADMIN' | 'CASHIER' | 'MEMBER';
+export type ContributionStatus = 'PAID' | 'PENDING' | 'LATE';
+export type ExitStatus = 'NONE' | 'REQUESTED' | 'APPROVED' | 'REJECTED';
+
 /** Membre sérialisé — miroir de GroupsService.listMembers (écran 42). */
 export interface GroupMemberRowDto {
   id: string;
   userId: string;
   fullName: string | null;
-  role: 'ADMIN' | 'MEMBER' | string;
+  role: GroupMemberRole;
   rotationPosition: number | null;
   trustScore: number;
   isBeneficiary: boolean;
-  contributionStatus: 'PAID' | 'LATE' | 'PENDING' | null;
+  contributionStatus: ContributionStatus | null;
   daysLate: number;
   joinedAt: string;
-  exitStatus: string | null;
+  exitStatus: ExitStatus;
 }
 
 /** Demande d'adhésion en attente (admin) — écran 42. */
@@ -20,7 +30,7 @@ export interface PendingJoinRequestDto {
   id: string;
   userId: string;
   fullName: string | null;
-  requestedAt: string;
+  requestedAt: string | null;
 }
 
 /** Membre avec demande de sortie REQUESTED (admin) — écran 52. */
@@ -34,31 +44,34 @@ export interface ExitRequestMemberDto {
 export interface GroupMemberLiteDto {
   id: string;
   userId: string;
-  role: 'ADMIN' | 'MEMBER' | string;
+  role: GroupMemberRole;
   rotationPosition: number | null;
-  joinStatus: 'PENDING' | 'APPROVED' | 'REJECTED' | string;
+  joinStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
   isActive: boolean;
   joinedAt: string;
   user: { id: string; fullName: string | null };
 }
 
-/** Groupe complet avec membres actifs — GET /groups/:id (écran 31). */
+/** Groupe complet — miroir du modèle Prisma Group (écran 31). */
 export interface GroupDto {
   id: string;
   name: string;
-  mode: 'ROTATIVE' | 'INTERNAL_LOAN' | 'MIXED' | string;
+  mode: GroupMode;
+  /** Decimal → string. */
   contributionAmount: string;
   periodicityDays: number;
-  rotationOrderType: 'DRAW' | 'FIXED' | string;
-  interestRate: number | null;
+  rotationOrderType: 'DRAW' | 'FIXED';
   penaltyRules: string | null;
+  /** Decimal → string. */
+  interestRate: string;
   openToDiaspora: boolean;
   inviteCode: string;
   memberCount: number;
   cashierMemberId: string | null;
   /** Compte de dépôt du caissier (écran 49) — null si non enregistré. */
-  depositAccountPhoneNumber: string | null;
   depositAccountProvider: string | null;
+  depositAccountPhoneNumber: string | null;
+  depositAccountRegisteredAt: string | null;
   members: GroupMemberLiteDto[];
   cycles: { id: string; cycleNumber: number; status: string }[];
   createdAt: string;
@@ -80,23 +93,20 @@ export interface GroupPreviewDto {
   name: string;
   contributionAmount: string;
   periodicityDays: number;
-  mode: 'ROTATIVE' | 'INTERNAL_LOAN' | 'MIXED' | string;
+  mode: GroupMode;
   openToDiaspora: boolean;
   memberCount: number;
   alreadyJoined: number;
 }
 
-/**
- * Membre du cycle actif — miroir de GroupsService.getCycleStatus
- * (écran 31) : statut de cotisation calculé serveur.
- */
+/** Membre du cycle actif — miroir de getCycleStatus (écran 31). */
 export interface CycleStatusMemberDto {
   id: string;
   userId: string;
   fullName: string | null;
-  role: 'ADMIN' | 'CASHIER' | 'MEMBER' | string;
+  role: GroupMemberRole;
   isBeneficiary: boolean;
-  contributionStatus: 'PAID' | 'PENDING' | 'LATE';
+  contributionStatus: ContributionStatus;
 }
 
 /** Réponse de GET /groups/:id/cycle-status — écran 31. */
@@ -105,6 +115,7 @@ export interface CycleStatusDto {
     id: string;
     cycleNumber: number;
     dueDate: string;
+    /** Decimal → string. */
     expectedAmount: string | null;
     beneficiaryUserId: string;
   } | null;
@@ -122,17 +133,18 @@ export interface GroupMessageDto {
   user: { id: string; fullName: string | null };
 }
 
-/** Écran 46 — profil d'un membre (score de fiabilité, métriques du ledger). */
+/** Écran 46 — profil d'un membre : miroir exact de getMemberProfile. */
 export interface MemberProfileDto {
   id: string;
   userId: string;
   fullName: string | null;
   trustScore: number;
-  role: string;
+  role: GroupMemberRole;
   joinedAt: string;
   rotationPosition: number | null;
+  /** Decimal → string. */
   outstandingDebt: string;
-  exitStatus: string | null;
+  exitStatus: ExitStatus;
   contributionsPaid: number;
   contributionsPaidOnTime: number;
   totalCycles: number;
@@ -147,12 +159,26 @@ export interface ReminderResultDto {
   sentAt: string;
 }
 
-/** Écran 50 — aperçu de sortie : montants calculés par le serveur. */
+/** Écran 50 — miroir exact de exitPreview. */
 export interface ExitPreviewDto {
+  rotationReceived: boolean;
+  rotationCycleNumber: number | null;
   contributionsPaid: string;
-  shareOfFund: string;
   outstandingDebt: string;
-  netAmount: string;
+  amountToRefund: string;
+  amountToSettle: string;
+}
+
+/** Écran 52 — miroir exact de listExitRequests. */
+export interface ExitRequestRowDto {
+  memberId: string;
+  userId: string;
+  fullName: string | null;
+  requestedAt: string | null;
+  reason: string | null;
+  rotationReceived: boolean;
+  amountToRefund: string;
+  amountToSettle: string;
 }
 
 export const groupsApi = {
@@ -184,7 +210,7 @@ export const groupsApi = {
   drawRotation: (groupId: string) =>
     apiClient.post<GroupDto>(`/groups/${groupId}/rotation/draw`),
 
-  /** Validation de l'ordre tiré — écran 30. */
+  /** Validation de l'ordre tiré — écran 30. ESLint exhaustive-deps OK. */
   confirmRotation: (groupId: string) =>
     apiClient.post<GroupDto>(`/groups/${groupId}/rotation/confirm`),
 
@@ -192,7 +218,7 @@ export const groupsApi = {
   startCycles: (groupId: string) =>
     apiClient.post(`/groups/${groupId}/cycles/start`),
 
-  /** Statut de cotisation du cycle actif — écran 31 (détail du groupe). */
+  /** Statut de cotisation du cycle actif — écran .tsx (détail du groupe). */
   getCycleStatus: (groupId: string) =>
     apiClient.get<CycleStatusDto>(`/groups/${groupId}/cycle-status`),
 
@@ -203,8 +229,10 @@ export const groupsApi = {
     }),
 
   /** Envoi d'un message dans la discussion — écran 41. */
-  sendMessage: (groupId: string, body: string) =>
-    apiClient.post<GroupMessageDto>(`/groups/${groupId}/messages`, { body }),
+  sendMessage: (groupId: string, stringBody: string) =>
+    apiClient.post<GroupMessageDto>(`/groups/${groupId}/messages`, {
+      body: stringBody,
+    }),
 
   // ---- Phase 4 : membres & administration (écrans 42-53) ----
 
@@ -224,6 +252,7 @@ export const groupsApi = {
     }),
 
   /** Écran 45 — retrait d'un membre par l'admin. */
+  `{memberId: string}`: undefined,
   removeMember: (groupId: string, memberId: string) =>
     apiClient.post(`/groups/${groupId}/remove-member`, { memberId }),
 
@@ -233,7 +262,7 @@ export const groupsApi = {
 
   /** Écran 52 — demandes de sortie en attente (admin) + montants. */
   listExitRequests: (groupId: string) =>
-    apiClient.get<ExitRequestMemberDto[]>(`/groups/${groupId}/exit-requests`),
+    apiClient.get<ExitRequestRowDto[]>(`/groups/${groupId}/exit-requests`),
 
   /** Désignation du caissier (admin) — écran 48. */
   assignCashier: (groupId: string, memberId: string) =>
