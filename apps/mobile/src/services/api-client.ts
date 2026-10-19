@@ -3,8 +3,10 @@ import * as SecureStore from 'expo-secure-store';
 
 const AUTH_TOKEN_KEY = 'cercle_access_token';
 
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000/api/v1';
+
 export const apiClient = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000/api/v1',
+  baseURL: API_BASE_URL,
   timeout: 15000,
 });
 
@@ -23,4 +25,13 @@ export async function setStoredAccessToken(token: string) {
 
 export async function clearStoredAccessToken() {
   await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+}
+
+/**
+ * Token JWT d'accès courant — utilisé pour construire les liens ouvrables
+ * hors de l'app (relevé PDF via expo-web-browser, qui ne peut pas poser
+ * de header Authorization).
+ */
+export async function getStoredAccessToken(): Promise<string | null> {
+  return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
 }
