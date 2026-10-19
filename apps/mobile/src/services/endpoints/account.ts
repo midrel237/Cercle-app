@@ -66,12 +66,6 @@ export const transactionsApi = {
 
   /** Écran 68 — détail d'une de mes transactions. */
   getOne: (id: string) => apiClient.get<TransactionDto>(`/transactions/${id}`),
-
-  /** Écran 69 — relevé PDF du groupe (réponse binaire : responseType arraybuffer). */
-  downloadGroupStatement: (groupId: string) =>
-    apiClient.get(`/transactions/group/${groupId}/statement`, {
-      responseType: 'arraybuffer',
-    }),
 };
 
 export const usersApi = {
