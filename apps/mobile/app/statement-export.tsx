@@ -139,7 +139,7 @@ export default function StatementExportScreen() {
         Alert.alert('Cercle', `Relevé enregistré : ${fileName}`);
       }
     } catch {
-      Alert.alert('Cercle', t('historyScreen.statementDownloadError'));
+      Alert.alert('Cercle', t('historyScreen.statementLoadError'));
     } finally {
       setDownloading(false);
     }
@@ -190,7 +190,8 @@ export default function StatementExportScreen() {
                   {t('historyScreen.statementTotal')}
                 </Text>
                 <Text style={[styles.stmtRight, { fontFamily: fonts.mono.semiBold }]}>
-                  {total.toLocaleString('fr-FR')} FCFA</Text>
+                  {total.toLocaleString('fr-FR')} FCFA
+                </Text>
               </View>
             ) : null}
           </View>
@@ -200,13 +201,9 @@ export default function StatementExportScreen() {
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20), gap: spacing.sm }]}>
         <AppButton label={t('historyScreen.shareButton')} variant="ghost" onPress={handleShare} disabled={loading || rows.length === 0} />
         <AppButton
-          label={
-            downloading
-              ? t('historyScreen.statementDownloading')
-              : t('historyScreen.downloadPdfButton')
-          }
+          label={t('historyScreen.downloadPdfButton')}
           onPress={handleDownloadPdf}
-          disabled={loading || downloading}
+          disabled={loading || downloading || rows.length === 0}
         />
       </View>
     </View>
