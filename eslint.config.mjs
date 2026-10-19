@@ -4,6 +4,7 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import importPlugin from 'eslint-plugin-import';
+import reactHooks from 'eslint-plugin-react-hooks';
 import prettier from 'eslint-config-prettier';
 
 export default tseslint.config(
@@ -66,10 +67,16 @@ export default tseslint.config(
     },
   },
 
-  // Mobile Expo/React Native
+  // Mobile Expo/React Native — plugin react-hooks (la règle
+  // exhaustive-deps est référencée dans des disable-comments des écrans :
+  // elle DOIT être définie, sinon ESLint plante en erreur).
   {
     files: ['apps/mobile/app/**/*.tsx', 'apps/mobile/src/**/*.ts*'],
+    plugins: {
+      'react-hooks': reactHooks,
+    },
     rules: {
+      'react-hooks/exhaustive-deps': 'warn',
       '@typescript-eslint/no-unsafe-member-access': 'warn',
       '@typescript-eslint/no-unused-expressions': 'off',
     },

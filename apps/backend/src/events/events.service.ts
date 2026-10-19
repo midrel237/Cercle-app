@@ -196,4 +196,32 @@ export class EventsService {
       data: { status: 'CLOSED', closedAt: new Date() },
     });
   }
+
+  /**
+   * Confirmation interne appelée après le webhook agrégateur
+   * (POST /events/confirm-contribution). La cotisation ne compte comme
+   * « collectée » qu'une fois sa transaction CONFIRMED — les lectures
+   * filtrent sur le statut, donc ce endpoint vérifie la transaction et
+   * renvoie l'état courant de la cotisation.
+   */
+  async confirmEventContribution(transactionId: string) {
+    const tx = await this.prisma.ledgerTransaction.findUnique({
+      where: { id: transactionId },
+    });
+    if (!tx) throw new NotFoundException('Transaction introuvable.');
+
+    const contribution = await this.prisma.eventContribution.findFirst({
+      where: { transactionId },
+    });
+    if (!contribution) {
+      throw new NotFoundException('Aucune cotisation rattachée à cette transaction.');
+    }
+
+    return {
+      eventId: contribution.eventId,
+      userId: contribution.userId,
+      amount: contribution.amount,
+      confirmed: tx.status === 'CONFIRMED',
+    };
+  }
 }

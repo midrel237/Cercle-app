@@ -17,10 +17,12 @@ export class UsersService {
    * donnees derivent du ledger / des tables existantes - jamais en dur.
    */
   async findProfile(userId: string) {
+    // Le modele User expose la relation `memberships` (GroupMember[]),
+    // pas `groups` — le compte filtre sur les memberships actifs.
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        _count: { select: { groups: { where: { isActive: true } } } },
+        _count: { select: { memberships: { where: { isActive: true } } } },
       },
     });
     if (!user) throw new NotFoundException('Utilisateur introuvable.');
@@ -46,7 +48,7 @@ export class UsersService {
       kycStatus: user.kycStatus,
       trustScore: user.trustScore,
       language: user.language,
-      activeGroups: user._count.groups,
+      activeGroups: user._count.memberships,
       paymentMethods,
       contributionsPaid: contributions.length,
       contributionsOnTime: onTime,

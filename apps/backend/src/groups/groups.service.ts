@@ -1,5 +1,4 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { Inject } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { SmsService } from '../common/sms/sms.service';
 import { CreateGroupDto } from './dto/create-group.dto';
@@ -361,7 +360,6 @@ export class GroupsService {
 
     const body = dto.body.trim();
     if (!body) throw new BadRequestException('Le message ne peut pas être vide.');
-
     return this.prisma.groupMessage.create({
       data: { groupId, userId: requesterId, body },
       include: { user: { select: { id: true, fullName: true } } },
@@ -552,7 +550,7 @@ export class GroupsService {
     });
 
     if (dto.alsoSms && member.user.phoneNumber) {
-      await this.smsService.send(member.user.phoneNumber, message);
+      await this.smsService.send({ to: member.user.phoneNumber, body: message });
     }
 
     return { sent: true, channel: dto.alsoSms ? 'NOTIFICATION+SMS' : 'NOTIFICATION' };
