@@ -9,11 +9,9 @@ import { colors, fonts, radii, spacing } from '../../src/theme';
 
 // Écran 19 — Autorisation des notifications push.
 // Demande la permission système (iOS alerte native, Android 13+ runtime
-// permission) via expo-notifications. Indispensable pour les rappels de
-// cotisation du tontine : la stratégie de push ( Expo Push Tokens)
-// sera branchée au module notifications du backend plus tard. L'utilisateur
-// peut refuser sans bloquer l'onboarding : le récapitulatif de sécurité
-// (écran 20) permet de la réactiver depuis les réglages système.
+// permission) via expo-notifications. L'utilisateur peut refuser sans
+// bloquer l'onboarding : le récapitulatif de sécurité (écran 20) permet
+// de la réactiver depuis les réglages système.
 export default function NotificationPermissionScreen() {
   const { t } = useTranslation();
   const [granted, setGranted] = useState<boolean | null>(null);
@@ -22,7 +20,7 @@ export default function NotificationPermissionScreen() {
   useEffect(() => {
     (async () => {
       const current = await Notifications.getPermissionsAsync();
-      setGranted(current.granted || current.undetermined === false);
+      setGranted(current.granted);
     })();
   }, []);
 
