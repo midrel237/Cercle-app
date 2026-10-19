@@ -21,15 +21,20 @@ import {
 } from '@expo-google-fonts/ibm-plex-mono';
 import '../src/i18n';
 
-// Garde le splash natif visible tant que les polices ne sont pas chargées —
-// l'écran "Splash" (route (auth)/splash) prend ensuite le relais avec
-// l'identité visuelle Cercle (voir écran 1 de la maquette).
+// Garde le splash natif visible tant que les polices ne sont pas chargees :
+// l'ecran "Splash" (route (auth)/splash) prend ensuite le relais avec
+// l'identite visuelle Cercle (voir ecran 1 de la maquette).
 SplashScreen.preventAutoHideAsync();
 
 /**
  * Layout racine. Le flux global suit le cahier des charges / la maquette :
  * (auth) -> (kyc) -> (onboarding) -> (tabs) + routes modales
- * (group, loan, payment, transaction, settings, notifications).
+ * (settings, notifications, statement-export).
+ *
+ * Note : les routes group/, loan/, payment/, transaction/ n'existent qu'en
+ * sous-chemins (group/join, loan/request, payment/methods, transaction/[id]...)
+ * Expo Router les decouvre automatiquement, il ne faut PAS les declarer ici
+ * (sinon warning "No route named ... exists in nested children").
  */
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -66,10 +71,6 @@ export default function RootLayout() {
         <Stack.Screen name="(kyc)" />
         <Stack.Screen name="(onboarding)" />
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="group" />
-        <Stack.Screen name="loan" />
-        <Stack.Screen name="payment" />
-        <Stack.Screen name="transaction" />
         <Stack.Screen name="settings" />
         <Stack.Screen name="notifications" options={{ presentation: 'modal' }} />
         <Stack.Screen name="statement-export" options={{ presentation: 'modal' }} />
