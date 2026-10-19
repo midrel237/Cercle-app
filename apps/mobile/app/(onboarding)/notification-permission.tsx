@@ -13,6 +13,10 @@ import { colors, fonts, radii, spacing } from '../../src/theme';
 // l'appel résout immédiatement sans alerte. L'utilisateur peut refuser
 // sans bloquer l'onboarding : le récapitulatif de sécurité (écran 20)
 // permet de la réactiver depuis les réglages système.
+//
+// Expo Go (SDK 53+) ne supporte plus les push Android : requestPermissionsAsync
+// peut alors jeter une erreur expo-notifications. On ne doit JAMAIS interrompre
+// l'onboarding pour ça — le refus silencieux est géré à l'écran 20.
 export default function NotificationPermissionScreen() {
   const { t } = useTranslation();
   const [isRequesting, setIsRequesting] = useState(false);
@@ -20,7 +24,12 @@ export default function NotificationPermissionScreen() {
   const handleAllow = async () => {
     setIsRequesting(true);
     try {
-      await Notifications.requestPermissionsAsync();
+      try {
+        await Notifications.requestPermissionsAsync();
+      } catch {
+        // Expo Go / environnement sans support push : permission ignorée.
+        // En development build (expo-dev-client), la permission réelle s'applique.
+      }
       router.replace('/(onboarding)/security');
     } finally {
       setIsRequesting(false);
