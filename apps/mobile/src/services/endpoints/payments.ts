@@ -2,44 +2,57 @@ import { apiClient } from '../api-client';
 
 export type MobileMoneyProvider = 'MTN_MOMO' | 'ORANGE_MONEY';
 
-/** Transaction du ledger — statut, sens, moyen de paiement. */
+/**
+ * Transaction du ledger — miroir du modèle Prisma LedgerTransaction
+ * (les Decimal deviennent des chaînes en JSON). Renvoyée à plat par
+ * POST /payments/prepare et GET /transactions/:id.
+ */
 export interface LedgerTransactionDto {
   id: string;
   groupId: string | null;
+  cycleId: string | null;
+  userId: string;
   type: string;
   status: 'PENDING' | 'CONFIRMED' | 'FAILED' | string;
   amount: string;
   currency: string;
-  isCredit: boolean;
+  amountXaf: string;
   provider: MobileMoneyProvider | null;
   externalReference: string | null;
   createdAt: string;
   confirmedAt: string | null;
 }
 
-/** Réponse de POST /payments/prepare — transaction PENDING prête à initier. */
-export interface PreparedPaymentDto {
-  transaction: LedgerTransactionDto;
-  /** Montant à collecter, en devise pivot XAF. */
-  amountXaf: string;
-}
-
-/** Moyen de paiement lié au compte (écran 34). */
+/** Moyen de paiement — miroir du modèle Prisma PaymentMethod (écran 34). */
 export interface PaymentMethodDto {
   id: string;
-  kind: 'MOBILE_MONEY' | 'BANK_CARD' | 'BANK_TRANSFER' | string;
+  type: 'MOBILE_MONEY' | 'BANK_CARD' | 'BANK_TRANSFER' | string;
   provider: string | null;
-  /** Numéro masqué côté backend (ex. +237 6•• ••• 789). */
-  maskedNumber: string | null;
+  phoneNumber: string | null;
+  cardToken: string | null;
+  cardBrand: string | null;
+  cardLast4: string | null;
+  bankName: string | null;
+  bankCountry: string | null;
+  ibanLast4: string | null;
+  isDefault: boolean;
   createdAt: string;
+}
+
+/** Réponse de l'agrégateur à POST /payments/initiate (écran 32→33). */
+export interface InitiateResultDto {
+  accepted: boolean;
+  reference: string;
+  message?: string;
 }
 
 export const paymentsApi = {
   /**
-   * Prépare la cotisation (écran 31→32) : transaction PENDING.
-   * - Cycle actif : montant fixé par le groupe (serveur), jamais envoyé.
-   * - Cagnotte d'évènement (eventId, écran 56) : montant libre optionnel —
-   *   la suggestion de l'évènement reste le défaut côté UI.
+   * Prépare la cotisation (écran 31→32) : crée la transaction PENDING
+   * (montant fixé par le serveur : celui du groupe ou de la cagnotte)
+   * et la renvoie à plat — id + amount servent à initiate.
+   * - Cycle actif : montant fixé par le groupe, jamais envoyé.
+   * - Cagnotte d'évènement (eventId, écran 56) : montant libre optionnel.
    */
   prepareContribution: (
     groupId: string,
@@ -47,7 +60,7 @@ export const paymentsApi = {
     eventId?: string,
     amount?: number,
   ) =>
-    apiClient.post<PreparedPaymentDto>('/payments/prepare', {
+    apiClient.post<LedgerTransactionDto>('/payments/prepare', {
       groupId,
       provider,
       eventId,
@@ -60,7 +73,7 @@ export const paymentsApi = {
     provider: MobileMoneyProvider,
     amount: number,
   ) =>
-    apiClient.post<LedgerTransactionDto>('/payments/initiate', {
+    apiClient.post<InitiateResultDto>('/payments/initiate', {
       transactionId,
       provider,
       amount,
