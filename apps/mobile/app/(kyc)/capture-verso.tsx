@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'expo-router';
 
 // Écrans 8-12 remplacés par le flux hébergé Didit — voir capture-recto.tsx.
