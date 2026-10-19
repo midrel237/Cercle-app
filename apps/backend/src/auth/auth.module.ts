@@ -5,11 +5,12 @@ import { SmsModule } from '../common/sms/sms.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { JwtQueryStrategy } from './strategies/jwt-query.strategy';
 
 @Module({
   imports: [PassportModule, JwtModule.register({}), SmsModule],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, JwtQueryStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}
