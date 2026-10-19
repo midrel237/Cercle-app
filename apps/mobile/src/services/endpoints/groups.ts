@@ -210,7 +210,7 @@ export const groupsApi = {
   drawRotation: (groupId: string) =>
     apiClient.post<GroupDto>(`/groups/${groupId}/rotation/draw`),
 
-  /** Validation de l'ordre tiré — écran 30. ESLint exhaustive-deps OK. */
+  /** Validation de l'ordre tiré — écran 30. */
   confirmRotation: (groupId: string) =>
     apiClient.post<GroupDto>(`/groups/${groupId}/rotation/confirm`),
 
@@ -218,7 +218,7 @@ export const groupsApi = {
   startCycles: (groupId: string) =>
     apiClient.post(`/groups/${groupId}/cycles/start`),
 
-  /** Statut de cotisation du cycle actif — écran .tsx (détail du groupe). */
+  /** Statut de cotisation du cycle actif — écran 31 (détail du groupe). */
   getCycleStatus: (groupId: string) =>
     apiClient.get<CycleStatusDto>(`/groups/${groupId}/cycle-status`),
 
@@ -229,10 +229,8 @@ export const groupsApi = {
     }),
 
   /** Envoi d'un message dans la discussion — écran 41. */
-  sendMessage: (groupId: string, stringBody: string) =>
-    apiClient.post<GroupMessageDto>(`/groups/${groupId}/messages`, {
-      body: stringBody,
-    }),
+  sendMessage: (groupId: string, body: string) =>
+    apiClient.post<GroupMessageDto>(`/groups/${groupId}/messages`, { body }),
 
   // ---- Phase 4 : membres & administration (écrans 42-53) ----
 
@@ -252,7 +250,6 @@ export const groupsApi = {
     }),
 
   /** Écran 45 — retrait d'un membre par l'admin. */
-  `{memberId: string}`: undefined,
   removeMember: (groupId: string, memberId: string) =>
     apiClient.post(`/groups/${groupId}/remove-member`, { memberId }),
 
