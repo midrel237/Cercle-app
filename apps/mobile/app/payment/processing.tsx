@@ -24,7 +24,7 @@ const PROVIDER_LABEL: Record<string, string> = {
 export default function PaymentProcessingScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { transactionId, amount, provider, groupId, eventId, loanId } =
+  const { transactionId, amount, provider, groupId, loanId } =
     useLocalSearchParams<{
       transactionId?: string;
       amount?: string;
