@@ -61,7 +61,7 @@ export default function NotificationsScreen() {
     const hours = Math.floor(diff / 3600000);
     if (hours < 1) return t('notificationsScreen.justNow');
     if (hours < 24) return t('notificationsScreen.hoursAgo', { count: hours });
-    const days = Math.floor(hours / 24);
+    // Plus d'un jour : date complète plutôt qu'un compteur de jours.
     return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
   };
 
