@@ -64,7 +64,7 @@ describe('NotificationsService — cron des retards', () => {
 
     await service.handleLateContributions();
 
-    const create = prisma.notification as { create: jest.Mock };
+    const create = (prisma.notification as { create: jest.Mock }).create;
     expect(create).toHaveBeenCalledTimes(1);
     expect(create.mock.calls[0][0].data).toMatchObject({
       userId: 'late-user',
@@ -101,7 +101,7 @@ describe('NotificationsService — cron des retards', () => {
 
     await service.handleLateContributions();
 
-    expect(prisma.notification as { create: jest.Mock }).not.toHaveBeenCalled();
+    expect((prisma.notification as { create: jest.Mock }).create).not.toHaveBeenCalled();
   });
 
   it('envoie le message en anglais pour un utilisateur de langue EN', async () => {
@@ -129,7 +129,7 @@ describe('NotificationsService — cron des retards', () => {
 
     await service.handleLateContributions();
 
-    const create = prisma.notification as { create: jest.Mock };
+    const create = (prisma.notification as { create: jest.Mock }).create;
     expect(create).toHaveBeenCalledTimes(1);
     expect(create.mock.calls[0][0].data.title).toBe('Late contribution');
     expect(create.mock.calls[0][0].data.body).toContain('is late');
@@ -141,6 +141,6 @@ describe('NotificationsService — cron des retards', () => {
     await service.handleLateContributions();
 
     expect(prisma.groupMember as { findMany: jest.Mock }).not.toHaveBeenCalled();
-    expect(prisma.notification as { create: jest.Mock }).not.toHaveBeenCalled();
+    expect((prisma.notification as { create: jest.Mock }).create).not.toHaveBeenCalled();
   });
 });
