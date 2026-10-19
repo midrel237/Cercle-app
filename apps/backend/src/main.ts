@@ -19,7 +19,7 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
-  // eslint-disable-next-line no-console
+  // no-console est desactive pour tout le backend (eslint.config.mjs).
   console.log(`Tontine backend démarré sur http://localhost:${port}/api/v1`);
 }
 bootstrap();

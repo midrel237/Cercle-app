@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -9,26 +9,18 @@ import { colors, fonts, radii, spacing } from '../../src/theme';
 
 // Écran 19 — Autorisation des notifications push.
 // Demande la permission système (iOS alerte native, Android 13+ runtime
-// permission) via expo-notifications. L'utilisateur peut refuser sans
-// bloquer l'onboarding : le récapitulatif de sécurité (écran 20) permet
-// de la réactiver depuis les réglages système.
+// permission) via requestPermissionsAsync : si elle est déjà accordée,
+// l'appel résout immédiatement sans alerte. L'utilisateur peut refuser
+// sans bloquer l'onboarding : le récapitulatif de sécurité (écran 20)
+// permet de la réactiver depuis les réglages système.
 export default function NotificationPermissionScreen() {
   const { t } = useTranslation();
-  const [granted, setGranted] = useState<boolean | null>(null);
   const [isRequesting, setIsRequesting] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      const current = await Notifications.getPermissionsAsync();
-      setGranted(current.granted);
-    })();
-  }, []);
 
   const handleAllow = async () => {
     setIsRequesting(true);
     try {
-      const result = await Notifications.requestPermissionsAsync();
-      setGranted(result.granted);
+      await Notifications.requestPermissionsAsync();
       router.replace('/(onboarding)/security');
     } finally {
       setIsRequesting(false);

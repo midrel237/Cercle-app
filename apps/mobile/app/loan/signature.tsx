@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 
 // Écran 62 (signature électronique) : intégré dans /loan/[id]/contract

@@ -6,7 +6,7 @@ export class ConsoleSmsProvider implements SmsProvider {
   readonly name = 'console';
 
   async send(message: SmsMessage): Promise<void> {
-    // eslint-disable-next-line no-console
+    // no-console est desactive pour tout le backend (eslint.config.mjs).
     console.log(`[SMS][${this.name}] -> ${message.to}: "${message.body}"`);
   }
 }

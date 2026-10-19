@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 
 // Écran 38 (confirmation Mobile Money sur le téléphone opérateur) : le
