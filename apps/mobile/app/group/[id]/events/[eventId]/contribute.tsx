@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppButton } from '../../../../../src/components/AppButton';
 import { FadeIn, PopIn, CountUp, GlowPulse } from '../../../../../src/components/motion';
-import { eventsApi, GroupEventType } from '../../../../../src/services/endpoints/events';
+import { eventsApi, GroupEventType, GroupEventDto } from '../../../../../src/services/endpoints/events';
 import { paymentsApi, MobileMoneyProvider } from '../../../../../src/services/endpoints/payments';
 import { useAuthStore } from '../../../../../src/store/auth.store';
 import { colors, fonts, radii, spacing } from '../../../../../src/theme';
@@ -18,21 +18,6 @@ const TYPE_LABEL: Record<GroupEventType, string> = {
   MALADIE: 'Maladie',
   AUTRE: 'Autre',
 };
-
-interface EventDetail {
-  id: string;
-  groupId: string;
-  type: GroupEventType;
-  customLabel: string | null;
-  description: string | null;
-  suggestedAmount: string | null;
-  status: 'OPEN' | 'CLOSED';
-  beneficiary: { id: string; fullName: string | null };
-  createdBy: { id: string; fullName: string | null };
-  collectedAmount: number;
-  contributions: { userId: string; fullName: string | null; amount: string }[];
-  waitingMembers: { userId: string; fullName: string | null }[];
-}
 
 /**
  * Écran 56 — Cotiser à l'évènement : collecté, contributeurs avec montants
@@ -49,7 +34,7 @@ export default function EventContributeScreen() {
   const { id, eventId } = useLocalSearchParams<{ id: string; eventId: string }>();
   const user = useAuthStore((s) => s.user);
 
-  const [event, setEvent] = useState<EventDetail | null>(null);
+  const [event, setEvent] = useState<GroupEventDto | null>(null);
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
@@ -81,6 +66,8 @@ export default function EventContributeScreen() {
   const alreadyContributed = event?.contributions.some((c) => c.userId === user?.id);
   const isClosed = event?.status === 'CLOSED';
   const isBeneficiary = event?.beneficiary?.id === user?.id;
+  // waitingMembers n'est présent que sur le détail (getOne) — fallback [].
+  const waitingMembers = event?.waitingMembers ?? [];
 
   const handleContribute = async () => {
     if (!id || !eventId || !valid || paying) return;
@@ -102,7 +89,7 @@ export default function EventContributeScreen() {
         pathname: '/payment/processing',
         params: {
           transactionId: transaction.id,
-          amount: String(transaction.amount),
+          amount: String(Number(transaction.amount)),
           provider,
           groupId: id,
           eventId,
@@ -135,7 +122,7 @@ export default function EventContributeScreen() {
               <Text style={styles.byline}>
                 {t('eventsScreen.openedByLabel', {
                   name: event.createdBy?.fullName ?? '',
-                  count: event.contributions.length + event.waitingMembers.length,
+                  count: event.contributions.length + waitingMembers.length,
                 })}
               </Text>
             </FadeIn>
@@ -190,7 +177,7 @@ export default function EventContributeScreen() {
                   </View>
                 </FadeIn>
               ))}
-              {event.waitingMembers.map((m, i) => (
+              {waitingMembers.map((m, i) => (
                 <FadeIn key={m.userId} delay={280 + (event.contributions.length + i) * 60}>
                   <View style={[styles.contribRow, styles.contribRowBorder]}>
                     <Text style={styles.contribName}>{m.fullName ?? t('eventsScreen.unnamedBeneficiary')}</Text>
