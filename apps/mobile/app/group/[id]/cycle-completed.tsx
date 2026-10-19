@@ -70,7 +70,7 @@ export default function CycleCompletedScreen() {
 /** Confettis : 12 points dorés/navy qui tombent en boucle, légers (opacity). */
 function Confetti() {
   const confetti = Array.from({ length: 12 }, (_, i) => ({
-    left: `${(i * 83) % 100}%`,
+    leftPct: (i * 83) % 100,
     delay: (i % 6) * 260,
     duration: 3200 + (i % 4) * 500,
     color: i % 3 === 0 ? colors.gold : i % 3 === 1 ? colors.goldDark : colors.navy,
@@ -86,12 +86,12 @@ function Confetti() {
 }
 
 function FallingDot({
-  left,
+  leftPct,
   delay,
   duration,
   color,
 }: {
-  left: string;
+  leftPct: number;
   delay: number;
   duration: number;
   color: string;
@@ -114,7 +114,7 @@ function FallingDot({
     <Animated.View
       style={{
         position: 'absolute',
-        left,
+        left: `${leftPct}%`,
         top,
         opacity,
         width: 6,

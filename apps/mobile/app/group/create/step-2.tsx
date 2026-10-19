@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, ViewStyle } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,10 +21,16 @@ const PERIODICITY_OPTIONS: PeriodicityOption[] = [
   { days: 30, icon: '📆', labelKey: 'createGroup.step2.monthly', hintKey: 'createGroup.step2.monthlyHint' },
 ];
 
-interface Step1Params {
-  name?: string;
-  mode?: string;
-}
+/** Pastille radio — hors StyleSheet.create (fonctions interdites par les
+ * types de style RN 0.86). */
+const radioButton = (selected: boolean): ViewStyle => ({
+  width: 20,
+  height: 20,
+  borderRadius: 10,
+  borderWidth: 2,
+  borderColor: selected ? colors.goldDark : colors.sand,
+  backgroundColor: selected ? colors.goldDark : colors.creamLight,
+});
 
 /**
  * Écran 24 — Create Group (step 2) : montant + périodicité.
@@ -34,7 +40,10 @@ interface Step1Params {
 export default function CreateGroupStep2Screen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { name, mode } = useLocalSearchParams<Step1Params>();
+  const { name, mode } = useLocalSearchParams<{
+    name?: string;
+    mode?: string;
+  }>();
 
   const [amountRaw, setAmountRaw] = useState('');
   const [periodicityDays, setPeriodicityDays] = useState<number>(7);
@@ -44,7 +53,6 @@ export default function CreateGroupStep2Screen() {
 
   const handleContinue = () => {
     if (!name || !mode) {
-      // Protection : accès direct à la step-2 sans passer par la step-1.
       router.replace('/group/create/step-1');
       return;
     }
@@ -106,7 +114,7 @@ export default function CreateGroupStep2Screen() {
                   <Text style={styles.optionTitle}>{t(opt.labelKey)}</Text>
                   <Text style={styles.optionHint}>{t(opt.hintKey)}</Text>
                 </View>
-                <View style={styles.radioButton(selected)} />
+                <View style={radioButton(selected)} />
               </Pressable>
             );
           })}
@@ -236,14 +244,6 @@ const styles = StyleSheet.create({
     color: colors.inkSoft,
     lineHeight: 17,
   },
-  radioButton: (selected: boolean) => ({
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: selected ? colors.goldDark : colors.sand,
-    backgroundColor: selected ? colors.goldDark : colors.creamLight,
-  }),
   footer: {
     paddingHorizontal: spacing.md + 2,
   },

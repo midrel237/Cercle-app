@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -29,12 +29,16 @@ const ROTATION_OPTIONS: {
   },
 ];
 
-interface Step3Params {
-  name?: string;
-  mode?: string;
-  contributionAmount?: string;
-  periodicityDays?: string;
-}
+/** Pastille radio — hors StyleSheet.create (fonctions interdites par les
+ * types de style RN 0.86). */
+const radioButton = (selected: boolean): ViewStyle => ({
+  width: 20,
+  height: 20,
+  borderRadius: 10,
+  borderWidth: 2,
+  borderColor: selected ? colors.goldDark : colors.sand,
+  backgroundColor: selected ? colors.goldDark : colors.creamLight,
+});
 
 /**
  * Écran 25 — Create Group (step 3) : ordre de rotation + récapitulatif.
@@ -44,7 +48,12 @@ interface Step3Params {
 export default function CreateGroupStep3Screen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const params = useLocalSearchParams<Step3Params>();
+  const params = useLocalSearchParams<{
+    name?: string;
+    mode?: string;
+    contributionAmount?: string;
+    periodicityDays?: string;
+  }>();
 
   const [rotation, setRotation] = useState<RotationOrderType>('DRAW');
 
@@ -139,7 +148,7 @@ export default function CreateGroupStep3Screen() {
                   <Text style={styles.optionTitle}>{t(opt.labelKey)}</Text>
                   <Text style={styles.optionHint}>{t(opt.hintKey)}</Text>
                 </View>
-                <View style={styles.radioButton(selected)} />
+                <View style={radioButton(selected)} />
               </Pressable>
             );
           })}
@@ -245,14 +254,6 @@ const styles = StyleSheet.create({
     color: colors.inkSoft,
     lineHeight: 17,
   },
-  radioButton: (selected: boolean) => ({
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: selected ? colors.goldDark : colors.sand,
-    backgroundColor: selected ? colors.goldDark : colors.creamLight,
-  }),
   summaryTitle: {
     fontFamily: fonts.fraunces.semiBold,
     fontSize: 18,

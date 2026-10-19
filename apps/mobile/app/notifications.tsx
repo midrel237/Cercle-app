@@ -3,8 +3,8 @@ import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, T
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { notificationsApi } from '../../src/services/endpoints/account';
-import { colors, fonts, radii, spacing } from '../../src/theme';
+import { notificationsApi } from '../src/services/endpoints/account';
+import { colors, fonts, radii, spacing } from '../src/theme';
 
 interface NotificationRow {
   id: string;

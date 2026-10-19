@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, ViewStyle } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -34,6 +34,17 @@ const MODE_OPTIONS: {
     hintKey: 'createGroup.step1.mixedHint',
   },
 ];
+
+/** Pastille radio — hors StyleSheet.create car les types RN 0.86
+ * n'acceptent plus de fonctions dans les styles. */
+const radioButton = (selected: boolean): ViewStyle => ({
+  width: 20,
+  height: 20,
+  borderRadius: 10,
+  borderWidth: 2,
+  borderColor: selected ? colors.goldDark : colors.sand,
+  backgroundColor: selected ? colors.goldDark : colors.creamLight,
+});
 
 /**
  * Écran 23 — Create Group (step 1) : nom + mode du groupe.
@@ -107,7 +118,7 @@ export default function CreateGroupStep1Screen() {
                   <Text style={styles.modeTitle}>{t(opt.labelKey)}</Text>
                   <Text style={styles.modeHint}>{t(opt.hintKey)}</Text>
                 </View>
-                <View style={styles.radioButton(selected)} />
+                <View style={radioButton(selected)} />
               </Pressable>
             );
           })}
@@ -230,14 +241,6 @@ const styles = StyleSheet.create({
     color: colors.inkSoft,
     lineHeight: 17,
   },
-  radioButton: (selected: boolean) => ({
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: selected ? colors.goldDark : colors.sand,
-    backgroundColor: selected ? colors.goldDark : colors.creamLight,
-  }),
   footer: {
     paddingHorizontal: spacing.md + 2,
   },

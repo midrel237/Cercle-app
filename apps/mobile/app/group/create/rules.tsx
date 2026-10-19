@@ -7,14 +7,6 @@ import { AppButton } from '../../../src/components/AppButton';
 import { groupsApi } from '../../../src/services/endpoints/groups';
 import { colors, fonts, radii, spacing } from '../../../src/theme';
 
-interface RulesParams {
-  name?: string;
-  mode?: string;
-  contributionAmount?: string;
-  periodicityDays?: string;
-  rotation?: string;
-}
-
 interface CreatedGroup {
   id: string;
 }
@@ -28,7 +20,13 @@ interface CreatedGroup {
 export default function GroupRulesScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const params = useLocalSearchParams<RulesParams>();
+  const params = useLocalSearchParams<{
+    name?: string;
+    mode?: string;
+    contributionAmount?: string;
+    periodicityDays?: string;
+    rotation?: string;
+  }>();
 
   const [interestRaw, setInterestRaw] = useState('');
   const [penalty, setPenalty] = useState('');
