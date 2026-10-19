@@ -6,6 +6,12 @@ import { SmsService } from '../common/sms/sms.service';
 /**
  * Tests du module groups — garde-fous d'administration (Phase 4) :
  * retrait de membre protégé, relance SMS, décision d'adhésion.
+ *
+ * NOTE mocks : chaque méthode du service commence par assertIsAdmin
+ * (groupMember.findUnique sur groupId_userId) puis interroge le membre
+ * cible (groupMember.findFirst). Chaque test doit donc configurer les
+ * DEUX appels — un seul mock laisse le second renvoyer undefined et
+ * la garde NotFound/Forbidden échoue au mauvais endroit.
  */
 describe('GroupsService — membres & administration', () => {
   let service: GroupsService;
@@ -37,6 +43,9 @@ describe('GroupsService — membres & administration', () => {
   describe('removeMember — protections admin', () => {
     it('empêche un admin de se retirer lui-même', async () => {
       (prisma.groupMember as { findUnique: jest.Mock }).findUnique.mockResolvedValue({
+        id: 'ma', userId: 'admin1', role: 'ADMIN', isActive: true,
+      });
+      (prisma.groupMember as { findFirst: jest.Mock }).findFirst.mockResolvedValue({
         id: 'm1', userId: 'admin1', role: 'ADMIN', isActive: true,
       });
       await expect(
@@ -46,6 +55,9 @@ describe('GroupsService — membres & administration', () => {
 
     it('empêche le retrait d un autre admin', async () => {
       (prisma.groupMember as { findUnique: jest.Mock }).findUnique.mockResolvedValue({
+        id: 'ma', userId: 'admin1', role: 'ADMIN', isActive: true,
+      });
+      (prisma.groupMember as { findFirst: jest.Mock }).findFirst.mockResolvedValue({
         id: 'm2', userId: 'a2', role: 'ADMIN', isActive: true,
       });
       await expect(
@@ -55,6 +67,9 @@ describe('GroupsService — membres & administration', () => {
 
     it('refuse le retrait d un membre déjà inactif', async () => {
       (prisma.groupMember as { findUnique: jest.Mock }).findUnique.mockResolvedValue({
+        id: 'ma', userId: 'admin1', role: 'ADMIN', isActive: true,
+      });
+      (prisma.groupMember as { findFirst: jest.Mock }).findFirst.mockResolvedValue({
         id: 'm3', userId: 'u3', role: 'MEMBER', isActive: false,
       });
       await expect(
@@ -65,6 +80,9 @@ describe('GroupsService — membres & administration', () => {
 
   describe('sendContributionReminder', () => {
     it('crée une notification et envoie un SMS quand demandé', async () => {
+      (prisma.groupMember as { findUnique: jest.Mock }).findUnique.mockResolvedValue({
+        id: 'ma', userId: 'admin1', role: 'ADMIN', isActive: true,
+      });
       (prisma.groupMember as { findFirst: jest.Mock }).findFirst.mockResolvedValue({
         id: 'm1', groupId: 'g1', userId: 'u1', isActive: true,
         user: { id: 'u1', fullName: 'Robert T.', phoneNumber: '+237600000000' },
@@ -83,6 +101,9 @@ describe('GroupsService — membres & administration', () => {
     });
 
     it('n envoie pas de SMS quand l option est désactivée', async () => {
+      (prisma.groupMember as { findUnique: jest.Mock }).findUnique.mockResolvedValue({
+        id: 'ma', userId: 'admin1', role: 'ADMIN', isActive: true,
+      });
       (prisma.groupMember as { findFirst: jest.Mock }).findFirst.mockResolvedValue({
         id: 'm1', groupId: 'g1', userId: 'u1', isActive: true,
         user: { id: 'u1', fullName: 'Robert T.', phoneNumber: '+237600000000' },
