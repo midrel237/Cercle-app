@@ -2,21 +2,23 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import * as Notifications from 'expo-notifications';
 import { AppButton } from '../../src/components/AppButton';
 import { KycProgressHeader } from '../../src/components/KycProgressHeader';
 import { colors, fonts, radii, spacing } from '../../src/theme';
 
 // Écran 19 — Autorisation des notifications push.
 // Demande la permission système (iOS alerte native, Android 13+ runtime
-// permission) via requestPermissionsAsync : si elle est déjà accordée,
-// l'appel résout immédiatement sans alerte. L'utilisateur peut refuser
-// sans bloquer l'onboarding : le récapitulatif de sécurité (écran 20)
-// permet de la réactiver depuis les réglages système.
+// permission). L'utilisateur peut refuser sans bloquer l'onboarding : le
+// récapitulatif de sécurité (écran 20) permet de la réactiver depuis les
+// réglages système.
 //
-// Expo Go (SDK 53+) ne supporte plus les push Android : requestPermissionsAsync
-// peut alors jeter une erreur expo-notifications. On ne doit JAMAIS interrompre
-// l'onboarding pour ça — le refus silencieux est géré à l'écran 20.
+// IMPORTANT — import dynamique : Expo Go (SDK 53+) ne contient pas les
+// modules natifs de push Android. Un import statique de 'expo-notifications'
+// jette "Cannot find native module 'ExpoTopicSubscriptionModule'" dès
+// l'évaluation du module de route, ce qui casse tout l'écran (warning
+// "missing default export"). On charge donc la librairie uniquement au
+// clic, dans un try/catch — en development build (expo-dev-client) la
+// permission réelle s'applique, en Expo Go l'échec est silencieux.
 export default function NotificationPermissionScreen() {
   const { t } = useTranslation();
   const [isRequesting, setIsRequesting] = useState(false);
@@ -25,10 +27,10 @@ export default function NotificationPermissionScreen() {
     setIsRequesting(true);
     try {
       try {
+        const Notifications = await import('expo-notifications');
         await Notifications.requestPermissionsAsync();
       } catch {
         // Expo Go / environnement sans support push : permission ignorée.
-        // En development build (expo-dev-client), la permission réelle s'applique.
       }
       router.replace('/(onboarding)/security');
     } finally {
