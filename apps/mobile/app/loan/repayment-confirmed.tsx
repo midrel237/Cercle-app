@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppButton } from '../../src/components/AppButton';
 import { FadeIn, PopIn } from '../../src/components/motion';
-import { colors, fonts, radii, spacing } from '../../src/theme';
+import { colors, fonts, spacing } from '../../src/theme';
 
 /**
  * Écran 66 — Remboursement confirmé : montant transféré, échéances
