@@ -7,10 +7,6 @@ import { AppButton } from '../../../src/components/AppButton';
 import { groupsApi } from '../../../src/services/endpoints/groups';
 import { colors, fonts, radii, spacing } from '../../../src/theme';
 
-interface CreatedGroup {
-  id: string;
-}
-
 /**
  * Écran 26 — Group Rules (admin) : options avancées du groupe.
  * Étape finale du tunnel de création : reçoit toutes les données des
@@ -34,6 +30,12 @@ export default function GroupRulesScreen() {
   const [interestError, setInterestError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(false);
+
+  const name = params.name ?? '';
+  const mode = params.mode ?? '';
+  const contributionAmount = Number(params.contributionAmount ?? 0);
+  const periodicityDays = Number(params.periodicityDays ?? 0);
+  const rotation = params.rotation ?? '';
 
   const hasAllParams = !!(
     params.name &&
@@ -61,16 +63,16 @@ export default function GroupRulesScreen() {
     setSubmitting(true);
     try {
       const { data } = await groupsApi.create({
-        name: params.name,
-        mode: params.mode,
-        contributionAmount: Number(params.contributionAmount),
-        periodicityDays: Number(params.periodicityDays),
-        rotationOrderType: params.rotation,
+        name,
+        mode,
+        contributionAmount,
+        periodicityDays,
+        rotationOrderType: rotation,
         interestRate: interest,
         penaltyRules: penalty.trim() === '' ? undefined : penalty.trim(),
         openToDiaspora,
       });
-      router.replace(`/group/${(data as CreatedGroup).id}`);
+      router.replace(`/group/${data.id}`);
     } catch {
       setError(true);
     } finally {

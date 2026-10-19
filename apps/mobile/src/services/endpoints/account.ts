@@ -1,6 +1,8 @@
 import { apiClient } from '../api-client';
+import type { MobileMoneyProvider, PaymentMethodType } from './payments';
 
 export type HistoryFilter = 'ALL' | 'CONTRIBUTIONS' | 'LOANS';
+export type KycStatus = 'NONE' | 'PENDING' | 'VERIFIED' | 'REJECTED';
 
 /**
  * Transaction sérialisée — miroir exact de serializeTransaction
@@ -9,7 +11,7 @@ export type HistoryFilter = 'ALL' | 'CONTRIBUTIONS' | 'LOANS';
  */
 export interface TransactionDto {
   id: string;
-  groupId: string | null;
+  groupId: string;
   groupName: string | null;
   cycleId: string | null;
   cycleNumber: number | null;
@@ -19,7 +21,7 @@ export interface TransactionDto {
   currency: string;
   isCredit: boolean;
   externalReference: string | null;
-  provider: string | null;
+  provider: MobileMoneyProvider | null;
   createdAt: string;
   confirmedAt: string | null;
 }
@@ -30,18 +32,24 @@ export interface HistoryDay {
   items: TransactionDto[];
 }
 
-/** Profil utilisateur — GET /users/me (écrans 72-73). */
+/**
+ * Profil utilisateur — miroir de UsersService.findProfile (écran 72) :
+ * kycStatus, trustScore, moyens de paiement et compteurs de cotisations.
+ */
 export interface UserProfileDto {
   id: string;
-  fullName: string | null;
   phoneNumber: string;
+  fullName: string | null;
+  kycStatus: KycStatus;
   trustScore: number;
   language: 'FR' | 'EN';
   activeGroups: number;
-  createdAt: string;
+  paymentMethods: { id: string; type: PaymentMethodType; provider: MobileMoneyProvider | null }[];
+  contributionsPaid: number;
+  contributionsOnTime: number;
 }
 
-/** Notification — écran 70. */
+/** Notification — miroir du modèle Notification (écran 70). */
 export interface NotificationDto {
   id: string;
   type: string;

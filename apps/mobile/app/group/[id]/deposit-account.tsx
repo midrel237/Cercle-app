@@ -12,6 +12,8 @@ const PROVIDERS = [
   { key: 'ORANGE_MONEY', label: 'Orange Money' },
 ] as const;
 
+type ProviderKey = (typeof PROVIDERS)[number]['key'];
+
 /**
  * Écran 49 — Compte de dépôt du groupe (caissier). Opérateur + numéro →
  * POST deposit-account (garde serveur : seul le caissier peut enregistrer
@@ -23,7 +25,7 @@ export default function DepositAccountScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const [provider, setProvider] = useState<'MTN_MOMO' | 'ORANGE_MONEY'>('MTN_MOMO');
+  const [provider, setProvider] = useState<ProviderKey>('MTN_MOMO');
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -38,7 +40,10 @@ export default function DepositAccountScreen() {
         const { data } = await groupsApi.getOne(id);
         if (!cancelled && data?.depositAccountPhoneNumber) {
           setPhone(data.depositAccountPhoneNumber);
-          if (data.depositAccountProvider) {
+          if (
+            data.depositAccountProvider === 'MTN_MOMO' ||
+            data.depositAccountProvider === 'ORANGE_MONEY'
+          ) {
             setProvider(data.depositAccountProvider);
           }
         }

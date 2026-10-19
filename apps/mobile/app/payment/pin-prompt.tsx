@@ -78,14 +78,15 @@ export default function PaymentPinPromptScreen() {
 
       // 2. Collecte via l'agrégateur : le vrai PIN opérateur sera demandé
       //    sur le téléphone de l'utilisateur (USSD/push), pas dans l'app.
-      await paymentsApi.initiate(transaction.id, provider, transaction.amount);
+      //    amount est un Decimal sérialisé en string → conversion number.
+      await paymentsApi.initiate(transaction.id, provider, Number(transaction.amount));
 
       // 3. Écran 33 : en attente de la confirmation opérateur (webhook).
       router.replace({
         pathname: '/payment/processing',
         params: {
           transactionId: transaction.id,
-          amount: String(transaction.amount),
+          amount: String(Number(transaction.amount)),
           provider,
           groupId,
           ...(eventId ? { eventId } : {}),
