@@ -1,19 +1,20 @@
 import { apiClient } from '../api-client';
 
 export type MobileMoneyProvider = 'MTN_MOMO' | 'ORANGE_MONEY';
+export type TransactionStatus = 'PENDING' | 'CONFIRMED' | 'FAILED';
+export type PaymentMethodType = 'MOBILE_MONEY' | 'BANK_CARD' | 'BANK_TRANSFER';
 
 /**
- * Transaction du ledger — miroir du modèle Prisma LedgerTransaction
- * (les Decimal deviennent des chaînes en JSON). Renvoyée à plat par
- * POST /payments/prepare et GET /transactions/:id.
+ * Transaction du ledger — miroir du modèle Prisma LedgerTransaction.
+ * Decimal → string en JSON. groupId est non-nullable (relation requise).
  */
 export interface LedgerTransactionDto {
   id: string;
-  groupId: string | null;
+  groupId: string;
   cycleId: string | null;
   userId: string;
   type: string;
-  status: 'PENDING' | 'CONFIRMED' | 'FAILED' | string;
+  status: TransactionStatus;
   amount: string;
   currency: string;
   amountXaf: string;
@@ -26,8 +27,8 @@ export interface LedgerTransactionDto {
 /** Moyen de paiement — miroir du modèle Prisma PaymentMethod (écran 34). */
 export interface PaymentMethodDto {
   id: string;
-  type: 'MOBILE_MONEY' | 'BANK_CARD' | 'BANK_TRANSFER' | string;
-  provider: string | null;
+  type: PaymentMethodType;
+  provider: MobileMoneyProvider | null;
   phoneNumber: string | null;
   cardToken: string | null;
   cardBrand: string | null;
