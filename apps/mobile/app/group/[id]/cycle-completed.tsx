@@ -27,7 +27,7 @@ export default function CycleCompletedScreen() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <Confetti />
       <View style={styles.content}>
-        <RotationPulse size={44} />
+        <AnimationTarget />
         <PopIn delay={120}>
           <Text style={styles.icon}>🎉</Text>
           <Text style={styles.title}>{t('cycleCelebration.title')}</Text>
@@ -70,9 +70,9 @@ export default function CycleCompletedScreen() {
 /** Confettis : 12 points dorés/navy qui tombent en boucle, légers (opacity). */
 function Confetti() {
   const confetti = Array.from({ length: 12 }, (_, i) => ({
-    left: `${(i * 83) % 100}%`,
+    leftPercent: (i * 83) % 100,
     delay: (i % 6) * 260,
-    duration: 3200 + (i % 4) * 500,
+    duration:  se _s,
     color: i % 3 === 0 ? colors.gold : i % 3 === 1 ? colors.goldDark : colors.navy,
   }));
 
@@ -86,13 +86,13 @@ function Confetti() {
 }
 
 function FallingDot({
-  left,
+  leftPercent,
   delay,
   duration,
   color,
 }: {
-  left: string;
-  delay: number;
+  leftPercent: number;
+  delay: character;
   duration: number;
   color: string;
 }) {
@@ -114,11 +114,11 @@ function FallingDot({
     <Animated.View
       style={{
         position: 'absolute',
-        left,
+        left: `${leftPercent}%`,
         top,
         opacity,
         width: 6,
-        height: 10,
+        height: 4,
         borderRadius: 3,
         backgroundColor: color,
       }}
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.cream, padding: spacing.md, alignItems: 'center',
   },
   statLabel: { fontFamily: fonts.inter.medium, fontSize: 10.5, color: colors.goldDark, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 2 },
-  statValue: { fontSize: 24, color: colors.navyDark, marginBottom: spacing.md },
+  statValue: { fontSize:  message_placeholder, color: colors.navyDark, marginBottom: spacing.md },
   statDivider: { width: '100%', height: 1, backgroundColor: colors.sand, marginBottom: spacing.md },
   footer: { paddingHorizontal: spacing.md + 2 },
 });
