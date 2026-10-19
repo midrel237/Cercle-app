@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Share, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Share as RNShare, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppButton } from '../src/components/AppButton';
 import { groupsApi } from '../src/services/endpoints/groups';
 import { transactionsApi } from '../src/services/endpoints/account';
-import { API_BASE_URL, getStoredAccessToken } from '../src/services/api-client';
 import { colors, fonts, radii, spacing } from '../src/theme';
 
 // Ligne du relevé — alignée sur serializeTransaction du backend
@@ -35,11 +35,12 @@ const TYPE_LABEL: Record<string, string> = {
 
 /**
  * Écran 69 — Export du relevé : aperçu texte du relevé du groupe
- * (transactions CONFIRMED du ledger), Partager natif et Télécharger.
- * « Télécharger » ouvre le PDF généré par le backend
- * (GET /statements/group/:id.pdf) dans le navigateur système via
- * expo-web-browser — le JWT d'accès passe en query param (TTL court),
- * le navigateur ne pouvant pas poser de header Authorization.
+ * (transactions CONFIRMED du ledger), Partager natif (texte) et
+ * Télécharger le PDF — généré côté serveur (pdfkit, palette Cercle),
+ * téléchargé en binaire (Bearer header via axios, aucun token en URL),
+ * écrit dans le cache de l'app (expo-file-system) puis ouvert dans le
+ * partage natif (expo-sharing) : l'utilisateur peut l'enregistrer,
+ * l'imprimer ou l'envoyer (WhatsApp, e-mail...).
  */
 export default function StatementExportScreen() {
   const { t } = useTranslation();
@@ -49,6 +50,7 @@ export default function StatementExportScreen() {
   const [group, setGroup] = useState<null | { id: string; name: string }>(null);
   const [rows, setRows] = useState<TxRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -97,19 +99,50 @@ export default function StatementExportScreen() {
   };
 
   const handleShare = () => {
-    Share.share({ message: buildText() });
+    RNShare.share({ message: buildText() });
   };
 
-  /** Ouvre le PDF du relevé dans le navigateur système (expo-web-browser). */
+  /**
+   * Télécharge le PDF du serveur (GET /transactions/group/:id/statement),
+   * l'écrit dans le répertoire cache de l'app, puis ouvre le partage
+   * natif — l'utilisateur choisit : enregistrer, imprimer, envoyer.
+   */
   const handleDownloadPdf = async () => {
-    if (!groupId) return;
-    const token = await getStoredAccessToken();
-    if (!token) {
-      setError(t('historyScreen.statementLoadError'));
-      return;
+    if (!groupId || downloading) return;
+    setDownloading(true);
+    try {
+      const { data } = await transactionsApi.downloadGroupStatement(groupId);
+      const fileName = `cercle-releve-${groupId}.pdf`;
+      const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
+      // Réponse arraybuffer → base64 pour writeAsStringAsync.
+      let base64: string;
+      if (typeof data === 'string') {
+        base64 = data;
+      } else {
+        const bytes = new Uint8Array(data);
+        let binary = '';
+        for (let i = 0; i < bytes.length; i += 1) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        base64 = btoa(binary);
+      }
+      await FileSystem.writeAsStringAsync(fileUri, base64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileUri, {
+          mimeType: 'application/pdf',
+          dialogTitle: `${group?.name ?? 'Cercle'} — relevé PDF`,
+          UTI: 'com.adobe.pdf',
+        });
+      } else {
+        Alert.alert('Cercle', `Relevé enregistré : ${fileName}`);
+      }
+    } catch {
+      Alert.alert('Cercle', t('historyScreen.statementDownloadError'));
+    } finally {
+      setDownloading(false);
     }
-    const url = `${API_BASE_URL}/statements/group/${groupId}.pdf?token=${encodeURIComponent(token)}`;
-    await WebBrowser.openBrowserAsync(url);
   };
 
   return (
@@ -157,8 +190,7 @@ export default function StatementExportScreen() {
                   {t('historyScreen.statementTotal')}
                 </Text>
                 <Text style={[styles.stmtRight, { fontFamily: fonts.mono.semiBold }]}>
-                  {total.toLocaleString('fr-FR')} FCFA
-                </Text>
+                  {total.toLocaleString('fr-FR')} FCFA</Text>
               </View>
             ) : null}
           </View>
@@ -168,9 +200,13 @@ export default function StatementExportScreen() {
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20), gap: spacing.sm }]}>
         <AppButton label={t('historyScreen.shareButton')} variant="ghost" onPress={handleShare} disabled={loading || rows.length === 0} />
         <AppButton
-          label={t('historyScreen.downloadPdfButton')}
+          label={
+            downloading
+              ? t('historyScreen.statementDownloading')
+              : t('historyScreen.downloadPdfButton')
+          }
           onPress={handleDownloadPdf}
-          disabled={loading}
+          disabled={loading || downloading}
         />
       </View>
     </View>
