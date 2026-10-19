@@ -3,9 +3,9 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { groupsApi } from '../../../src/services/endpoints/groups';
-import { FadeIn, PopIn, CountUp } from '../../../src/components/motion';
-import { colors, fonts, radii, spacing } from '../../../src/theme';
+import { groupsApi } from '../../../../src/services/endpoints/groups';
+import { FadeIn, PopIn, CountUp } from '../../../../src/components/motion';
+import { colors, fonts, radii, spacing } from '../../../../src/theme';
 
 interface MemberProfile {
   id: string;
