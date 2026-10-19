@@ -26,6 +26,9 @@ export interface GroupDto {
   inviteCode: string;
   memberCount: number;
   cashierMemberId: string | null;
+  /** Compte de dépôt du caissier (écran 49) — null si non enregistré. */
+  depositAccountPhoneNumber: string | null;
+  depositAccountProvider: string | null;
   members: GroupMemberLiteDto[];
   cycles: { id: string; cycleNumber: number; status: string }[];
   createdAt: string;
