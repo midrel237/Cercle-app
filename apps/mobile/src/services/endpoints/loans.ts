@@ -1,45 +1,116 @@
 import { apiClient } from '../api-client';
 
-/** Échéance d'un prêt — échéancier (écrans 59-64) et remboursement. */
+/**
+ * Miroirs des sérialiseurs de LoansService (loans.service.ts).
+ * Decimal Prisma → string en JSON, DateTime → ISO string.
+ */
+
+export type LoanStatus = 'REQUESTED' | 'VOTING' | 'APPROVED' | 'REJECTED' | 'ACTIVE' | 'REPAID' | 'DEFAULTED';
+
+/** Échéance persistée — miroir du modèle LoanRepaymentSchedule. */
 export interface LoanInstallmentDto {
   id: string;
+  loanId: string;
   installmentNumber: number;
-  /** Part du capital (Decimal en chaîne). */
-  principal: string;
-  /** Intérêts (Decimal en chaîne). */
-  interest: string;
-  total: string;
   dueDate: string;
-  status: 'PENDING' | 'PAID' | 'LATE' | string;
+  /** Decimal → string. */
+  amount: string;
   paidAt: string | null;
+  status: 'PENDING' | 'PAID' | 'LATE';
 }
 
-/** Prêt interne avec votes et échéancier — écrans 57-65. */
+/** Vote d'un membre — miroir du modèle LoanVote (include voter). */
+export interface LoanVoteDto {
+  id: string;
+  loanId: string;
+  voterId: string;
+  approve: boolean;
+  votedAt: string;
+  voter: { id: string; fullName: string | null };
+}
+
+/** Contrat — miroir du modèle LoanContract. */
+export interface LoanContractDto {
+  id: string;
+  loanId: string;
+  contractPdfUrl: string | null;
+  signedByBorrower: boolean;
+  signedAt: string | null;
+  createdAt: string;
+}
+
+/** Prêt complet (détail/findOne) — miroir de LoansService.findOne. */
 export interface LoanDto {
   id: string;
   groupId: string;
   borrowerId: string;
   amount: string;
-  interestRate: number | null;
-  durationMonths: number;
-  reason: string;
-  status: 'PENDING' | 'APPROVED' | 'ACTIVE' | 'REPAID' | 'REJECTED' | 'LATE' | string;
-  guarantorId: string | null;
-  signedAt: string | null;
-  createdAt: string;
-  votes: { id: string; voterId: string; approve: boolean; createdAt: string }[];
-  installments: LoanInstallmentDto[];
+  interestRate: string;
+  status: LoanStatus;
+  requestedAt: string;
+  approvedAt: string | null;
+  dueDate: string | null;
   borrower: { id: string; fullName: string | null };
+  votes: LoanVoteDto[];
+  repaymentSchedule: LoanInstallmentDto[];
+  contract: LoanContractDto | null;
 }
 
-/** Réponse de POST /loans — prêt créé + aperçu de l'échéancier (écran 58). */
+/** Champs calculés ajoutés par findOne (écrans 59, 64). */
+export interface LoanDetailDto extends LoanDto {
+  majorityRequired: number;
+  approvals: number;
+  rejections: number;
+  activeMembers: number;
+}
+
+/** Échéance de l'aperçu prévisionnel (request) — pas de status/id. */
+export interface SchedulePreviewDto {
+  installmentNumber: number;
+  dueDate: string;
+  amount: number;
+}
+
+/** Réponse de POST /loans — prêt créé + échéancier prévisionnel (écran 58). */
 export interface LoanRequestResultDto {
   loan: LoanDto;
-  schedulePreview: {
-    installmentNumber: number;
-    total: string;
-    dueDate: string;
-  }[];
+  schedulePreview: SchedulePreviewDto[];
+}
+
+/** Prêt résumé (listMine) — miroir de LoansService.findMine (écran 57). */
+export interface MyLoanRowDto {
+  id: string;
+  groupId: string;
+  groupName: string;
+  amount: string;
+  interestRate: string;
+  status: LoanStatus;
+  requestedAt: string;
+  approvedAt: string | null;
+  contractSigned: boolean;
+  installmentsPaid: number;
+  installmentsTotal: number;
+  remainingAmount: number;
+  totalWithInterest: number;
+  nextDueDate: string | null;
+  nextInstallmentAmount: string | null;
+}
+
+/** Transaction brute renvoyée par prepareRepayment (modèle LedgerTransaction). */
+export interface RepaymentTransactionDto {
+  id: string;
+  groupId: string;
+  userId: string;
+  type: string;
+  amount: string;
+  currency: string;
+  amountXaf: string;
+  status: 'PENDING' | 'CONFIRMED' | 'FAILED';
+  createdAt: string;
+  confirmedAt: string | null;
+  cycleId?: string | null;
+  provider?: string | null;
+  externalReference?: string | null;
 }
 
 export const loansApi = {
@@ -59,23 +130,26 @@ export const loansApi = {
   vote: (loanId: string, approve: boolean) =>
     apiClient.post<LoanDto>(`/loans/${loanId}/vote`, { approve }),
 
-  /** Prêts d'un groupe (demandes à valider incluses). */
+  /** Prêts d'un groupe (demandes à valider incluses) — Prisma brut include. */
   listForGroup: (groupId: string) =>
     apiClient.get<LoanDto[]>(`/loans/group/${groupId}`),
 
-  /** Écran 57 — mes prêts (actifs + soldés, tous groupes). */
-  listMine: () => apiClient.get<LoanDto[]>('/loans/me'),
+  /** Écran 57 — mes prêts (actifs + soldés) : lignes résumées. */
+  listMine: () => apiClient.get<MyLoanRowDto[]>('/loans/me'),
 
-  /** Détail d'un prêt (écrans 59-64 : votes, échéancier, contrat). */
-  getOne: (id: string) => apiClient.get<LoanDto>(`/loans/${id}`),
+  /** Détail d'un prêt — findOne + compteurs de votes (écrans 59-64). */
+  getOne: (id: string) => apiClient.get<LoanDetailDto>(`/loans/${id}`),
 
   /** Écran 63 — signer le contrat (emprunteur). */
   signContract: (loanId: string) =>
     apiClient.post<LoanDto>(`/loans/${loanId}/sign`),
 
-  /** Écran 65 — préparer le remboursement d'une échéance (transaction PENDING). */
+  /**
+   * Écran 65 — préparer le remboursement : crée la transaction
+   * LOAN_REPAYMENT PENDING (Prisma brut, miroir de LedgerTransaction).
+   */
   prepareRepayment: (loanId: string, installmentNumber: number) =>
-    apiClient.post<{ transactionId: string; amount: string }>(
+    apiClient.post<RepaymentTransactionDto>(
       `/loans/${loanId}/repay?installment=${installmentNumber}`,
     ),
 };
