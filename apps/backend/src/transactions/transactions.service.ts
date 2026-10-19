@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import type { TransactionType } from '@prisma/client';
 
 /**
  * Le ledger est APPEND-ONLY : on ne modifie jamais une ligne existante pour
@@ -58,9 +59,10 @@ export class TransactionsService {
     userId: string,
     opts: { filter?: 'ALL' | 'CONTRIBUTIONS' | 'LOANS' } = {},
   ) {
-    // Prisma exige des tableaux mutables — pas de `as const`.
-    const CONTRIBUTION_TYPES: string[] = ['CONTRIBUTION', 'EVENT_CONTRIBUTION'];
-    const LOAN_TYPES: string[] = ['LOAN_DISBURSEMENT', 'LOAN_REPAYMENT'];
+    // Le champ `type` de LedgerTransaction est l'enum Prisma TransactionType :
+    // tableau mutable et typé explicitement (pas `as const`, pas `string[]`).
+    const CONTRIBUTION_TYPES: TransactionType[] = ['CONTRIBUTION', 'EVENT_CONTRIBUTION'];
+    const LOAN_TYPES: TransactionType[] = ['LOAN_DISBURSEMENT', 'LOAN_REPAYMENT'];
 
     const where =
       opts.filter === 'CONTRIBUTIONS'
