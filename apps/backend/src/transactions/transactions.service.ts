@@ -58,11 +58,15 @@ export class TransactionsService {
     userId: string,
     opts: { filter?: 'ALL' | 'CONTRIBUTIONS' | 'LOANS' } = {},
   ) {
+    // Prisma exige des tableaux mutables — pas de `as const`.
+    const CONTRIBUTION_TYPES: string[] = ['CONTRIBUTION', 'EVENT_CONTRIBUTION'];
+    const LOAN_TYPES: string[] = ['LOAN_DISBURSEMENT', 'LOAN_REPAYMENT'];
+
     const where =
       opts.filter === 'CONTRIBUTIONS'
-        ? { userId, type: { in: ['CONTRIBUTION', 'EVENT_CONTRIBUTION'] as const } }
+        ? { userId, type: { in: CONTRIBUTION_TYPES } }
         : opts.filter === 'LOANS'
-          ? { userId, type: { in: ['LOAN_DISBURSEMENT', 'LOAN_REPAYMENT'] as const } }
+          ? { userId, type: { in: LOAN_TYPES } }
           : { userId };
 
     const transactions = await this.prisma.ledgerTransaction.findMany({
