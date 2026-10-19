@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     lineHeight: 17,
   },
   refText: {
-    fontFamily: fonts.mono.regular,
+    fontFamily: fonts.mono.medium,
     fontSize: 10.5,
     color: colors.lavenderSoft,
     marginTop: spacing.md,
