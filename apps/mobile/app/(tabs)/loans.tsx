@@ -3,27 +3,9 @@ import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, T
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { loansApi } from '../../src/services/endpoints/loans';
+import { loansApi, MyLoanRowDto } from '../../src/services/endpoints/loans';
 import { FadeIn, Stagger, CountUp } from '../../src/components/motion';
 import { colors, fonts, radii, spacing } from '../../src/theme';
-
-interface LoanRow {
-  id: string;
-  groupId: string;
-  groupName: string;
-  amount: string;
-  interestRate: string;
-  status: string;
-  requestedAt: string;
-  approvedAt: string | null;
-  contractSigned: boolean;
-  installmentsPaid: number;
-  installmentsTotal: number;
-  remainingAmount: string;
-  totalWithInterest: number;
-  nextDueDate: string | null;
-  nextInstallmentAmount: string | null;
-}
 
 /**
  * Écran 57 — Mes prêts : RESTE À REMBOURSER global, prêts actifs
@@ -37,7 +19,7 @@ export default function LoansScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 
-  const [loans, setLoans] = useState<LoanRow[]>([]);
+  const [loans, setLoans] = useState<MyLoanRowDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +43,7 @@ export default function LoansScreen() {
 
   const remainingTotal = loans
     .filter((l) => l.status === 'ACTIVE')
-    .reduce((sum, l) => sum + Number(l.remainingAmount), 0);
+    .reduce((sum, l) => sum + l.remainingAmount, 0);
 
   const active = loans.filter(
     (l) => l.status === 'ACTIVE' || l.status === 'APPROVED' || l.status === 'VOTING',
@@ -72,7 +54,7 @@ export default function LoansScreen() {
   const dateLabel = (d: string | null) =>
     d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '';
 
-  const card = (l: LoanRow, activeStyle = false) => (
+  const card = (l: MyLoanRowDto, activeStyle = false) => (
     <Pressable
       style={[styles.loanCard, activeStyle && styles.loanCardActive]}
       onPress={() => router.push(`/loan/${l.id}`)}
@@ -91,7 +73,7 @@ export default function LoansScreen() {
           {t('loansScreen.activeMeta', {
             paid: l.installmentsPaid,
             total: l.installmentsTotal,
-            remaining: Number(l.remainingAmount).toLocaleString('fr-FR'),
+            remaining: l.remainingAmount.toLocaleString('fr-FR'),
           })}
           {l.nextDueDate ? ` · ${t('loansScreen.nextDue', { date: dateLabel(l.nextDueDate) })}` : ''}
         </Text>
