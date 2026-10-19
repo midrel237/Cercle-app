@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Share, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppButton } from '../src/components/AppButton';
 import { groupsApi } from '../src/services/endpoints/groups';
 import { transactionsApi } from '../src/services/endpoints/account';
+import { API_BASE_URL, getStoredAccessToken } from '../src/services/api-client';
 import { colors, fonts, radii, spacing } from '../src/theme';
 
 // Ligne du relevé — alignée sur serializeTransaction du backend
@@ -34,8 +36,11 @@ const TYPE_LABEL: Record<string, string> = {
 /**
  * Écran 69 — Export du relevé : aperçu texte du relevé du groupe
  * (transactions CONFIRMED du ledger), Partager natif et Télécharger.
- * Le PDF réel (maquette : liste pointillée « Cercle · Généré le… »)
- * est différé au module PDF ; l'aperçu texte reste fidèle au contenu.
+ * « Télécharger » ouvre le PDF généré par le backend
+ * (GET /statements/group/:id.pdf, générateur TS pur) dans le navigateur
+ * système via expo-web-browser — le JWT d'accès passe en query param
+ * (stratégie jwt-query dédiée, TTL 15 min), le navigateur ne pouvant
+ * pas poser de header Authorization.
  */
 export default function StatementExportScreen() {
   const { t } = useTranslation();
@@ -45,6 +50,7 @@ export default function StatementExportScreen() {
   const [group, setGroup] = useState<null | { id: string; name: string }>(null);
   const [rows, setRows] = useState<TxRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [opening, setOpening] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -94,6 +100,25 @@ export default function StatementExportScreen() {
 
   const handleShare = () => {
     Share.share({ message: buildText() });
+  };
+
+  /** Ouvre le PDF du relevé dans le navigateur système (expo-web-browser). */
+  const handleDownloadPdf = async () => {
+    if (!groupId || opening) return;
+    setOpening(true);
+    try {
+      const token = await getStoredAccessToken();
+      if (!token) {
+        setError(t('historyScreen.statementLoadError'));
+        return;
+      }
+      const url = `${API_BASE_URL}/statements/group/${groupId}.pdf?token=${encodeURIComponent(token)}`;
+      await WebBrowser.openBrowserAsync(url);
+    } catch {
+      setError(t('historyScreen.statementLoadError'));
+    } finally {
+      setOpening(false);
+    }
   };
 
   return (
@@ -153,8 +178,8 @@ export default function StatementExportScreen() {
         <AppButton label={t('historyScreen.shareButton')} variant="ghost" onPress={handleShare} disabled={loading || rows.length === 0} />
         <AppButton
           label={t('historyScreen.downloadPdfButton')}
-          onPress={handleShare} // PDF différé — partage texte équivalent en MVP.
-          disabled={loading || rows.length === 0}
+          onPress={handleDownloadPdf}
+          disabled={loading || opening}
         />
       </View>
     </View>
