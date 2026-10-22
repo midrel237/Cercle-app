@@ -6,12 +6,23 @@ import { JwtPayload } from '../auth/strategies/jwt.strategy';
 import { PrismaService } from '../database/prisma.service';
 import { DiditService } from './didit.service';
 
-/** Statuts métier Cercle mappés depuis la décision Didit. */
+/** Statuts métier Cercle mappés depuis le statut Didit v3. */
 export type CercleKycStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
 
+/**
+ * Cartographie des statuts Didit v3 (casse exacte, cf. docs.didit.me
+ * /integration/verification-statuses) vers Cercle :
+ *   "Approved"  -> VERIFIED
+ *   "Declined"  -> REJECTED
+ *   tout le reste ("Not Started", "In Progress", "Awaiting User",
+ *   "Resubmitted", "In Review", "Expired", "Abandoned", "Kyc Expired")
+ *   -> PENDING
+ * Exportée car partagée entre le polling de secours de /kyc/me/status
+ * (ce contrôleur) et le webhook public (kyc-webhook.controller.ts).
+ */
 export function mapDiditDecision(decision?: string): CercleKycStatus {
-  if (decision === 'APPROVED') return 'VERIFIED';
-  if (decision === 'DECLINED') return 'REJECTED';
+  if (decision === 'Approved') return 'VERIFIED';
+  if (decision === 'Declined') return 'REJECTED';
   return 'PENDING';
 }
 
@@ -46,11 +57,10 @@ export async function applyKycDecision(
 /**
  * Endpoints KYC authentifiés (JWT) pour l'app mobile.
  *
- * Le webhook Didit vit désormais dans un contrôleur séparé
+ * Le webhook Didit vit dans un contrôleur séparé
  * (kyc-webhook.controller.ts), volontairement SANS guard JWT : Didit
  * appelle ce callback sans token, et la vérification de signature
- * HMAC-SHA256 y suffit. Le laisser ici lui aurait valu un 401 en
- * production (le guard de classe s'applique à toutes les routes).
+ * HMAC-SHA256 y suffit.
  */
 @UseGuards(JwtAuthGuard)
 @Controller('kyc')
@@ -64,9 +74,10 @@ export class KycController {
   ) {}
 
   /**
-   * Crée une session Didit pour l'utilisateur connecté et renvoie l'URL
+   * Crée une session Didit v3 pour l'utilisateur connecté et renvoie l'URL
    * du flux de vérification. L'app mobile ouvre sessionUrl via
-   * expo-web-browser et revient via `cercle://kyc/return`.
+   * expo-web-browser et revient via `cercle://kyc/return` (Didit y ajoute
+   * ?verificationSessionId=...&status=...).
    */
   @Post('me/session')
   async createSession(
@@ -76,8 +87,8 @@ export class KycController {
     const mobileScheme = this.config.get<string>('MOBILE_SCHEME', 'cercle');
     const session = await this.didit.createSession({
       callbackUrl: `${mobileScheme}://kyc/return`,
-      vendorId: body?.vendorId,
-      redirectUrl: `${mobileScheme}://kyc/return`,
+      // ID utilisateur Cercle — vendor_data Didit (déduplication, entité).
+      vendorId: body?.vendorId ?? user.sub,
     });
 
     await this.prisma.$transaction(async (tx) => {
@@ -97,7 +108,7 @@ export class KycController {
     return { sessionUrl: session.sessionUrl };
   }
 
-  /** Statut KYC courant — appelé par l'app mobile après le retour deep link. */
+  /** Statut KYC courant — appelé par l'app mobile après le retour du callback. */
   @Get('me/status')
   async status(@CurrentUser() user: JwtPayload) {
     const kyc = await this.prisma.kycDocument.findFirst({
@@ -112,7 +123,7 @@ export class KycController {
     // interroge Didit pour fournir la décision en temps réel.
     if (kyc.status === 'PENDING' && kyc.diditSessionId) {
       try {
-        const remote = await this.didit.getSession(kyc.diditSessionId);
+        const remote = await this.didit.getSessionDecision(kyc.diditSessionId);
         const mapped = mapDiditDecision(remote.status);
         if (mapped !== 'PENDING') {
           await applyKycDecision(this.prisma, kyc.id, kyc.userId, mapped, remote.status);
