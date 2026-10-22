@@ -7,7 +7,9 @@ ALTER TABLE "kyc_documents" ADD COLUMN "didit_session_id" TEXT;
 ALTER TABLE "kyc_documents" ADD COLUMN "didit_decision" TEXT;
 ALTER TABLE "kyc_documents" ADD COLUMN "verified_at" TIMESTAMP(3);
 CREATE UNIQUE INDEX "kyc_documents_didit_session_id_key" ON "kyc_documents"("didit_session_id");
--- La capture documentaire est déléguée à Didit : champs legacy rendus optionnels
-ALTER TABLE "kyc_documents" ALTER COLUMN "document_type" DROP NOT NULL;
-ALTER TABLE "kyc_documents" ALTER COLUMN "recto_url" DROP NOT NULL;
-ALTER TABLE "kyc_documents" ALTER COLUMN "selfie_url" DROP NOT NULL;
+-- La capture documentaire est deleguee a Didit : champs legacy rendus optionnels.
+-- Colonnes camelCase dans la base (pas de @map sur ces champs dans le schema) ;
+-- les noms snake_case utilises precedemment n'existaient pas (P3018/42703).
+ALTER TABLE "kyc_documents" ALTER COLUMN "documentType" DROP NOT NULL;
+ALTER TABLE "kyc_documents" ALTER COLUMN "rectoUrl" DROP NOT NULL;
+ALTER TABLE "kyc_documents" ALTER COLUMN "selfieUrl" DROP NOT NULL;
