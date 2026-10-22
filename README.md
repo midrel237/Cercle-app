@@ -14,7 +14,7 @@ charges Tontine App* et à la maquette `Cercle_maquettes_ecrans.html` (80 écran
 | Mobile Money | Agrégateur (CinetPay/Maviance) |
 | Notifications | In-app + cron @nestjs/schedule (Expo Push/SMS à brancher) |
 | Relevés PDF | Générateur TypeScript pur (node:zlib) — module statements |
-| SMS | Africa's Talking (SmsProvider, console en dev) |
+| SMS | Termii (SmsProvider, console en dev) |
 | Auth | JWT + Secure Store + biométrie + OTP SMS |
 
 ## Documentation
@@ -58,7 +58,7 @@ npm run mobile                      # Expo (autre terminal)
 ## Étapes suivantes
 
 1. Écrans restants : onboarding (16-20), vie du groupe (27-53), prêts (57-66).
-2. Identifiants prod Africa's Talking / Didit.
+2. Identifiants prod Termii / Didit.
 3. Agrégateur Mobile Money réel + PSP carte diaspora.
 4. Règle trustScore (dégradation, plancher, récupération) — socle prêt.
 5. Expo Push dans dispatch() — stockage du token par utilisateur.
