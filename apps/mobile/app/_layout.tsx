@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
@@ -19,6 +19,9 @@ import {
   IBMPlexMono_500Medium,
   IBMPlexMono_600SemiBold,
 } from '@expo-google-fonts/ibm-plex-mono';
+import { usersApi } from '../src/services/endpoints/account';
+import { useAuthStore } from '../src/store/auth.store';
+import { getStoredAccessToken } from '../src/services/api-client';
 import '../src/i18n';
 
 // Garde le splash natif visible tant que les polices ne sont pas chargees :
@@ -35,6 +38,12 @@ SplashScreen.preventAutoHideAsync();
  * sous-chemins (group/join, loan/request, payment/methods, transaction/[id]...)
  * Expo Router les decouvre automatiquement, il ne faut PAS les declarer ici
  * (sinon warning "No route named ... exists in nested children").
+ *
+ * Restauration de session : si un token JWT est encore en SecureStore, on
+ * charge le profil (GET /users/me) et on reprend directement dans (tabs) —
+ * plus de re-OTP / re-KYC a chaque ouverture de l'app. Token invalide ou
+ * absent → flux normal depuis (auth). L'ecran (auth)/splash n'est plus une
+ * etape obligatoire : initialRouteName depend de la session.
  */
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -49,24 +58,67 @@ export default function RootLayout() {
     IBMPlexMono_600SemiBold,
   });
 
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
+  const [sessionChecked, setSessionChecked] = useState(false);
+  const sessionRestored = useRef(false);
+  const setUser = useAuthStore((s) => s.setUser);
+
+  useEffect(() => {
+    const restoreSession = async () => {
+      try {
+        const token = await getStoredAccessToken();
+        if (!token) {
+          return;
+        }
+        // Token present : verifier qu'il est encore valide cote backend et
+        // hydrater le store (id, fullName, kycStatus). 401 = token expire
+        // → flux d'auth normal (le token reste en place, inoffensif).
+        const { data } = await usersApi.getProfile();
+        if (data?.id) {
+          setUser({
+            id: data.id,
+            phoneNumber: data.phoneNumber,
+            fullName: data.fullName,
+            language: data.language === 'FR' ? 'fr' : 'en',
+            kycStatus: data.kycStatus === 'VERIFIED' ? 'verified'
+              : data.kycStatus === 'PENDING' ? 'pending'
+              : data.kycStatus === 'REJECTED' ? 'rejected'
+              : 'not_started',
+            hasBiometricEnabled: false,
+            trustScore: data.trustScore,
+            preferredCurrency: 'XAF',
+          } as never);
+          sessionRestored.current = true;
+        }
+      } catch {
+        // Token absent/expire/reseau indisponible : flux de connexion normal.
+      } finally {
+        setSessionChecked(true);
+      }
+    };
+    restoreSession();
+  }, [setUser]);
+
+  const onLayoutRootView = React.useCallback(async () => {
+    if (fontsLoaded && sessionChecked) {
       await SplashScreen.hideAsync();
     }
-  }, [fontsLoaded]);
+  }, [fontsLoaded, sessionChecked]);
 
   useEffect(() => {
     onLayoutRootView();
   }, [onLayoutRootView]);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || !sessionChecked) {
     return null;
   }
 
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
-      <Stack screenOptions={{ headerShown: false }} initialRouteName="(auth)">
+      <Stack
+        screenOptions={{ headerShown: false }}
+        initialRouteName={sessionRestored.current ? '(tabs)' : '(auth)'}
+      >
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(kyc)" />
         <Stack.Screen name="(onboarding)" />

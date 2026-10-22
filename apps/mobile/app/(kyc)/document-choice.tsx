@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 import Svg, { Path } from 'react-native-svg';
 import { AppButton } from '../../src/components/AppButton';
 import { KycProgressHeader } from '../../src/components/KycProgressHeader';
@@ -46,8 +47,9 @@ const OPTIONS: { type: KycDocumentType; labelKey: string; hintKey: string }[] = 
 // Le choix local sert d'indication de préférence ; la collecte des pièces
 // est déléguée au flux hébergé Didit : « Continuer » appelle
 // POST /kyc/me/session puis ouvre sessionUrl dans le navigateur système
-// (WebBrowser auth session). Le retour s'effectue via le deep link
-// cercle://kyc/return géré sur processing.tsx.
+// (WebBrowser auth session). Le retour s'effectue via le callback
+// calculé côté mobile (exp:// en Expo Go, cercle:// en build), géré sur
+// processing.tsx.
 //
 // Correctifs UI : icônes SVG au lieu des emojis (🪪 se rendait en
 // rectangle illisible), micro-animations FadeIn en cascade sur les cartes.
@@ -62,10 +64,15 @@ export default function KycDocumentChoiceScreen() {
     setError(null);
     setLoading(true);
     try {
-      const { data } = await kycApi.createSession();
+      // URL de retour dynamique : en Expo Go, seul exp:// est ouvrable
+      // (le schéma personnalisé cercle:// n'est pas enregistré sur l'app
+      // Go) ; en build de dev/production, cercle://. Linking.createURL
+      // produit la bonne URL selon l'environnement.
+      const callbackUrl = Linking.createURL('/kyc/return');
+      const { data } = await kycApi.createSession(callbackUrl);
       // Auth session : aucun cookie partagé avec le navigateur de l'OS,
-      // et le retour deep link ferme la fenêtre automatiquement.
-      await WebBrowser.openAuthSessionAsync(data.sessionUrl, 'cercle://kyc/return');
+      // et le retour callback ferme la fenêtre automatiquement.
+      await WebBrowser.openAuthSessionAsync(data.sessionUrl, callbackUrl);
       router.replace('/(kyc)/processing');
     } catch (err) {
       setError(t('kyc.documentChoice.sessionError'));

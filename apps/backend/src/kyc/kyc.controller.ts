@@ -75,18 +75,23 @@ export class KycController {
 
   /**
    * Crée une session Didit v3 pour l'utilisateur connecté et renvoie l'URL
-   * du flux de vérification. L'app mobile ouvre sessionUrl via
-   * expo-web-browser et revient via `cercle://kyc/return` (Didit y ajoute
-   * ?verificationSessionId=...&status=...).
+   * du flux de vérification.
+   *
+   * `callbackUrl` (optionnel) : URL de retour après le flux Didit, fournie
+   * par le mobile. Nécessaire car Expo Go ne peut pas ouvrir le schéma
+   * personnalisé `cercle://` (seuls les schémas exp:// y fonctionnent) :
+   * le client calcule son URL de retour (Linking.createURL) selon son
+   * environnement — exp:// en Expo Go, cercle:// en build de dev/production.
+   * Par défaut : MOBILE_SCHEME://kyc/return (build).
    */
   @Post('me/session')
   async createSession(
     @CurrentUser() user: JwtPayload,
-    @Body() body: { vendorId?: string },
+    @Body() body: { vendorId?: string; callbackUrl?: string },
   ) {
     const mobileScheme = this.config.get<string>('MOBILE_SCHEME', 'cercle');
     const session = await this.didit.createSession({
-      callbackUrl: `${mobileScheme}://kyc/return`,
+      callbackUrl: body?.callbackUrl ?? `${mobileScheme}://kyc/return`,
       // ID utilisateur Cercle — vendor_data Didit (déduplication, entité).
       vendorId: body?.vendorId ?? user.sub,
     });

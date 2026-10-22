@@ -6,7 +6,7 @@ export type KycStatus = 'NONE' | 'PENDING' | 'VERIFIED' | 'REJECTED';
 //   POST /kyc/me/session  -> { sessionUrl }  (session de vérification Didit)
 //   GET  /kyc/me/status   -> { status }       (polling après le retour deep link)
 export const kycApi = {
-  createSession: () =>
-    apiClient.post<{ sessionUrl: string }>('/kyc/me/session'),
+  createSession: (callbackUrl?: string) =>
+    apiClient.post<{ sessionUrl: string }>('/kyc/me/session', { callbackUrl }),
   getStatus: () => apiClient.get<{ status: KycStatus }>('/kyc/me/status'),
 };
