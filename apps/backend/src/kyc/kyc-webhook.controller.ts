@@ -14,18 +14,31 @@ import { DiditService } from './didit.service';
 import { applyKycDecision, mapDiditDecision } from './kyc.controller';
 
 /**
- * Webhook Didit — public SANS auth JWT (Didit ne possède pas nos jetons).
- * Sécurité assurée uniquement par la vérification de signature
- * HMAC-SHA256 de l'en-tête X-Signature contre le secret partagé.
+ * Webhook Didit v3 — public SANS auth JWT (Didit ne possède pas nos jetons).
+ * Sécurité assurée par la vérification de signature HMAC-SHA256 de l'en-tête
+ * X-Signature contre le secret partagé, plus la fraîcheur X-Timestamp.
  *
  * ⚠ Ne jamais ajouter @UseGuards(JwtAuthGuard) ici : ce contrôleur
  * recevrait un 401 en production et les décisions de vérification
- * ne seraient jamais appliquées (le polling de secours de
- * /kyc/me/status masquerait le bug en développement).
+ * ne seraient jamais appliquées.
+ *
+ * Enveloppe v3 (docs.didit.me/integration/webhooks) :
+ * {
+ *   "event_id": "...", "session_id": "...",
+ *   "status": "Approved" | "Declined" | ...,
+ *   "webhook_type": "status.updated",
+ *   "vendor_data": "...", "environment": "live" | "sandbox",
+ *   ...
+ * }
+ * L'événement pertinent est "status.updated" avec session_id + status à la
+ * racine (l'ancien "session.completed" avec data.id/data.decision était v2).
  */
 @Controller('kyc/didit')
 export class KycWebhookController {
   private readonly logger = new Logger(KycWebhookController.name);
+
+  /** Tolérance de fraîcheur du timestamp Didit (docs : 5 minutes). */
+  private static readonly MAX_TIMESTAMP_SKEW = 300;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -41,26 +54,38 @@ export class KycWebhookController {
     const raw = req.rawBody.toString('utf8');
     const signature = String(req.headers['x-signature'] ?? '');
     this.verifySignature(raw, signature);
+    this.verifyTimestamp(req.headers['x-timestamp']);
 
     const event = JSON.parse(raw) as {
-      type?: string;
-      data?: { id?: string; decision?: string };
+      webhook_type?: string;
+      session_id?: string;
+      status?: string;
+      environment?: string;
     };
-    this.logger.log(`Didit webhook : ${event.type}`);
+    this.logger.log(
+      `Didit webhook : ${event.webhook_type} / ${event.status} (${event.environment ?? '?'})`,
+    );
 
-    if (event.type === 'session.completed' && event.data?.id) {
-      const mapped = mapDiditDecision(event.data.decision);
+    if (event.webhook_type === 'status.updated' && event.session_id && event.status) {
+      const mapped = mapDiditDecision(event.status);
+      if (mapped === 'PENDING') {
+        // Statut intermédiaire (In Progress, In Review...) : rien à faire,
+        // on attend la décision finale. On répond 200 pour que Didit
+        // cesse les tentatives de relance.
+        this.logger.log(`Didit webhook : statut intermédiaire « ${event.status} » ignoré.`);
+        return { received: true };
+      }
+
       const kyc = await this.prisma.kycDocument.findFirst({
-        where: { diditSessionId: event.data.id },
+        where: { diditSessionId: event.session_id },
       });
       if (kyc) {
-        await applyKycDecision(
-          this.prisma,
-          kyc.id,
-          kyc.userId,
-          mapped,
-          event.data.decision,
-        );
+        await applyKycDecision(this.prisma, kyc.id, kyc.userId, mapped, event.status);
+      } else {
+        // Session inconnue (autre environnement, données purgées) : on
+        // journalise sans échouer — un 500 déclencherait inutilement les
+        // relances de Didit.
+        this.logger.warn(`Didit webhook : session inconnue ${event.session_id}`);
       }
     }
 
@@ -88,6 +113,22 @@ export class KycWebhookController {
         : Buffer.alloc(expected.length);
     if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
       throw new UnauthorizedException('Signature Didit invalide.');
+    }
+  }
+
+  /**
+   * Fraîcheur de l'enveloppe : rejette les webhooks rejoués au-delà de la
+   * fenêtre de tolérance (docs Didit : abs(now - X-Timestamp) <= 300 s).
+   * Absent ou invalide => refus (l'en-tête est toujours envoyé en v3).
+   */
+  private verifyTimestamp(rawTimestamp: unknown) {
+    const ts = Number(rawTimestamp);
+    if (!Number.isFinite(ts) || ts <= 0) {
+      throw new UnauthorizedException('Timestamp Didit absent ou invalide.');
+    }
+    const now = Math.floor(Date.now() / 1000);
+    if (Math.abs(now - ts) > KycWebhookController.MAX_TIMESTAMP_SKEW) {
+      throw new UnauthorizedException('Timestamp Didit trop ancien (rejeu ?).');
     }
   }
 }

@@ -2,118 +2,121 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 /**
- * Wrapper isolé de l'API Didit (api.didit.com v2).
- * Tous les détails du fournisseur (base URL, auth, signature) sont
+ * Wrapper isolé de l'API Didit v3 (verification.didit.me).
+ * Tous les détails du fournisseur (base URL, auth, statuts) sont
  * centralisés ici pour pouvoir les vérifier/ajuster en un seul endroit
- * une fois les identifiants réels branchés (developers.didit.com).
+ * (docs.didit.me).
+ *
+ * Migration v2 -> v3 (l'ancienne base didit.app/api/v2 a été retirée —
+ * les appels renvoyaient 404) :
+ * - Auth : plus de flux OAuth client_credentials ; une simple clé
+ *   d'application dans l'en-tête x-api-key (DIDIT_API_KEY).
+ * - Création : POST /v3/session/ avec workflow_id obligatoire (UUID du
+ *   workflow publié dans la Console Didit) + callback + vendor_data
+ *   (ID utilisateur Cercle — lie la session à l'utilisateur et permet
+ *   la détection de doublons côté Didit).
+ * - Lecture : GET /v3/session/{id}/decision/ — statuts exacts
+ *   "Approved" / "Declined" / "In Review" (casse sensible).
  */
 @Injectable()
 export class DiditService {
   private readonly logger = new Logger(DiditService.name);
-  private readonly baseUrl = 'https://didit.app/api/v2';
-  private tokenCache: { token: string; expiresAt: number } | null = null;
+  private readonly baseUrl = 'https://verification.didit.me';
 
   constructor(private readonly config: ConfigService) {}
 
-  get clientId(): string {
-    return this.config.get<string>('DIDIT_CLIENT_ID', '');
+  get apiKey(): string {
+    return this.config.get<string>('DIDIT_API_KEY', '');
   }
 
-  get clientSecret(): string {
-    return this.config.get<string>('DIDIT_CLIENT_SECRET', '');
+  get workflowId(): string {
+    return this.config.get<string>('DIDIT_WORKFLOW_ID', '');
   }
 
   get webhookSecret(): string {
     return this.config.get<string>('DIDIT_WEBHOOK_SECRET', '');
   }
 
-  /**
-   * Authentification OAuth2 client_credentials — Didit renvoie un token
-   * porteur avec une durée de validité (expires_in).
-   */
-  private async getAccessToken(): Promise<string> {
-    const now = Math.floor(Date.now() / 1000);
-    if (this.tokenCache && this.tokenCache.expiresAt > now + 60) {
-      return this.tokenCache.token;
-    }
-
-    const res = await fetch(`${this.baseUrl}/auth/token/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        client_id: this.clientId,
-        client_secret: this.clientSecret,
-      }),
-    });
-
-    if (!res.ok) {
-      throw new Error(`Didit auth échouée: ${res.status}`);
-    }
-
-    const body = (await res.json()) as {
-      access_token: string;
-      expires_in: number;
+  private authHeaders(): Record<string, string> {
+    return {
+      'x-api-key': this.apiKey,
+      'Content-Type': 'application/json',
     };
-    this.tokenCache = {
-      token: body.access_token,
-      expiresAt: now + body.expires_in,
-    };
-    return body.access_token;
   }
 
   /**
-   * Crée une session de vérification d'identité hébergée.
-   * L'utilisateur finalise la vérification dans le flux Didit
-   * (web / mobile SDK), puis revient dans l'app via le deep link.
+   * Crée une session de vérification d'identité hébergée (v3).
+   * L'utilisateur finalise la vérification dans le flux Didit, puis revient
+   * dans l'app via le callback cercle://kyc/return (Didit y ajoute
+   * ?verificationSessionId={session_id}&status={status}).
    */
   async createSession(params: {
     callbackUrl: string;
     vendorId?: string;
-    redirectUrl: string;
+    language?: string;
   }): Promise<{ sessionId: string; sessionUrl: string }> {
-    const token = await this.getAccessToken();
+    const body: Record<string, unknown> = {
+      workflow_id: this.workflowId,
+      callback: params.callbackUrl,
+      language: params.language ?? 'fr',
+    };
+    if (!this.workflowId) {
+      throw new Error(
+        'DIDIT_WORKFLOW_ID manquant : créez et publiez un workflow KYC dans la Console Didit.',
+      );
+    }
+    if (params.vendorId) {
+      // Identifiant stable de l'utilisateur Cercle — recommandé par Didit
+      // (déduplication des sessions, lien avec l'entité User).
+      body.vendor_data = params.vendorId;
+    }
 
-    const res = await fetch(`${this.baseUrl}/sessions/`, {
+    const res = await fetch(`${this.baseUrl}/v3/session/`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
+      headers: this.authHeaders(),
+      body: JSON.stringify(body),
     });
 
     if (!res.ok) {
-      this.logger.error(`Didit createSession échec: ${res.status}`);
+      const detail = await res.text().catch(() => '');
+      this.logger.error(`Didit createSession échec: ${res.status} ${detail.slice(0, 300)}`);
       throw new Error(`Didit createSession échec: ${res.status}`);
     }
 
-    const body = (await res.json()) as {
-      id: string;
-      url: string;
+    const parsed = (await res.json()) as {
+      id?: string;
+      session_id?: string;
+      url?: string;
     };
-    return { sessionId: body.id, sessionUrl: body.url };
+    const sessionId = parsed.id ?? parsed.session_id;
+    if (!sessionId || !parsed.url) {
+      throw new Error('Didit createSession : réponse inattendue (id/url absents).');
+    }
+    return { sessionId, sessionUrl: parsed.url };
   }
 
   /**
-   * Récupère l'état d'une session Didit (pour le polling de secours si
-   * le webhook n'est pas encore arrivé lors du retour du deep link).
-   * Cartographie statuts Didit → Cercle:
-   *   PENDING  → PENDING
-   *   APPROVED → VERIFIED
-   *   DECLINED → REJECTED
+   * Récupère la décision d'une session Didit (polling de secours si le
+   * webhook n'est pas encore arrivé lors du retour du callback).
+   * Statuts Didit v3 (casse exacte) :
+   *   "Not Started" / "In Progress" / "Awaiting User" / "Resubmitted" -> PENDING
+   *   "Approved"  -> VERIFIED
+   *   "Declined"  -> REJECTED
+   *   "In Review" -> reste PENDING (décision humaine en cours)
    */
-  async getSession(sessionId: string): Promise<{ status: string }> {
-    const token = await this.getAccessToken();
-
-    const res = await fetch(`${this.baseUrl}/sessions/${sessionId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  async getSessionDecision(
+    sessionId: string,
+  ): Promise<{ status: string; decision?: unknown }> {
+    const res = await fetch(
+      `${this.baseUrl}/v3/session/${sessionId}/decision/`,
+      { headers: this.authHeaders() },
+    );
 
     if (!res.ok) {
       throw new Error(`Didit getSession échec: ${res.status}`);
     }
 
-    const body = (await res.json()) as { status: string };
-    return { status: body.status };
+    const body = (await res.json()) as { status?: string; decision?: unknown };
+    return { status: body.status ?? '', decision: body.decision };
   }
 }
