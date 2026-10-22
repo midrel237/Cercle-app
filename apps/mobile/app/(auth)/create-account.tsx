@@ -4,15 +4,19 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { AppButton } from '../../src/components/AppButton';
+import { BackButton } from '../../src/components/BackButton';
 import { RotationMotif } from '../../src/components/RotationMotif';
+import { FadeIn } from '../../src/components/motion';
 import { authApi } from '../../src/services/endpoints/auth';
 import { useCountryStore } from '../../src/store/country.store';
 import { colors, fonts, radii, spacing } from '../../src/theme';
@@ -23,8 +27,15 @@ import { colors, fonts, radii, spacing } from '../../src/theme';
 // verifyOtp — inscription progressive), mais avec un cadrage et une copie
 // dédiés à un nouveau membre, plus l'acceptation explicite des conditions
 // d'utilisation.
+//
+// Correctifs UI : bouton retour partagé BackButton (flèche SVG — le glyphe
+// ← se rendait en glyphe cassé ; position absolute sous la zone sûre),
+// ScrollView au lieu d'un View centré avec marginTop négatif (le contenu
+// débordait sur petits écrans et le bas était rogné), micro-animations
+// FadeIn en cascade.
 export default function CreateAccountScreen() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const selectedCountry = useCountryStore((s) => s.selectedCountry);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -61,81 +72,101 @@ export default function CreateAccountScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={12}>
-        <Text style={styles.backIcon}>←</Text>
-      </Pressable>
+      <BackButton variant="dark" />
 
-      <View style={styles.content}>
-        <RotationMotif size={60} activeIndex={0} />
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: insets.top + 56, paddingBottom: insets.bottom + 24 },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <RotationMotif size={64} activeIndex={0} />
 
-        <Text style={styles.title}>{t('auth.createAccount.title')}</Text>
-        <Text style={styles.tagline}>{t('auth.createAccount.subtitle')}</Text>
+        <FadeIn delay={120}>
+          <Text style={styles.title}>{t('auth.createAccount.title')}</Text>
+        </FadeIn>
+        <FadeIn delay={180}>
+          <Text style={styles.tagline}>{t('auth.createAccount.subtitle')}</Text>
+        </FadeIn>
 
         <View style={styles.form}>
-          <Text style={styles.label}>{t('auth.phoneNumberLabel')}</Text>
-          <View style={styles.phoneRow}>
+          <FadeIn delay={240}>
+            <Text style={styles.label}>{t('auth.phoneNumberLabel')}</Text>
+            <View style={styles.phoneRow}>
+              <Pressable
+                style={styles.dialCodeBox}
+                onPress={() => router.push('/(auth)/country-picker')}
+              >
+                <Text style={styles.dialCodeText}>
+                  {selectedCountry.flag} {selectedCountry.dialCode} ▾
+                </Text>
+              </Pressable>
+              <TextInput
+                style={styles.phoneInput}
+                value={phoneNumber}
+                onChangeText={(v) => {
+                  setPhoneNumber(v);
+                  if (error) setError(null);
+                }}
+                placeholder={t('auth.phoneNumberPlaceholder')}
+                placeholderTextColor={colors.navySoft}
+                keyboardType="phone-pad"
+                autoComplete="tel"
+                returnKeyType="done"
+                onSubmitEditing={handleCreateAccount}
+              />
+            </View>
+          </FadeIn>
+
+          <FadeIn delay={310}>
             <Pressable
-              style={styles.dialCodeBox}
-              onPress={() => router.push('/(auth)/country-picker')}
-            >
-              <Text style={styles.dialCodeText}>
-                {selectedCountry.flag} {selectedCountry.dialCode} ▾
-              </Text>
-            </Pressable>
-            <TextInput
-              style={styles.phoneInput}
-              value={phoneNumber}
-              onChangeText={(v) => {
-                setPhoneNumber(v);
+              style={styles.termsRow}
+              onPress={() => {
+                setAcceptedTerms((v) => !v);
                 if (error) setError(null);
               }}
-              placeholder={t('auth.phoneNumberPlaceholder')}
-              placeholderTextColor={colors.navySoft}
-              keyboardType="phone-pad"
-              autoComplete="tel"
-              returnKeyType="done"
-              onSubmitEditing={handleCreateAccount}
+              hitSlop={6}
+            >
+              <View style={[styles.checkbox, acceptedTerms && styles.checkboxChecked]}>
+                {acceptedTerms && <Text style={styles.checkboxMark}>✓</Text>}
+              </View>
+              <Text style={styles.termsText}>
+                {t('auth.createAccount.termsPrefix')}{' '}
+                <Text style={styles.termsLink}>{t('auth.createAccount.termsLink')}</Text>{' '}
+                {t('auth.createAccount.termsAnd')}{' '}
+                <Text style={styles.termsLink}>{t('auth.createAccount.privacyLink')}</Text>{' '}
+                {t('auth.createAccount.termsSuffix')}
+              </Text>
+            </Pressable>
+          </FadeIn>
+
+          {error && (
+            <FadeIn>
+              <Text style={styles.errorText}>{error}</Text>
+            </FadeIn>
+          )}
+
+          <FadeIn delay={380}>
+            <AppButton
+              label={isSubmitting ? t('auth.sendingOtp') : t('auth.createAccount.submitButton')}
+              onPress={handleCreateAccount}
+              disabled={isSubmitting}
+              style={styles.submitButton}
             />
-          </View>
+            {isSubmitting && <ActivityIndicator color={colors.gold} style={styles.spinner} />}
 
-          <Pressable
-            style={styles.termsRow}
-            onPress={() => {
-              setAcceptedTerms((v) => !v);
-              if (error) setError(null);
-            }}
-            hitSlop={6}
-          >
-            <View style={[styles.checkbox, acceptedTerms && styles.checkboxChecked]}>
-              {acceptedTerms && <Text style={styles.checkboxMark}>✓</Text>}
-            </View>
-            <Text style={styles.termsText}>
-              {t('auth.createAccount.termsPrefix')}{' '}
-              <Text style={styles.termsLink}>{t('auth.createAccount.termsLink')}</Text>{' '}
-              {t('auth.createAccount.termsAnd')}{' '}
-              <Text style={styles.termsLink}>{t('auth.createAccount.privacyLink')}</Text>{' '}
-              {t('auth.createAccount.termsSuffix')}
-            </Text>
-          </Pressable>
-
-          {error && <Text style={styles.errorText}>{error}</Text>}
-
-          <AppButton
-            label={isSubmitting ? t('auth.sendingOtp') : t('auth.createAccount.submitButton')}
-            onPress={handleCreateAccount}
-            disabled={isSubmitting}
-            style={styles.submitButton}
-          />
-          {isSubmitting && <ActivityIndicator color={colors.gold} style={styles.spinner} />}
-
-          <Pressable onPress={() => router.replace('/(auth)/login')} hitSlop={8}>
-            <Text style={styles.footerText}>
-              {t('auth.createAccount.alreadyHaveAccount')}{' '}
-              <Text style={styles.footerLink}>{t('auth.createAccount.signIn')}</Text>
-            </Text>
-          </Pressable>
+            <Pressable onPress={() => router.replace('/(auth)/login')} hitSlop={8}>
+              <Text style={styles.footerText}>
+                {t('auth.createAccount.alreadyHaveAccount')}{' '}
+                <Text style={styles.footerLink}>{t('auth.createAccount.signIn')}</Text>
+              </Text>
+            </Pressable>
+          </FadeIn>
         </View>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -145,28 +176,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.navy,
   },
-  backBtn: {
-    marginTop: 16,
-    marginLeft: 20,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: 'rgba(255,255,255,.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,.18)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  backIcon: {
-    fontSize: 15,
-    color: colors.white,
+  scroll: {
+    flex: 1,
   },
   content: {
-    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
     paddingHorizontal: spacing.lg + 2,
-    marginTop: -40,
+    flexGrow: 1,
   },
   title: {
     fontFamily: fonts.fraunces.semiBold,
@@ -266,6 +282,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   submitButton: {
+    marginTop: spacing.sm,
     marginBottom: spacing.sm + 2,
   },
   spinner: {

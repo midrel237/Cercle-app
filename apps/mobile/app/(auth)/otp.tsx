@@ -1,8 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { AppButton } from '../../src/components/AppButton';
+import { RotationMotif } from '../../src/components/RotationMotif';
+import { FadeIn, PopIn } from '../../src/components/motion';
 import { authApi } from '../../src/services/endpoints/auth';
 import { setStoredAccessToken } from '../../src/services/api-client';
 import { useAuthStore } from '../../src/store/auth.store';
@@ -15,17 +18,15 @@ const RESEND_SECONDS = 45;
 // Suite directe de l'écran 4 : le numéro de téléphone est reçu en
 // paramètre de navigation. Un seul champ caché capture la saisie, projetée
 // sur 6 cases visuelles façon maquette. La vérification se déclenche
-// automatiquement dès que les 6 chiffres sont saisis (comme sur la plupart
-// des apps mobiles), sans attendre un appui sur « Vérifier ».
+// automatiquement dès que les 6 chiffres sont saisis.
 //
-// Le serveur (POST /auth/otp/verify) vérifie un vrai code à 6 chiffres,
-// hashé et expirant après 5 minutes (voir auth.service.ts côté backend),
-// et renvoie un jeton JWT stocké ici dès la vérification réussie. Le
-// numéro est aussi mémorisé dans useAuthStore : il sera requis par
-// POST /auth/pin/create à l'étape onboarding (écran 17), alors que les
-// paramètres de navigation de cet écran auront disparu depuis longtemps.
+// Correctifs UI : le motif signature remplace l'emoji 💬 (rendu cassé en
+// rectangle compressé sur certains appareils), safe-area sur le padding
+// haut, ScrollView pour les petits écrans + clavier, micro-animations
+// (FadeIn pour le texte, PopIn sur les cases du code).
 export default function OtpScreen() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { phoneNumber } = useLocalSearchParams<{ phoneNumber?: string }>();
   const setPhoneNumber = useAuthStore((s) => s.setPhoneNumber);
   const inputRef = useRef<TextInput>(null);
@@ -85,22 +86,34 @@ export default function OtpScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.emoji}>💬</Text>
-        <Text style={styles.title}>{t('auth.otp.title')}</Text>
-        <Text style={styles.subtitle}>
-          {t('auth.otp.subtitle')}
-          {'\n'}
-          <Text style={styles.phone}>{phoneNumber ?? ''}</Text>
-        </Text>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 24 },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <RotationMotif size={56} activeIndex={1} animated delay={60} />
+        <FadeIn delay={140}>
+          <Text style={styles.title}>{t('auth.otp.title')}</Text>
+          <Text style={styles.subtitle}>
+            {t('auth.otp.subtitle')}
+            {'\n'}
+            <Text style={styles.phone}>{phoneNumber ?? ''}</Text>
+          </Text>
+        </FadeIn>
 
-        <Pressable onPress={() => inputRef.current?.focus()} style={styles.otpRow}>
-          {digits.map((d, i) => (
-            <View key={i} style={[styles.digitBox, d ? styles.digitBoxFilled : null]}>
-              <Text style={styles.digitText}>{d ?? '·'}</Text>
-            </View>
-          ))}
-        </Pressable>
+        <PopIn delay={260}>
+          <Pressable onPress={() => inputRef.current?.focus()} style={styles.otpRow}>
+            {digits.map((d, i) => (
+              <View key={i} style={[styles.digitBox, d ? styles.digitBoxFilled : null]}>
+                <Text style={styles.digitText}>{d ?? '·'}</Text>
+              </View>
+            ))}
+          </Pressable>
+        </PopIn>
 
         {/* Champ réel, invisible : capte la saisie clavier numérique. */}
         <TextInput
@@ -114,7 +127,9 @@ export default function OtpScreen() {
         />
 
         {error ? (
-          <Text style={styles.errorText}>{error}</Text>
+          <FadeIn>
+            <Text style={styles.errorText}>{error}</Text>
+          </FadeIn>
         ) : secondsLeft > 0 ? (
           <Text style={styles.resendText}>
             {t('auth.otp.resendIn')}{' '}
@@ -127,9 +142,9 @@ export default function OtpScreen() {
             <Text style={styles.resendLink}>{t('auth.otp.resendAction')}</Text>
           </Pressable>
         )}
-      </View>
+      </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
         <AppButton
           label={isVerifying ? t('auth.otp.verifying') : t('auth.otp.verifyButton')}
           onPress={() => handleVerify(code)}
@@ -145,21 +160,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.creamLight,
   },
+  scroll: {
+    flex: 1,
+  },
   content: {
     flex: 1,
     alignItems: 'center',
-    paddingTop: 56,
     paddingHorizontal: spacing.xl,
-  },
-  emoji: {
-    fontSize: 30,
-    marginBottom: spacing.sm + 2,
   },
   title: {
     fontFamily: fonts.fraunces.semiBold,
     fontSize: 19,
     color: colors.navyDark,
+    marginTop: spacing.sm,
     marginBottom: spacing.sm,
+    textAlign: 'center',
   },
   subtitle: {
     fontFamily: fonts.inter.regular,
@@ -225,6 +240,5 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingHorizontal: spacing.md + 2,
-    paddingBottom: 20,
   },
 });

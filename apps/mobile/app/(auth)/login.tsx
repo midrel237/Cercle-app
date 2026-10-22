@@ -4,15 +4,18 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { AppButton } from '../../src/components/AppButton';
 import { RotationMotif } from '../../src/components/RotationMotif';
+import { FadeIn } from '../../src/components/motion';
 import { authApi } from '../../src/services/endpoints/auth';
 import { useCountryStore } from '../../src/store/country.store';
 import { colors, fonts, radii, spacing } from '../../src/theme';
@@ -21,13 +24,16 @@ import { colors, fonts, radii, spacing } from '../../src/theme';
 // C'est un écran unique de saisie du numéro de téléphone : il sert aussi
 // bien à un nouveau membre (« Créer un compte », écran 80) qu'à un membre
 // existant, puisque les deux parcours se rejoignent sur la vérification
-// par OTP (écran 5). Le couple téléphone + PIN (POST /auth/login) est
-// réservé à une reconnexion ultérieure sur un appareil déjà configuré, pas
-// à cet écran de première saisie. L'indicatif pays est géré par
-// useCountryStore, partagé avec l'écran 79 (sélection du pays) et l'écran
-// 80 (création de compte).
+// par OTP (écran 5). L'indicatif pays est géré par useCountryStore,
+// partagé avec l'écran 79 (sélection du pays) et l'écran 80.
+//
+// Correctifs UI : ScrollView au lieu d'un View centré (le contenu pouvait
+// déborder et être rogné sur petits écrans), micro-animations FadeIn en
+// cascade ; le motif signature est rendu plus contrasté par le correctif
+// du composant RotationMotif.
 export default function LoginScreen() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const selectedCountry = useCountryStore((s) => s.selectedCountry);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,63 +64,77 @@ export default function LoginScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={styles.content}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: insets.top + 48, paddingBottom: insets.bottom + 24 },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <RotationMotif size={72} activeIndex={0} />
 
-        <Text style={styles.brand}>{t('auth.brandName')}</Text>
-        <Text style={styles.tagline}>{t('auth.brandTagline')}</Text>
+        <FadeIn delay={120}>
+          <Text style={styles.brand}>{t('auth.brandName')}</Text>
+          <Text style={styles.tagline}>{t('auth.brandTagline')}</Text>
+        </FadeIn>
 
         <View style={styles.form}>
-          <Text style={styles.label}>{t('auth.phoneNumberLabel')}</Text>
-          <View style={styles.phoneRow}>
-            <Pressable
-              style={styles.dialCodeBox}
-              onPress={() => router.push('/(auth)/country-picker')}
-            >
-              <Text style={styles.dialCodeText}>
-                {selectedCountry.flag} {selectedCountry.dialCode} ▾
+          <FadeIn delay={220}>
+            <Text style={styles.label}>{t('auth.phoneNumberLabel')}</Text>
+            <View style={styles.phoneRow}>
+              <Pressable
+                style={styles.dialCodeBox}
+                onPress={() => router.push('/(auth)/country-picker')}
+              >
+                <Text style={styles.dialCodeText}>
+                  {selectedCountry.flag} {selectedCountry.dialCode} ▾
+                </Text>
+              </Pressable>
+              <TextInput
+                style={styles.phoneInput}
+                value={phoneNumber}
+                onChangeText={(v) => {
+                  setPhoneNumber(v);
+                  if (error) setError(null);
+                }}
+                placeholder={t('auth.phoneNumberPlaceholder')}
+                placeholderTextColor={colors.navySoft}
+                keyboardType="phone-pad"
+                autoComplete="tel"
+                returnKeyType="done"
+                onSubmitEditing={handleContinue}
+              />
+            </View>
+
+            {error ? (
+              <Text style={styles.errorText}>{error}</Text>
+            ) : (
+              <Text style={styles.hint}>{t('auth.diasporaHint')}</Text>
+            )}
+          </FadeIn>
+
+          <FadeIn delay={300}>
+            <AppButton
+              label={isSubmitting ? t('auth.sendingOtp') : t('common.continue')}
+              onPress={handleContinue}
+              disabled={isSubmitting}
+              style={styles.continueButton}
+            />
+            {isSubmitting && (
+              <ActivityIndicator color={colors.gold} style={styles.spinner} />
+            )}
+
+            <Pressable onPress={() => router.push('/(auth)/create-account')} hitSlop={8}>
+              <Text style={styles.footerText}>
+                {t('auth.noAccountYet')}{' '}
+                <Text style={styles.footerLink}>{t('auth.createAccount.linkLabel')}</Text>
               </Text>
             </Pressable>
-            <TextInput
-              style={styles.phoneInput}
-              value={phoneNumber}
-              onChangeText={(v) => {
-                setPhoneNumber(v);
-                if (error) setError(null);
-              }}
-              placeholder={t('auth.phoneNumberPlaceholder')}
-              placeholderTextColor={colors.navySoft}
-              keyboardType="phone-pad"
-              autoComplete="tel"
-              returnKeyType="done"
-              onSubmitEditing={handleContinue}
-            />
-          </View>
-
-          {error ? (
-            <Text style={styles.errorText}>{error}</Text>
-          ) : (
-            <Text style={styles.hint}>{t('auth.diasporaHint')}</Text>
-          )}
-
-          <AppButton
-            label={isSubmitting ? t('auth.sendingOtp') : t('common.continue')}
-            onPress={handleContinue}
-            disabled={isSubmitting}
-            style={styles.continueButton}
-          />
-          {isSubmitting && (
-            <ActivityIndicator color={colors.gold} style={styles.spinner} />
-          )}
-
-          <Pressable onPress={() => router.push('/(auth)/create-account')} hitSlop={8}>
-            <Text style={styles.footerText}>
-              {t('auth.noAccountYet')}{' '}
-              <Text style={styles.footerLink}>{t('auth.createAccount.linkLabel')}</Text>
-            </Text>
-          </Pressable>
+          </FadeIn>
         </View>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -124,11 +144,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.navy,
   },
-  content: {
+  scroll: {
     flex: 1,
+  },
+  content: {
     alignItems: 'center',
-    justifyContent: 'center',
     paddingHorizontal: spacing.lg + 2,
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   brand: {
     fontFamily: fonts.fraunces.semiBold,

@@ -4,6 +4,8 @@ import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { AppButton } from '../../src/components/AppButton';
 import { KycProgressHeader } from '../../src/components/KycProgressHeader';
+import { RotationMotif } from '../../src/components/RotationMotif';
+import { FadeIn } from '../../src/components/motion';
 import { useKycStore } from '../../src/store/kyc.store';
 import { colors, fonts, radii, spacing } from '../../src/theme';
 
@@ -11,8 +13,16 @@ import { colors, fonts, radii, spacing } from '../../src/theme';
 // Purement informatif : présente les 3 étapes à venir (choix du document,
 // capture recto/verso, selfie) et recueille le consentement au traitement
 // des données avant de démarrer. Rien n'est encore envoyé au serveur ici
-// — l'appel POST /users/me/kyc n'intervient qu'une fois les photos
-// capturées (écrans 8-10, pas encore construits).
+// — la session Didit n'intervient qu'à l'écran document-choice.
+//
+// Correctifs (bugs constatés sur l'appareil) :
+// - le motif signature (roue) remplace l'emoji 🪪 qui se rendait en
+//   rectangle compressé illisible sur certains appareils ;
+// - les rangées label/hint passent de row à column empilée : en row sans
+//   flex, les textes fusionnaient (« documentCNI ») et débordaient à
+//   droite, tronqués au bord de l'écran ;
+// - apparition animée en cascade (FadeIn) conformément au cahier des
+//   charges qui exige des micro-animations sur chaque écran.
 export default function KycIntroScreen() {
   const { t } = useTranslation();
   const dataProcessingAccepted = useKycStore((s) => s.dataProcessingAccepted);
@@ -36,42 +46,58 @@ export default function KycIntroScreen() {
       />
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.emoji}>🪪</Text>
-        <Text style={styles.title}>{t('kyc.intro.title')}</Text>
-        <Text style={styles.description}>{t('kyc.intro.description')}</Text>
+        <RotationMotif size={72} activeIndex={0} animated delay={60} />
+        <FadeIn delay={120}>
+          <Text style={styles.title}>{t('kyc.intro.title')}</Text>
+        </FadeIn>
+        <FadeIn delay={180}>
+          <Text style={styles.description}>{t('kyc.intro.description')}</Text>
+        </FadeIn>
 
         <View style={styles.card}>
-          <View style={[styles.row, styles.rowBorder]}>
-            <Text style={styles.rowLabel}>1. {t('kyc.intro.step1')}</Text>
-            <Text style={styles.rowHint}>{t('kyc.intro.step1Hint')}</Text>
-          </View>
-          <View style={[styles.row, styles.rowBorder]}>
-            <Text style={styles.rowLabel}>2. {t('kyc.intro.step2')}</Text>
-            <Text style={styles.rowHint}>{t('kyc.intro.step2Hint')}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.rowLabel}>3. {t('kyc.intro.step3')}</Text>
-            <Text style={styles.rowHint}>{t('kyc.intro.step3Hint')}</Text>
-          </View>
+          <FadeIn delay={260}>
+            <View style={[styles.row, styles.rowBorder]}>
+              <Text style={styles.rowLabel}>1. {t('kyc.intro.step1')}</Text>
+              <Text style={styles.rowHint}>{t('kyc.intro.step1Hint')}</Text>
+            </View>
+          </FadeIn>
+          <FadeIn delay={330}>
+            <View style={[styles.row, styles.rowBorder]}>
+              <Text style={styles.rowLabel}>2. {t('kyc.intro.step2')}</Text>
+              <Text style={styles.rowHint}>{t('kyc.intro.step2Hint')}</Text>
+            </View>
+          </FadeIn>
+          <FadeIn delay={400}>
+            <View style={styles.row}>
+              <Text style={styles.rowLabel}>3. {t('kyc.intro.step3')}</Text>
+              <Text style={styles.rowHint}>{t('kyc.intro.step3Hint')}</Text>
+            </View>
+          </FadeIn>
         </View>
 
-        <Pressable
-          style={styles.consentRow}
-          onPress={() => {
-            setDataProcessingAccepted(!dataProcessingAccepted);
-            if (error) setError(null);
-          }}
-        >
-          <View style={styles.consentText}>
-            <Text style={styles.consentLabel}>{t('kyc.intro.consentLabel')}</Text>
-            <Text style={styles.consentSub}>{t('kyc.intro.consentSub')}</Text>
-          </View>
-          <View style={[styles.switch, dataProcessingAccepted && styles.switchOn]}>
-            <View style={[styles.switchKnob, dataProcessingAccepted && styles.switchKnobOn]} />
-          </View>
-        </Pressable>
+        <FadeIn delay={480}>
+          <Pressable
+            style={styles.consentRow}
+            onPress={() => {
+              setDataProcessingAccepted(!dataProcessingAccepted);
+              if (error) setError(null);
+            }}
+          >
+            <View style={styles.consentText}>
+              <Text style={styles.consentLabel}>{t('kyc.intro.consentLabel')}</Text>
+              <Text style={styles.consentSub}>{t('kyc.intro.consentSub')}</Text>
+            </View>
+            <View style={[styles.switch, dataProcessingAccepted && styles.switchOn]}>
+              <View style={[styles.switchKnob, dataProcessingAccepted && styles.switchKnobOn]} />
+            </View>
+          </Pressable>
+        </FadeIn>
 
-        {error && <Text style={styles.errorText}>{error}</Text>}
+        {error && (
+          <FadeIn>
+            <Text style={styles.errorText}>{error}</Text>
+          </FadeIn>
+        )}
       </ScrollView>
 
       <View style={styles.footer}>
@@ -95,14 +121,11 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg - 4,
     paddingBottom: spacing.xxl,
   },
-  emoji: {
-    fontSize: 44,
-    marginBottom: spacing.sm + 6,
-  },
   title: {
     fontFamily: fonts.fraunces.semiBold,
     fontSize: 20,
     color: colors.navyDark,
+    marginTop: spacing.sm,
     marginBottom: spacing.xs + 4,
     textAlign: 'center',
   },
@@ -122,12 +145,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.creamLight,
     overflow: 'hidden',
   },
+  // FIX débordement : column au lieu de row — label au-dessus, hint en
+  // dessous, chaque texte contraint à la largeur de la carte (wrap).
   row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     paddingVertical: 13,
     paddingHorizontal: 14,
+    alignItems: 'flex-start',
   },
   rowBorder: {
     borderBottomWidth: 1,
@@ -137,11 +160,13 @@ const styles = StyleSheet.create({
     fontFamily: fonts.inter.medium,
     fontSize: 12.5,
     color: colors.ink,
+    marginBottom: 2,
   },
   rowHint: {
     fontFamily: fonts.inter.regular,
     fontSize: 11,
     color: colors.inkSoft,
+    lineHeight: 15,
   },
   consentRow: {
     flexDirection: 'row',
