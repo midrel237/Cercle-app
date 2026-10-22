@@ -24,15 +24,14 @@ describe('TermiiSmsProvider', () => {
     process.env.TERMII_SENDER_ID = 'Cercle';
 
     let captured: { url: string; body: string } | undefined;
-    global.fetch = jest.fn(
-      async (url: RequestInfo | URL, init?: RequestInit) => {
-        captured = { url: String(url), body: String(init?.body) };
-        return new Response(JSON.stringify({ message: 'Successfully Sent' }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      },
-    );
+    const fetchMock = jest.fn(async (url: string, init?: RequestInit) => {
+      captured = { url, body: String(init?.body) };
+      return new Response(JSON.stringify({ message: 'Successfully Sent' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
 
     await provider.send({ to: '+237 690 000 000', body: 'code 123456' });
 
@@ -51,12 +50,13 @@ describe('TermiiSmsProvider', () => {
   it('leve une erreur sur une reponse Termii en echec HTTP', async () => {
     process.env.TERMII_API_KEY = 'test-key';
 
-    global.fetch = jest.fn(
+    const fetchMock = jest.fn(
       async () =>
         new Response('Unauthorized', {
           status: 401,
         }),
     );
+    global.fetch = fetchMock as unknown as typeof fetch;
 
     await expect(
       provider.send({ to: '+237690000000', body: 'code 123456' }),
@@ -66,13 +66,14 @@ describe('TermiiSmsProvider', () => {
   it('leve une erreur si Termii renvoie un message d echec', async () => {
     process.env.TERMII_API_KEY = 'test-key';
 
-    global.fetch = jest.fn(
+    const fetchMock = jest.fn(
       async () =>
         new Response(JSON.stringify({ message: 'Invalid phone number' }), {
           status: 200,
           headers: { 'Content-Type': 'application/json' },
         }),
     );
+    global.fetch = fetchMock as unknown as typeof fetch;
 
     await expect(
       provider.send({ to: '+237690000000', body: 'code 123456' }),
