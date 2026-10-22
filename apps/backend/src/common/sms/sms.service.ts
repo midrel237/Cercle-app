@@ -1,13 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { SmsMessage, SmsProvider } from './sms-provider.interface';
 import { ConsoleSmsProvider } from './console.provider';
-import { AfricasTalkingSmsProvider } from './africas-talking.provider';
-
-// Alias acceptés pour SMS_PROVIDER. Le .env.example racine documente
-// "africastalking" (sans tiret) tandis que le nom interne du provider est
-// "africas-talking" : les deux formes sont valides pour éviter tout
-// "SMS_PROVIDER inconnu" au démarrage selon la doc suivie.
-const AFRICASTALKING_ALIASES = new Set(['africastalking', 'africas-talking']);
+import { TermiiSmsProvider } from './termii.provider';
 
 @Injectable()
 export class SmsService {
@@ -18,11 +12,11 @@ export class SmsService {
 
     if (kind === 'console') {
       this.provider = new ConsoleSmsProvider();
-    } else if (AFRICASTALKING_ALIASES.has(kind)) {
-      this.provider = new AfricasTalkingSmsProvider();
+    } else if (kind === 'termii') {
+      this.provider = new TermiiSmsProvider();
     } else {
       throw new Error(
-        `SMS_PROVIDER inconnu: "${kind}". Valeurs acceptées: console, africastalking, africas-talking.`,
+        `SMS_PROVIDER inconnu: "${kind}". Valeurs acceptées: console, termii.`,
       );
     }
   }
