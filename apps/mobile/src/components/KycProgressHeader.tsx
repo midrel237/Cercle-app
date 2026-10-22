@@ -2,6 +2,8 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Path } from 'react-native-svg';
+import { FadeIn } from './motion';
 import { colors, fonts, radii, spacing } from '../theme';
 
 interface Props {
@@ -14,26 +16,36 @@ interface Props {
 }
 
 // Utilisé par tous les écrans du parcours KYC (6 à 15) pour garder un
-// en-tête cohérent : bouton retour (positionné sous la zone sûre, cf.
-// correctif appliqué à welcome/otp/create-account/country-picker),
-// libellé d'étape et barre de progression, fidèles à la maquette.
+// en-tête cohérent : bouton retour (positionné sous la zone sûre), libellé
+// d'étape et barre de progression, fidèles à la maquette.
+//
+// Correctifs : la flèche est un tracé SVG et non le caractère ← (le glyphe
+// U+2190 est absent des polices Inter/Fraunces et se rend en glyphe cassé
+// « D » sur certains appareils Android) ; apparition animée en fondu de
+// l'en-tête.
 export function KycProgressHeader({ stepLabel, progress, onBack }: Props) {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
-      <Pressable
-        style={styles.backBtn}
-        onPress={onBack ?? (() => router.back())}
-        hitSlop={12}
-      >
-        <Text style={styles.backIcon}>←</Text>
-      </Pressable>
-      <Text style={styles.stepLabel}>{stepLabel}</Text>
-      <View style={styles.track}>
-        <View style={[styles.fill, { width: `${Math.round(progress * 100)}%` }]} />
+    <FadeIn duration={300}>
+      <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
+        <Pressable style={styles.backBtn} onPress={onBack ?? (() => router.back())} hitSlop={12}>
+          <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+            <Path
+              d="M15 5l-7 7 7 7"
+              stroke={colors.navyDark}
+              strokeWidth={2.2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </Svg>
+        </Pressable>
+        <Text style={styles.stepLabel}>{stepLabel}</Text>
+        <View style={styles.track}>
+          <View style={[styles.fill, { width: `${Math.round(progress * 100)}%` }]} />
+        </View>
       </View>
-    </View>
+    </FadeIn>
   );
 }
 
@@ -52,10 +64,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.sm + 2,
-  },
-  backIcon: {
-    fontSize: 15,
-    color: colors.navyDark,
   },
   stepLabel: {
     fontFamily: fonts.mono.medium,
