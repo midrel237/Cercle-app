@@ -15,6 +15,7 @@ import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { AppButton } from '../../src/components/AppButton';
 import { BackButton } from '../../src/components/BackButton';
+import { CountryDropdown } from '../../src/components/CountryDropdown';
 import { RotationMotif } from '../../src/components/RotationMotif';
 import { FadeIn } from '../../src/components/motion';
 import { authApi } from '../../src/services/endpoints/auth';
@@ -26,13 +27,8 @@ import { colors, fonts, radii, spacing } from '../../src/theme';
 // réellement créé côté serveur à la vérification OTP, cf. auth.service.ts
 // verifyOtp — inscription progressive), mais avec un cadrage et une copie
 // dédiés à un nouveau membre, plus l'acceptation explicite des conditions
-// d'utilisation.
-//
-// Correctifs UI : bouton retour partagé BackButton (flèche SVG — le glyphe
-// ← se rendait en glyphe cassé ; position absolute sous la zone sûre),
-// ScrollView au lieu d'un View centré avec marginTop négatif (le contenu
-// débordait sur petits écrans et le bas était rogné), micro-animations
-// FadeIn en cascade.
+// d'utilisation. L'indicatif pays se choisit via la liste déroulante
+// inline CountryDropdown (plus d'écran dédié).
 export default function CreateAccountScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -96,14 +92,7 @@ export default function CreateAccountScreen() {
           <FadeIn delay={240}>
             <Text style={styles.label}>{t('auth.phoneNumberLabel')}</Text>
             <View style={styles.phoneRow}>
-              <Pressable
-                style={styles.dialCodeBox}
-                onPress={() => router.push('/(auth)/country-picker')}
-              >
-                <Text style={styles.dialCodeText}>
-                  {selectedCountry.flag} {selectedCountry.dialCode} ▾
-                </Text>
-              </Pressable>
+              <CountryDropdown width={84} />
               <TextInput
                 style={styles.phoneInput}
                 value={phoneNumber}
@@ -212,20 +201,6 @@ const styles = StyleSheet.create({
   phoneRow: {
     flexDirection: 'row',
     gap: spacing.sm,
-  },
-  dialCodeBox: {
-    width: 84,
-    borderRadius: radii.sm,
-    borderWidth: 1,
-    borderColor: colors.navyMedium,
-    backgroundColor: colors.navyDark,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dialCodeText: {
-    fontFamily: fonts.inter.medium,
-    fontSize: 12.5,
-    color: colors.white,
   },
   phoneInput: {
     flex: 1,
