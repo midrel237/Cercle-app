@@ -8,7 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { groupsApi } from '../../src/services/endpoints/groups';
@@ -37,6 +37,10 @@ interface GroupListItem {
  * Liste les groupes de l'utilisateur (câblé sur GET /groups) avec, pour
  * chacun, sa roue de rotation signature. L'état vide correspond à
  * l'écran 21 de la maquette : deux cartes d'action (créer / rejoindre).
+ *
+ * Rechargement au focus : la liste est rechargée à chaque retour sur
+ * l'onglet (useFocusEffect) — après la création d'un groupe ou l'adhésion
+ * par code, le groupe apparaît immédiatement sans pull-to-refresh manuel.
  */
 export default function HomeScreen() {
   const { t } = useTranslation();
@@ -63,6 +67,15 @@ export default function HomeScreen() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Recharger quand on revient sur l'onglet Accueil (fin de la création
+  // d'un groupe, retour du détail, adhésion…). Le useEffect ci-dessus ne
+  // rejoue pas : l'écran reste monté dans la tab bar.
+  useFocusEffect(
+    React.useCallback(() => {
+      load();
+    }, [load]),
+  );
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
