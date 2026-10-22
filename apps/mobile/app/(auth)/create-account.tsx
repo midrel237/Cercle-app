@@ -48,8 +48,9 @@ export default function CreateAccountScreen() {
     try {
       await authApi.requestOtp(fullPhoneNumber);
       router.push({ pathname: '/(auth)/otp', params: { phoneNumber: fullPhoneNumber } });
-    } catch {
-      setError(t('auth.otpSendError'));
+    } catch (err: any) {
+  console.warn('[OTP] échec:', err?.message, '| status:', err?.response?.status, '| URL:', err?.config?.baseURL);
+  setError(t('auth.otpSendError'));
     } finally {
       setIsSubmitting(false);
     }
