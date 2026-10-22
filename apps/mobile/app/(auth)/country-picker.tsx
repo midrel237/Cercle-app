@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
@@ -8,6 +9,8 @@ import {
   DIASPORA_COUNTRIES,
   REGIONAL_COUNTRIES,
 } from '../../src/constants/countries';
+import { BackButton } from '../../src/components/BackButton';
+import { FadeIn } from '../../src/components/motion';
 import { useCountryStore } from '../../src/store/country.store';
 import { colors, fonts, radii, spacing } from '../../src/theme';
 
@@ -18,8 +21,13 @@ type Section = { title: string; data: Country[] };
 // 80 (création de compte). Le pays choisi est écrit dans useCountryStore,
 // puis on revient simplement en arrière (router.back()) — l'écran appelant
 // relit le store, pas besoin de faire transiter la sélection par l'URL.
+//
+// Correctifs UI : bouton retour partagé BackButton (flèche SVG — le
+// glyphe ← se rendait en glyphe cassé sur certains appareils ; position
+// absolute sous la zone sûre), micro-animations FadeIn sur l'en-tête.
 export default function CountryPickerScreen() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const setSelectedCountry = useCountryStore((s) => s.setSelectedCountry);
   const selectedCountry = useCountryStore((s) => s.selectedCountry);
   const [query, setQuery] = useState('');
@@ -47,44 +55,50 @@ export default function CountryPickerScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={12}>
-          <Text style={styles.backIcon}>←</Text>
-        </Pressable>
-        <Text style={styles.title}>{t('auth.countryPicker.title')}</Text>
-        <Text style={styles.subtitle}>{t('auth.countryPicker.subtitle')}</Text>
-      </View>
+      <BackButton />
 
-      <ScrollView style={styles.scroll} keyboardShouldPersistTaps="handled">
-        <View style={styles.searchBar}>
-          <Text style={styles.searchIcon}>🔍</Text>
-          <TextInput
-            style={styles.searchInput}
-            value={query}
-            onChangeText={setQuery}
-            placeholder={t('auth.countryPicker.searchPlaceholder')}
-            placeholderTextColor={colors.inkSoft}
-          />
-        </View>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 56 }]}
+        keyboardShouldPersistTaps="handled"
+      >
+        <FadeIn>
+          <Text style={styles.title}>{t('auth.countryPicker.title')}</Text>
+          <Text style={styles.subtitle}>{t('auth.countryPicker.subtitle')}</Text>
+        </FadeIn>
 
-        {sections.map((section) => (
+        <FadeIn delay={100}>
+          <View style={styles.searchBar}>
+            <Text style={styles.searchIcon}>🔍</Text>
+            <TextInput
+              style={styles.searchInput}
+              value={query}
+              onChangeText={setQuery}
+              placeholder={t('auth.countryPicker.searchPlaceholder')}
+              placeholderTextColor={colors.inkSoft}
+            />
+          </View>
+        </FadeIn>
+
+        {sections.map((section, si) => (
           <View key={section.title}>
             <Text style={styles.sectionTitle}>{section.title}</Text>
-            {section.data.map((country) => {
+            {section.data.map((country, ci) => {
               const isSelected = country.code === selectedCountry.code;
               return (
-                <Pressable
-                  key={country.code}
-                  style={[styles.card, isSelected && styles.cardSelected]}
-                  onPress={() => handleSelect(country)}
-                >
-                  <Text style={styles.flag}>{country.flag}</Text>
-                  <View style={styles.cardText}>
-                    <Text style={styles.countryName}>{country.name}</Text>
-                    <Text style={styles.dialCode}>{country.dialCode}</Text>
-                  </View>
-                  <View style={[styles.radioDot, isSelected && styles.radioDotOn]} />
-                </Pressable>
+                <FadeIn key={country.code} delay={140 + (si * 3 + ci) * 35}>
+                  <Pressable
+                    style={[styles.card, isSelected && styles.cardSelected]}
+                    onPress={() => handleSelect(country)}
+                  >
+                    <Text style={styles.flag}>{country.flag}</Text>
+                    <View style={styles.cardText}>
+                      <Text style={styles.countryName}>{country.name}</Text>
+                      <Text style={styles.dialCode}>{country.dialCode}</Text>
+                    </View>
+                    <View style={[styles.radioDot, isSelected && styles.radioDotOn]} />
+                  </Pressable>
+                </FadeIn>
               );
             })}
           </View>
@@ -99,24 +113,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.creamLight,
   },
-  header: {
-    paddingTop: 16,
-    paddingHorizontal: 20,
+  scroll: {
+    flex: 1,
   },
-  backBtn: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: colors.sand,
-    backgroundColor: colors.creamLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.sm + 2,
-  },
-  backIcon: {
-    fontSize: 15,
-    color: colors.navyDark,
+  scrollContent: {
+    paddingHorizontal: spacing.md + 2,
+    paddingBottom: spacing.xl,
   },
   title: {
     fontFamily: fonts.fraunces.semiBold,
@@ -129,10 +131,6 @@ const styles = StyleSheet.create({
     color: colors.inkSoft,
     marginTop: 2,
   },
-  scroll: {
-    flex: 1,
-    padding: spacing.md + 2,
-  },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -142,7 +140,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     paddingHorizontal: 13,
     paddingVertical: 10,
-    marginBottom: spacing.md - 2,
+    marginVertical: spacing.md - 2,
     backgroundColor: colors.creamLight,
   },
   searchIcon: {
