@@ -1,11 +1,15 @@
 import React from 'react';
 import Svg, { Circle, Path } from 'react-native-svg';
+import { FadeIn } from './motion';
 import { colors } from '../theme';
 
 interface Props {
   size?: number;
   /** Index (0-5) du membre "actif" mis en avant sur la roue. */
   activeIndex?: number;
+  /** Apparition animée en fondu (par défaut). Passer false sur les écrans statiques. */
+  animated?: boolean;
+  delay?: number;
 }
 
 /**
@@ -13,12 +17,16 @@ interface Props {
  * à 6 points représentant les membres d'un groupe de tontine, avec un
  * repère (le point doré) qui indique le tour en cours. Réutilisé sur les
  * écrans de démarrage, bienvenue, et partout où l'on évoque la rotation.
+ *
+ * Correctifs : contraste du cercle porteur renforcé (navyLight au lieu de
+ * navyMedium, quasi invisible sur fond navy) et apparition animée en fondu
+ * via motion.tsx (la roue paraissait figée sur les écrans d'accueil).
  */
-export function RotationMotif({ size = 120, activeIndex = 0 }: Props) {
+export function RotationMotif({ size = 120, activeIndex = 0, animated = true, delay = 0 }: Props) {
   const center = size / 2;
   const radius = size * 0.4;
   const dotRadius = size * 0.05;
-  const activeDotRadius = size * 0.058;
+  const activeDotRadius = size * 0.062;
 
   const points = Array.from({ length: 6 }, (_, i) => {
     const angle = (Math.PI * 2 * i) / 6 - Math.PI / 2;
@@ -30,9 +38,17 @@ export function RotationMotif({ size = 120, activeIndex = 0 }: Props) {
 
   const active = points[activeIndex % points.length];
 
-  return (
+  const motif = (
     <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      <Circle cx={center} cy={center} r={radius} fill="none" stroke={colors.navyMedium} strokeWidth={2} />
+      <Circle
+        cx={center}
+        cy={center}
+        r={radius}
+        fill="none"
+        stroke={colors.navyLight}
+        strokeWidth={2}
+        opacity={0.9}
+      />
       <Path
         d={`M${center},${center} L${active.x},${active.y}`}
         stroke={colors.gold}
@@ -43,9 +59,16 @@ export function RotationMotif({ size = 120, activeIndex = 0 }: Props) {
         i === activeIndex % points.length ? (
           <Circle key={i} cx={p.x} cy={p.y} r={activeDotRadius} fill={colors.gold} />
         ) : (
-          <Circle key={i} cx={p.x} cy={p.y} r={dotRadius} fill={colors.navyLight} />
+          <Circle key={i} cx={p.x} cy={p.y} r={dotRadius} fill={colors.lavender} opacity={0.85} />
         ),
       )}
     </Svg>
+  );
+
+  if (!animated) return motif;
+  return (
+    <FadeIn delay={delay} dy={8} duration={450}>
+      {motif}
+    </FadeIn>
   );
 }
