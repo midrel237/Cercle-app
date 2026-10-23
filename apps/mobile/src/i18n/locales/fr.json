@@ -94,28 +94,36 @@
     },
     "documentChoice": {
       "stepLabel": "Étape 2 sur 2 · Votre document",
-      "title": "Quel document allez-vous vérifier ?",
+      "title": "Quel document allez-vous utiliser ?",
       "subtitle": "Vous serez redirigé vers une vérification sécurisée. Gardez votre document à portée de main.",
-      "cni": "Carte nationale d'identité",
-      "cniHint": "Le plus courant au Cameroun",
+      "cni": "Carte Nationale d'Identité",
+      "cniHint": "Recto et verso requis",
       "passport": "Passeport",
-      "passportHint": "Valable partout dans le monde",
+      "passportHint": "Page photo uniquement",
       "license": "Permis de conduire",
       "licenseHint": "Avec photo et en cours de validité",
       "sessionError": "Impossible de démarrer la vérification pour l'instant. Réessayez."
     },
     "processing": {
-      "title": "Vérification en cours…",
-      "subtitle": "Nous confirmons votre identité. Cela ne prend généralement que quelques instants, ne fermez pas l'application."
+      "title": "Analyse en cours…",
+      "subtitle": "Nous confirmons votre identité. Cela ne prend généralement que quelques instants, ne fermez pas l'application.",
+      "step1": "Documents reçus",
+      "step2": "Lisibilité vérifiée",
+      "step3": "Correspondance du visage",
+      "step4": "Vérification finale"
     },
     "success": {
       "title": "Identité vérifiée !",
       "subtitle": "Votre identité a été confirmée avec succès. Votre compte Cercle est désormais sécurisé et complet.",
+      "certifiedLabel": "Certifié",
+      "verifiedOnLabel": "Vérifié le {{date}}",
       "continueButton": "Continuer"
     },
     "rejected": {
-      "title": "Vérification refusée",
-      "subtitle": "Votre document n'a pas pu être validé cette fois. Vous pouvez réessayer avec un autre document ou un meilleur éclairage.",
+      "title": "Vérification impossible",
+      "subtitle": "La photo du document est trop floue pour être validée automatiquement.",
+      "tipsTitle": "Conseils",
+      "tipsBody": "Utilisez un fond uni, évitez les reflets et assurez-vous que les 4 coins du document sont visibles.",
       "retryButton": "Réessayer"
     }
   },
@@ -123,29 +131,29 @@
     "createPin": {
       "stepLabel": "Sécurisez votre compte",
       "title": "Créez votre code PIN",
-      "subtitle": "Ce code à 4 chiffres protégera l'accès à votre compte Cercle. Ne le partagez avec personne."
+      "subtitle": "Ce code protège l'accès à votre compte et vos transactions."
     },
     "pinConfirm": {
       "stepLabel": "Sécurisez votre compte",
-      "title": "Confirmez votre code PIN",
-      "subtitle": "Ressaisissez le même code pour valider.",
+      "title": "Confirmez votre code",
+      "subtitle": "Saisissez à nouveau le même code à 4 chiffres.",
       "mismatchError": "Les codes ne correspondent pas. Retour à la saisie…",
       "missingPhoneError": "Numéro introuvable. Veuillez vérifier votre téléphone à nouveau.",
       "serverError": "Impossible d'enregistrer le code pour l'instant. Réessayez."
     },
     "biometric": {
       "stepLabel": "Sécurisez votre compte",
-      "title": "Ouverture plus rapide",
+      "title": "Déverrouillage rapide",
       "subtitle": "Activez la biométrie pour ouvrir Cercle sans ressaisir votre code à chaque fois.",
       "fingerprintLabel": "Empreinte digitale",
-      "faceIdLabel": "Reconnaissance faciale",
+      "faceIdLabel": "Face ID",
       "hint": "Vos données biométriques restent sur votre appareil",
       "unavailableTitle": "Biométrie indisponible",
       "unavailableSubtitle": "Votre appareil ne propose pas de déverrouillage biométrique (ou aucune empreinte n'est enregistrée). Votre code PIN reste votre protection."
     },
     "notifications": {
       "stepLabel": "Sécurisez votre compte",
-      "title": "Rester au courant de votre cercle",
+      "title": "Restez informée à temps",
       "subtitle": "Les notifications vous préviennent des moments clés de votre tontine.",
       "row1Title": "Rappels de cotisation",
       "row1Hint": "Avant chaque tour de cotisation",
@@ -178,20 +186,32 @@
     "loading": "Chargement…",
     "loadError": "Impossible de charger vos groupes pour l'instant.",
     "retry": "Réessayer",
+    "summary": {
+      "totalLabel": "TOTAL COTISÉ CE MOIS",
+      "groups_one": "{{count}} groupe actif",
+      "groups_other": "{{count}} groupes actifs",
+      "pending_one": "{{count}} cotisation en attente",
+      "pending_other": "{{count}} cotisations en attente",
+      "allUpToDate": "Toutes vos cotisations sont à jour"
+    },
     "empty": {
-      "title": "Bienvenue dans Cercle",
-      "subtitle": "Créez votre premier groupe de tontine ou rejoignez celui d'un proche avec son code d'invitation.",
-      "cardOneTitle": "Créer un groupe",
+      "title": "Aucun groupe pour l'instant",
+      "subtitle": "Vous n'avez encore rejoint aucun groupe. Créez votre propre tontine ou rejoignez-en une avec un code d'invitation.",
+      "cardOneTitle": "+ Créer un groupe",
       "cardOneHint": "Définissez montant, périodicité et membres",
-      "cardTwoTitle": "Rejoindre un groupe",
+      "cardTwoTitle": "Rejoindre avec un code",
       "cardTwoHint": "Avec le code d'invitation de l'administrateur"
     },
     "group": {
       "memberCount_one": "{{count}} membre",
       "memberCount_other": "{{count}} membres",
+      "cycleOf": "Cycle {{current}}/{{total}}",
       "adminRole": "Admin",
       "cashierRole": "Caissier",
-      "memberRole": "Membre"
+      "memberRole": "Membre",
+      "statusUpToDate": "À jour",
+      "statusPending": "En attente",
+      "statusLate": "En retard"
     }
   },
   "createGroup": {
@@ -260,7 +280,7 @@
       "penaltyLabel": "Règles de pénalité",
       "penaltyPlaceholder": "Ex. Retard de cotisation : 500 FCFA de pénalité",
       "penaltyHint": "Libre à vous — ces règles seront affichées aux membres.",
-      "diasporaLabel": "Ouvert à la diaspora",
+      "diasporaLabel": "Ouvert aux membres de la diaspora",
       "diasporaHint": "Les membres à l'étranger peuvent rejoindre et cotiser depuis l'étranger (carte bancaire, virement).",
       "createButton": "Créer le groupe",
       "creating": "Création en cours…",
@@ -297,7 +317,7 @@
     "homeButton": "Retour à l'accueil"
   },
   "drawOrder": {
-    "title": "Ordre de rotation",
+    "title": "Tirage au sort de l'ordre",
     "membersCount_one": "{{count}} membre",
     "membersCount_other": "{{count}} membres",
     "unnamed": "Membre",
@@ -308,8 +328,8 @@
     "drawError": "Impossible de tirer l'ordre pour l'instant. Vérifiez votre connexion et réessayez."
   },
   "drawResult": {
-    "title": "Ordre de rotation confirmé",
-    "subtitle": "Le tirage a été validé et ne peut plus être modifié.",
+    "title": "Ordre confirmé",
+    "subtitle": "Le tirage a été validé par le groupe et ne peut plus être modifié.",
     "unnamed": "Membre",
     "startButton": "Démarrer le cycle 1",
     "starting": "Démarrage…",
@@ -366,12 +386,12 @@
       "refWaiting": "Réf. transaction en attente…"
     },
     "methods": {
-      "title": "Comptes liés",
+      "title": "Moyens de paiement",
       "defaultLabel": "Par défaut",
       "cardLabel": "Carte bancaire",
       "transferLabel": "Virement bancaire",
       "empty": "Aucun moyen de paiement lié pour l'instant.",
-      "addButton": "+ Ajouter un moyen de paiement",
+      "addButton": "Ajouter un moyen de paiement",
       "securityNote": "Vos identifiants Mobile Money ne sont jamais stockés par Cercle.",
       "loadError": "Impossible de charger vos moyens de paiement."
     },
@@ -398,7 +418,7 @@
     },
     "failed": {
       "title": "Le paiement n'a pas abouti",
-      "subtitle": "Solde insufficient sur le compte {{provider}} utilisé. Aucun montant n'a été débité.",
+      "subtitle": "Solde insuffisant sur le compte {{provider}} utilisé. Aucun montant n'a été débité.",
       "amountLabel": "Montant",
       "refLabel": "Référence",
       "codeLabel": "Code erreur",
@@ -555,7 +575,7 @@
     "loadError": "Impossible de charger vos prêts pour l'instant.",
     "loadGroupsError": "Impossible de charger vos groupes pour l'instant.",
     "noLoanGroups": "Aucun de vos groupes ne permet les prêts internes.",
-    "remainingTitle": "Reste à rembourser",
+    "remainingTitle": "RESTE À REMBOURSER",
     "activeCount_one": "{{count}} prêt actif · {{installments}} échéance restante",
     "activeCount_other": "{{count}} prêt actif · {{installments}} échéances restantes",
     "activeSection_one": "Actifs ({{count}})",
@@ -586,7 +606,7 @@
     "submitButton": "Envoyer la demande",
     "submitting": "Envoi de la demande…",
     "requestError": "Impossible d'envoyer la demande pour l'instant. Réessayez.",
-    "voteTitle": "Demande à valider",
+    "voteTitle": "Approbation collective du prêt",
     "voteRequestLine": "{{name}} demande {{amount}} FCFA",
     "voteProgress": "{{approvals}} / {{required}} approbations requises (majorité)",
     "voteActiveMembers_one": "{{count}} membre actif",
@@ -629,14 +649,14 @@
     "paidOnLabel": "Payée le {{date}}",
     "lateLabel": "En retard",
     "repayButton": "Rembourser l'échéance — {{amount}} FCFA",
-    "repayTitle": "Rembourser l'échéance {{number}}",
+    "repayTitle": "Rembourser une échéance",
     "installmentAmountTitle": "Montant de l'échéance",
     "repayLoanRef": "Prêt",
     "repayMethodLabel": "Payer avec",
     "repayMethodMomo": "MTN MoMo",
     "repayConfirmButton": "Rembourser {{amount}} FCFA",
     "repayError": "Impossible de préparer le remboursement pour l'instant. Réessayez.",
-    "repaymentConfirmedTitle": "Échéance remboursée",
+    "repaymentConfirmedTitle": "Remboursement confirmé",
     "repaymentConfirmedSubtitle": "{{amount}} FCFA ont été transférés avec succès. Il reste {{remaining}} échéance(s) sur ce prêt.",
     "viewLoanButton": "Voir le prêt"
   },
@@ -682,7 +702,8 @@
     "identityVerified": "Identité vérifiée",
     "identityPending": "Identité non vérifiée",
     "trustScoreLabel": "Score de fiabilité",
-    "onTimeLine": "{{onTime}} cotisations sans retard sur {{total}}",
+    "trustScoreExcellent": "Excellent",
+    "onTimeLine": "{{onTime}} cotisations sans retard",
     "paymentMethodsLabel": "Moyens de paiement",
     "groupsLabel": "Mes groupes",
     "languageLabel": "Langue",
