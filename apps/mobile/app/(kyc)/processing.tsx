@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { FadeIn, Stagger, StaggerItem } from '../../src/components/motion';
+import { Stagger } from '../../src/components/motion';
 import { kycApi, KycStatus } from '../../src/services/endpoints/kyc';
 import { colors, fonts, radii, spacing } from '../../src/theme';
 
@@ -94,29 +94,27 @@ export default function KycProcessingScreen() {
           const done = i < step;
           const active = i === step;
           return (
-            <StaggerItem key={i}>
-              <View style={styles.stepRow}>
-                <View
-                  style={[
-                    styles.stepDot,
-                    done && styles.stepDotDone,
-                    active && styles.stepDotActive,
-                  ]}
-                >
-                  {done && <Text style={styles.stepDotText}>✓</Text>}
-                </View>
-                <Text
-                  style={[
-                    styles.stepLabel,
-                    done && styles.stepLabelDone,
-                    active && styles.stepLabelActive,
-                  ]}
-                  numberOfLines={1}
-                >
-                  {s.label}
-                </Text>
+            <View key={i} style={styles.stepRow}>
+              <View
+                style={[
+                  styles.stepDot,
+                  done && styles.stepDotDone,
+                  active && styles.stepDotActive,
+                ]}
+              >
+                {done && <Text style={styles.stepDotText}>✓</Text>}
               </View>
-            </StaggerItem>
+              <Text
+                style={[
+                  styles.stepLabel,
+                  done && styles.stepLabelDone,
+                  active && styles.stepLabelActive,
+                ]}
+                numberOfLines={1}
+              >
+                {s.label}
+              </Text>
+            </View>
           );
         })}
       </Stagger>
