@@ -577,6 +577,7 @@
     "loadGroupsError": "Impossible de charger vos groupes pour l'instant.",
     "noLoanGroups": "Aucun de vos groupes ne permet les prêts internes.",
     "remainingTitle": "RESTE À REMBOURSER",
+    "loanAmountLine": "{{amount}} FCFA sur {{months}} mois",
     "activeCount_one": "{{count}} prêt actif · {{installments}} échéance restante",
     "activeCount_other": "{{count}} prêt actif · {{installments}} échéances restantes",
     "activeSection_one": "Actifs ({{count}})",
