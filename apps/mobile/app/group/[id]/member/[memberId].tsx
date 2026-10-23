@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.creamLight, paddingHorizontal: spacing.md,
   },
   metricRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing.sm + 2 },
-  metricRowBorder: { borderTopWidth: 1, borderTopTopColor: colors.sand, borderTopColor: colors.sand },
+  metricRowBorder: { borderTopWidth: 1, borderTopColor: colors.sand },
   metricLabel: { fontFamily: fonts.inter.regular, fontSize: 12.5, color: colors.inkSoft },
   metricValue: { fontFamily: fonts.mono.medium, fontSize: 12.5, color: colors.navyDark },
 });
