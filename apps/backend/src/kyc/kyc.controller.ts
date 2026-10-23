@@ -113,7 +113,11 @@ export class KycController {
     return { sessionUrl: session.sessionUrl };
   }
 
-  /** Statut KYC courant — appelé par l'app mobile après le retour du callback. */
+  /**
+   * Statut KYC courant — appelé par l'app mobile après le retour du
+   * callback. Renvoie aussi `verifiedAt` (ISO) : l'écran 14 de la
+   * maquette affiche « Certifié · Vérifié le {date} ».
+   */
   @Get('me/status')
   async status(@CurrentUser() user: JwtPayload) {
     const kyc = await this.prisma.kycDocument.findFirst({
@@ -121,7 +125,7 @@ export class KycController {
       orderBy: { createdAt: 'desc' },
     });
     if (!kyc) {
-      return { status: 'NONE' };
+      return { status: 'NONE', verifiedAt: null };
     }
 
     // Retour instantané : si le webhook n'est pas encore arrivé, on
@@ -132,12 +136,17 @@ export class KycController {
         const mapped = mapDiditDecision(remote.status);
         if (mapped !== 'PENDING') {
           await applyKycDecision(this.prisma, kyc.id, kyc.userId, mapped, remote.status);
-          return { status: mapped };
+          const verifiedAt =
+            mapped === 'VERIFIED' ? new Date().toISOString() : null;
+          return { status: mapped, verifiedAt };
         }
       } catch (err) {
         this.logger.warn(`Polling Didit impossible : ${String(err)}`);
       }
     }
-    return { status: kyc.status };
+    return {
+      status: kyc.status,
+      verifiedAt: kyc.verifiedAt?.toISOString() ?? null,
+    };
   }
 }
