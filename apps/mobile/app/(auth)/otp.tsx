@@ -7,7 +7,7 @@ import { AppButton } from '../../src/components/AppButton';
 import { RotationMotif } from '../../src/components/RotationMotif';
 import { FadeIn, PopIn } from '../../src/components/motion';
 import { authApi } from '../../src/services/endpoints/auth';
-import { setStoredAccessToken } from '../../src/services/api-client';
+import { setStoredAccessToken, setStoredPhoneNumber } from '../../src/services/api-client';
 import { useAuthStore } from '../../src/store/auth.store';
 import { colors, fonts, radii, spacing } from '../../src/theme';
 
@@ -19,6 +19,10 @@ const RESEND_SECONDS = 45;
 // paramètre de navigation. Un seul champ caché capture la saisie, projetée
 // sur 6 cases visuelles façon maquette. La vérification se déclenche
 // automatiquement dès que les 6 chiffres sont saisis.
+//
+// Le numéro vérifié est persisté en SecureStore : le login PIN-first
+// (écran 4) en a besoin à la prochaine ouverture, même après un
+// redémarrage de l'app (le store zustand est en mémoire).
 //
 // Correctifs UI : le motif signature remplace l'emoji 💬 (rendu cassé en
 // rectangle compressé sur certains appareils), safe-area sur le padding
@@ -51,6 +55,8 @@ export default function OtpScreen() {
         await setStoredAccessToken(data.accessToken);
       }
       setPhoneNumber(phoneNumber);
+      // Persisté pour le login PIN-first de la prochaine session.
+      await setStoredPhoneNumber(phoneNumber);
       router.replace('/(kyc)/intro');
     } catch {
       setError(t('auth.otp.verifyError'));
