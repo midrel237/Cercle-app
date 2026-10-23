@@ -1,0 +1,25 @@
+{
+  "groupSettings": {
+    "title": "Group rules",
+    "rulesSection": "Rules",
+    "amountLabel": "Amount",
+    "amountValue": "{{amount}} FCFA / cycle",
+    "periodicityLabel": "Schedule",
+    "penaltyLabel": "Late penalty",
+    "penaltyNone": "None defined",
+    "interestLabel": "Internal loan interest rate",
+    "interestValue": "{{rate}} %",
+    "diasporaLabel": "Open to diaspora members",
+    "diasporaYes": "Open",
+    "diasporaNo": "No",
+    "administrationSection": "Administration",
+    "cashierLabel": "Cashier",
+    "cashierNone": "None assigned",
+    "depositAccountLabel": "Deposit account",
+    "depositNone": "Not registered",
+    "closeGroupLabel": "Close the group",
+    "closeGroupHint": "Requires all cycles to be completed. This action will be available at the end of the cycle.",
+    "closeGroupAlertTitle": "Closure unavailable",
+    "notAdminHint": "Only the admin can edit these rules."
+  }
+}

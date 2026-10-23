@@ -22,8 +22,9 @@ interface Profile {
 
 /**
  * Écran 72 — Profil & fiabilité : identité vérifiée, SCORE DE FIABILITÉ
- * (ressort + compteur), cotisations sans retard, moyens de paiement,
- * groupes actifs, langue, notifications + liens.
+ * (ressort + compteur), badge « Excellent » (maquette : 92/100 ·
+ * Excellent · 14 cotisations sans retard), moyens de paiement, groupes
+ * actifs, langue, notifications + liens.
  */
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -89,7 +90,9 @@ export default function ProfileScreen() {
               </Text>
             </FadeIn>
 
-            {/* Score de fiabilité — ressort + compteur. */}
+            {/* Score de fiabilité — ressort + compteur + badge Excellent
+                (maquette écran 72 : « Score de fiabilité — 92/100 —
+                Excellent — 14 cotisations sans retard »). */}
             <PopIn delay={180}>
               <View style={styles.scoreCard}>
                 <Text style={styles.scoreLabel}>{t('profileScreen.trustScoreLabel')}</Text>
@@ -99,6 +102,11 @@ export default function ProfileScreen() {
                   duration={1100}
                   style={[styles.scoreValue, { color: scoreColor(profile.trustScore) }]}
                 />
+                {profile.trustScore >= 80 ? (
+                  <Text style={[styles.scoreBadge, { color: colors.success }]}>
+                    {t('profileScreen.trustScoreExcellent')}
+                  </Text>
+                ) : null}
                 <Text style={styles.scoreDetail}>
                   {t('profileScreen.onTimeLine', {
                     onTime: profile.contributionsOnTime,
@@ -168,6 +176,7 @@ const styles = StyleSheet.create({
   },
   scoreLabel: { fontFamily: fonts.inter.medium, fontSize: 10.5, color: colors.goldDark, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 2 },
   scoreValue: { fontSize: 26, marginBottom: 2 },
+  scoreBadge: { fontFamily: fonts.inter.semiBold, fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 2 },
   scoreDetail: { fontFamily: fonts.inter.regular, fontSize: 11.5, color: colors.inkSoft },
   infoCard: {
     borderWidth: 1, borderColor: colors.sand, borderRadius: radii.md,

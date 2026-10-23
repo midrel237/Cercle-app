@@ -1,5 +1,6 @@
 import React from 'react';
 import Svg, { Path } from 'react-native-svg';
+import { ColorValue } from 'react-native';
 import { colors } from '../theme';
 
 export type TabIconName = 'home' | 'loans' | 'history' | 'profile';
@@ -7,7 +8,9 @@ export type TabIconName = 'home' | 'loans' | 'history' | 'profile';
 interface Props {
   name: TabIconName;
   size?: number;
-  color?: string;
+  /** ColorValue : le callback tabBarIcon d'expo-router fournit un
+   * ColorValue (souvent OpaqueColorValue via StyleSheet), pas un string. */
+  color?: ColorValue;
 }
 
 /**
@@ -17,7 +20,7 @@ interface Props {
  */
 export function TabBarIcon({ name, size = 24, color = colors.navyDark }: Props) {
   const common = {
-    stroke: color,
+    stroke: color as string,
     strokeWidth: 1.8,
     strokeLinecap: 'round' as const,
     strokeLinejoin: 'round' as const,

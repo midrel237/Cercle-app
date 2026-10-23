@@ -1,24 +1,42 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { AppButton } from '../../src/components/AppButton';
+import { PopIn } from '../../src/components/motion';
 import { colors, fonts, radii, spacing } from '../../src/theme';
 
 // Écran 14 — Identité vérifiée (décision Didit APPROVED).
-// Le statut user.kycStatus est désormais VERIFIED côté backend (webhook
-// ou polling de secours) ; le parcours se poursuit vers la sécurité du
-// compte (écrans 16-20 : PIN, biométrie, notifications).
+// Conforme à la maquette : badge « Certifié », date « Vérifié le {date} »
+// (transmise par l'écran 13 depuis GET /kyc/me/status.verifiedAt), puis
+// « Continuer » vers la création du PIN (écrans 16-20).
+//
+// Correctif : l'emoji ✅ (badge) se rendait en rectangle cassé sur certains
+// appareils — remplacé par un badge dessiné (cercle or + coche ✓).
 export default function KycSuccessScreen() {
   const { t } = useTranslation();
+  const { verifiedAt } = useLocalSearchParams<{ verifiedAt?: string }>();
+
+  const verifiedOn = verifiedAt
+    ? new Date(verifiedAt).toLocaleDateString('fr-FR')
+    : new Date().toLocaleDateString('fr-FR');
 
   return (
     <View style={styles.container}>
-      <View style={styles.badge}>
-        <Text style={styles.badgeEmoji}>✅</Text>
-      </View>
+      <PopIn delay={100}>
+        <View style={styles.badge}>
+          <Text style={styles.badgeCheck}>✓</Text>
+        </View>
+      </PopIn>
       <Text style={styles.title}>{t('kyc.success.title')}</Text>
       <Text style={styles.subtitle}>{t('kyc.success.subtitle')}</Text>
+
+      <View style={styles.certifiedCard}>
+        <View style={styles.certifiedRow}>
+          <Text style={styles.certifiedLabel}>{t('kyc.success.certifiedLabel')}</Text>
+          <Text style={styles.certifiedValue}>{t('kyc.success.verifiedOnLabel', { date: verifiedOn })}</Text>
+        </View>
+      </View>
 
       <View style={styles.footer}>
         <AppButton
@@ -42,15 +60,15 @@ const styles = StyleSheet.create({
     width: 76,
     height: 76,
     borderRadius: radii.pill,
-    backgroundColor: colors.cream,
-    borderWidth: 1.5,
-    borderColor: colors.goldDark,
+    backgroundColor: colors.goldDark,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
   },
-  badgeEmoji: {
-    fontSize: 34,
+  badgeCheck: {
+    color: colors.white,
+    fontSize: 36,
+    fontFamily: fonts.inter.bold,
   },
   title: {
     fontFamily: fonts.fraunces.semiBold,
@@ -65,6 +83,33 @@ const styles = StyleSheet.create({
     color: colors.inkSoft,
     lineHeight: 18,
     textAlign: 'center',
+    marginBottom: spacing.lg,
+  },
+  certifiedCard: {
+    borderWidth: 1.5,
+    borderColor: colors.goldDark,
+    borderRadius: radii.md,
+    backgroundColor: colors.cream,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    marginBottom: spacing.lg,
+  },
+  certifiedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  certifiedLabel: {
+    fontFamily: fonts.inter.bold,
+    fontSize: 12,
+    color: colors.navyDark,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  certifiedValue: {
+    fontFamily: fonts.mono.medium,
+    fontSize: 12,
+    color: colors.inkSoft,
   },
   footer: {
     position: 'absolute',

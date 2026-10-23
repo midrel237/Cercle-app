@@ -1,0 +1,25 @@
+{
+  "groupSettings": {
+    "title": "Règles du groupe",
+    "rulesSection": "Règles",
+    "amountLabel": "Montant",
+    "amountValue": "{{amount}} FCFA / cycle",
+    "periodicityLabel": "Périodicité",
+    "penaltyLabel": "Pénalité de retard",
+    "penaltyNone": "Aucune définie",
+    "interestLabel": "Taux d'intérêt des prêts internes",
+    "interestValue": "{{rate}} %",
+    "diasporaLabel": "Ouvert aux membres de la diaspora",
+    "diasporaYes": "Ouvert",
+    "diasporaNo": "Non",
+    "administrationSection": "Administration",
+    "cashierLabel": "Caissier",
+    "cashierNone": "Aucun désigné",
+    "depositAccountLabel": "Compte de dépôt",
+    "depositNone": "Non enregistré",
+    "closeGroupLabel": "Clôturer le groupe",
+    "closeGroupHint": "Nécessite que tous les cycles soient terminés. Cette action sera disponible en fin de cycle.",
+    "closeGroupAlertTitle": "Clôture indisponible",
+    "notAdminHint": "Seul l'administrateur peut modifier ces règles."
+  }
+}

@@ -37,6 +37,12 @@
     "phoneRequiredError": "Please enter a phone number.",
     "otpSendError": "Couldn't send the code right now. Please try again.",
     "sendingOtp": "Sending…",
+    "loginSubtitle": "Enter your PIN code to open Cercle.",
+    "loginPinError": "Incorrect PIN code. Try again.",
+    "loginNoPinError": "No PIN code is set for this number. Create your account to define one.",
+    "loginError": "Couldn't sign in right now. Please try again.",
+    "forgotPinLink": "Forgot your PIN?",
+    "forgotPinHint": "A verification code will be sent by SMS to set a new PIN.",
     "createAccount": {
       "linkLabel": "Create an account",
       "title": "Create your account",
@@ -88,28 +94,36 @@
     },
     "documentChoice": {
       "stepLabel": "Step 2 of 2 · Your document",
-      "title": "Which document will you verify?",
+      "title": "Which document will you use?",
       "subtitle": "You'll be redirected to a secure verification. Keep your document at hand.",
       "cni": "National ID card",
-      "cniHint": "The most common in Cameroon",
+      "cniHint": "Both sides required",
       "passport": "Passport",
-      "passportHint": "Valid worldwide",
+      "passportHint": "Photo page only",
       "license": "Driver's license",
       "licenseHint": "With photo, currently valid",
       "sessionError": "Couldn't start verification right now. Please try again."
     },
     "processing": {
-      "title": "Verification in progress…",
-      "subtitle": "We're confirming your identity. It usually takes just a few moments — please keep the app open."
+      "title": "Analysis in progress…",
+      "subtitle": "We're confirming your identity. It usually takes just a few moments — please keep the app open.",
+      "step1": "Documents received",
+      "step2": "Readability verified",
+      "step3": "Face match",
+      "step4": "Final verification"
     },
     "success": {
       "title": "Identity verified!",
       "subtitle": "Your identity has been successfully confirmed. Your Cercle account is now secure and complete.",
+      "certifiedLabel": "Certified",
+      "verifiedOnLabel": "Verified on {{date}}",
       "continueButton": "Continue"
     },
     "rejected": {
-      "title": "Verification declined",
-      "subtitle": "Your document couldn't be validated this time. You can try again with another document or better lighting.",
+      "title": "Verification failed",
+      "subtitle": "The document photo is too blurry to be validated automatically.",
+      "tipsTitle": "Tips",
+      "tipsBody": "Use a plain background, avoid glare, and make sure all 4 corners of the document are visible.",
       "retryButton": "Try again"
     }
   },
@@ -117,29 +131,29 @@
     "createPin": {
       "stepLabel": "Secure your account",
       "title": "Create your PIN code",
-      "subtitle": "This 4-digit code will protect access to your Cercle account. Don't share it with anyone."
+      "subtitle": "This code protects access to your account and your transactions."
     },
     "pinConfirm": {
       "stepLabel": "Secure your account",
-      "title": "Confirm your PIN code",
-      "subtitle": "Enter the same code again to validate.",
+      "title": "Confirm your code",
+      "subtitle": "Enter the same 4-digit code again.",
       "mismatchError": "Codes don't match. Going back…",
       "missingPhoneError": "Phone number not found. Please verify your phone again.",
       "serverError": "Couldn't save the code right now. Please try again."
     },
     "biometric": {
       "stepLabel": "Secure your account",
-      "title": "Faster unlocking",
+      "title": "Quick unlock",
       "subtitle": "Enable biometrics to open Cercle without re-entering your code every time.",
       "fingerprintLabel": "Fingerprint",
-      "faceIdLabel": "Facial recognition",
+      "faceIdLabel": "Face ID",
       "hint": "Your biometric data stays on your device",
       "unavailableTitle": "Biometrics unavailable",
       "unavailableSubtitle": "Your device doesn't offer biometric unlock (or no fingerprint is enrolled). Your PIN code remains your protection."
     },
     "notifications": {
       "stepLabel": "Secure your account",
-      "title": "Stay on top of your circle",
+      "title": "Stay informed on time",
       "subtitle": "Notifications keep you informed about your tontine's key moments.",
       "row1Title": "Contribution reminders",
       "row1Hint": "Before each contribution turn",
@@ -172,20 +186,32 @@
     "loading": "Loading…",
     "loadError": "Couldn't load your groups right now.",
     "retry": "Retry",
+    "summary": {
+      "totalLabel": "TOTAL CONTRIBUTED THIS MONTH",
+      "groups_one": "{{count}} active group",
+      "groups_other": "{{count}} active groups",
+      "pending_one": "{{count}} contribution pending",
+      "pending_other": "{{count}} contributions pending",
+      "allUpToDate": "All your contributions are up to date"
+    },
     "empty": {
-      "title": "Welcome to Cercle",
-      "subtitle": "Create your first tontine group or join a relative's one with their invite code.",
-      "cardOneTitle": "Create a group",
+      "title": "No group yet",
+      "subtitle": "You haven't joined any group yet. Create your own tontine or join one with an invite code.",
+      "cardOneTitle": "+ Create a group",
       "cardOneHint": "Set amount, schedule, and members",
-      "cardTwoTitle": "Join a group",
+      "cardTwoTitle": "Join with a code",
       "cardTwoHint": "With the admin's invite code"
     },
     "group": {
       "memberCount_one": "{{count}} member",
       "memberCount_other": "{{count}} members",
+      "cycleOf": "Cycle {{current}}/{{total}}",
       "adminRole": "Admin",
       "cashierRole": "Cashier",
-      "memberRole": "Member"
+      "memberRole": "Member",
+      "statusUpToDate": "Up to date",
+      "statusPending": "Pending",
+      "statusLate": "Late"
     }
   },
   "createGroup": {
@@ -254,7 +280,7 @@
       "penaltyLabel": "Penalty rules",
       "penaltyPlaceholder": "e.g. Late contribution: 500 FCFA penalty",
       "penaltyHint": "Up to you — these rules will be shown to members.",
-      "diasporaLabel": "Open to diaspora",
+      "diasporaLabel": "Open to diaspora members",
       "diasporaHint": "Members abroad can join and contribute from overseas (bank card, wire transfer).",
       "createButton": "Create the group",
       "creating": "Creating…",
@@ -291,7 +317,7 @@
     "homeButton": "Back to home"
   },
   "drawOrder": {
-    "title": "Rotation order",
+    "title": "Rotation order draw",
     "membersCount_one": "{{count}} member",
     "membersCount_other": "{{count}} members",
     "unnamed": "Member",
@@ -302,8 +328,8 @@
     "drawError": "Couldn't draw the order right now. Check your connection and try again."
   },
   "drawResult": {
-    "title": "Rotation order confirmed",
-    "subtitle": "The draw has been confirmed and can no longer be changed.",
+    "title": "Order confirmed",
+    "subtitle": "The draw has been confirmed by the group and can no longer be changed.",
     "unnamed": "Member",
     "startButton": "Start cycle 1",
     "starting": "Starting…",
@@ -360,12 +386,12 @@
       "refWaiting": "Transaction ref. pending…"
     },
     "methods": {
-      "title": "Linked accounts",
+      "title": "Payment methods",
       "defaultLabel": "Default",
       "cardLabel": "Bank card",
       "transferLabel": "Wire transfer",
       "empty": "No payment method linked yet.",
-      "addButton": "+ Add a payment method",
+      "addButton": "Add a payment method",
       "securityNote": "Your Mobile Money credentials are never stored by Cercle.",
       "loadError": "Couldn't load your payment methods."
     },
@@ -451,6 +477,7 @@
     "trustScoreLabel": "Reliability score",
     "memberSince": "Member since {{date}}",
     "onTimeContributions": "{{onTime}} contributions paid on time out of {{total}}",
+    "lateOnCycles": "{{count}} delays over the last {{total}} cycles",
     "metricOnTime": "Contributions paid on time",
     "metricLoansRepaid": "Loans fully repaid",
     "metricRotation": "Rotation turn received",
@@ -549,7 +576,8 @@
     "loadError": "Couldn't load your loans right now.",
     "loadGroupsError": "Couldn't load your groups right now.",
     "noLoanGroups": "None of your groups allow internal loans.",
-    "remainingTitle": "Remaining to repay",
+    "remainingTitle": "REMAINING TO REPAY",
+    "loanAmountLine": "{{amount}} FCFA over {{months}} months",
     "activeCount_one": "{{count}} active loan · {{installments}} installment left",
     "activeCount_other": "{{count}} active loan · {{installments}} installments left",
     "activeSection_one": "Active ({{count}})",
@@ -580,7 +608,7 @@
     "submitButton": "Send the request",
     "submitting": "Sending the request…",
     "requestError": "Couldn't send the request right now. Please try again.",
-    "voteTitle": "Request to validate",
+    "voteTitle": "Collective loan approval",
     "voteRequestLine": "{{name}} requests {{amount}} FCFA",
     "voteProgress": "{{approvals}} / {{required}} approvals required (majority)",
     "voteActiveMembers_one": "{{count}} active member",
@@ -623,14 +651,14 @@
     "paidOnLabel": "Paid on {{date}}",
     "lateLabel": "Late",
     "repayButton": "Repay installment — {{amount}} FCFA",
-    "repayTitle": "Repay installment {{number}}",
+    "repayTitle": "Repay an installment",
     "installmentAmountTitle": "Installment amount",
     "repayLoanRef": "Loan",
     "repayMethodLabel": "Pay with",
     "repayMethodMomo": "MTN MoMo",
     "repayConfirmButton": "Repay {{amount}} FCFA",
     "repayError": "Couldn't prepare the repayment right now. Please try again.",
-    "repaymentConfirmedTitle": "Installment repaid",
+    "repaymentConfirmedTitle": "Repayment confirmed",
     "repaymentConfirmedSubtitle": "{{amount}} FCFA were transferred successfully. {{remaining}} installment(s) left on this loan.",
     "viewLoanButton": "View the loan"
   },
@@ -676,7 +704,8 @@
     "identityVerified": "Identity verified",
     "identityPending": "Identity not verified",
     "trustScoreLabel": "Reliability score",
-    "onTimeLine": "{{onTime}} contributions without delay out of {{total}}",
+    "trustScoreExcellent": "Excellent",
+    "onTimeLine": "{{onTime}} contributions without delay",
     "paymentMethodsLabel": "Payment methods",
     "groupsLabel": "My groups",
     "languageLabel": "Language",

@@ -1,60 +1,122 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
+  TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { AppButton } from '../../src/components/AppButton';
-import { CountryDropdown } from '../../src/components/CountryDropdown';
 import { RotationMotif } from '../../src/components/RotationMotif';
-import { FadeIn } from '../../src/components/motion';
+import { FadeIn, PopIn } from '../../src/components/motion';
 import { authApi } from '../../src/services/endpoints/auth';
-import { useCountryStore } from '../../src/store/country.store';
+import { setStoredAccessToken, getStoredPhoneNumber } from '../../src/services/api-client';
+import { useAuthStore } from '../../src/store/auth.store';
 import { colors, fonts, radii, spacing } from '../../src/theme';
 
-// Écran 4 — Connexion / entrée du parcours d'authentification.
-// C'est un écran unique de saisie du numéro de téléphone : il sert aussi
-// bien à un nouveau membre (« Créer un compte », écran 80) qu'à un membre
-// existant, puisque les deux parcours se rejoignent sur la vérification
-// par OTP (écran 5). L'indicatif pays est géré par useCountryStore,
-// partagé avec l'écran 80 ; sa sélection se fait désormais par la liste
-// déroulante inline CountryDropdown (plus d'écran dédié).
+const PIN_LENGTH = 4;
+
+// Écran 4 — Connexion.
+// Un compte existant (qui a déjà configuré son PIN à l'inscription, écran
+// 16-17) se connecte UNIQUEMENT avec son code PIN : le numéro de téléphone
+// est rappelé en lecture seule (restauré depuis SecureStore si le store
+// mémoire est vide — redémarrage de l'app), la saisie se fait sur 4 cases
+// façon maquette (même pattern que l'écran 16). 4 chiffres →
+// POST /auth/login (numéro mémorisé + PIN) → tokens → accueil.
+// Le lien « Code PIN oublié ? » relance le flux OTP (vérification par
+// SMS), « Créer un compte » ouvre l'inscription.
+//
+// Correctif clavier (Android) : même pattern que create-pin — input
+// invisible mais dimensionné (jamais 1x1/opacity 0 seul) + focus différé.
 export default function LoginScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const selectedCountry = useCountryStore((s) => s.selectedCountry);
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const inputRef = useRef<TextInput>(null);
+  const [pin, setPin] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const phoneNumber = useAuthStore((s) => s.phoneNumber);
+  const setPhoneNumber = useAuthStore((s) => s.setPhoneNumber);
+  const setUser = useAuthStore((s) => s.setUser);
 
-  const handleContinue = async () => {
-    const digits = phoneNumber.trim();
-    if (!digits) {
-      setError(t('auth.phoneRequiredError'));
-      return;
+  useEffect(() => {
+    // autoFocus peu fiable au montage : focus explicite différé.
+    const t1 = setTimeout(() => inputRef.current?.focus(), 120);
+    return () => clearTimeout(t1);
+  }, []);
+
+  useEffect(() => {
+    // Store mémoire vide (redémarrage de l'app) : restaurer le dernier
+    // numéro utilisé sur cet appareil depuis SecureStore.
+    const restore = async () => {
+      if (phoneNumber) return;
+      const stored = await getStoredPhoneNumber();
+      if (stored) {
+        setPhoneNumber(stored);
+      }
+    };
+    restore();
+  }, [phoneNumber, setPhoneNumber]);
+
+  const handleChange = (raw: string) => {
+    const digitsOnly = raw.replace(/[^0-9]/g, '').slice(0, PIN_LENGTH);
+    setPin(digitsOnly);
+    if (error) setError(null);
+    if (digitsOnly.length === PIN_LENGTH) {
+      handleSubmit(digitsOnly);
     }
+  };
 
-    const fullPhoneNumber = `${selectedCountry.dialCode}${digits.replace(/\s+/g, '')}`;
+  const handleSubmit = async (value: string) => {
+    if (isSubmitting || !phoneNumber) return;
     setError(null);
     setIsSubmitting(true);
     try {
-      await authApi.requestOtp(fullPhoneNumber);
-      router.push({ pathname: '/(auth)/otp', params: { phoneNumber: fullPhoneNumber } });
+      const { data } = await authApi.login(phoneNumber, value);
+      if (data?.accessToken) {
+        await setStoredAccessToken(data.accessToken);
+      }
+      // Hydrate le store avec le profil retourné par /auth/login.
+      setUser({
+        id: data.user.id,
+        phoneNumber: data.user.phoneNumber,
+        fullName: data.user.fullName,
+        language: data.user.language === 'FR' ? 'fr' : 'en',
+        kycStatus: data.user.kycStatus === 'VERIFIED' ? 'verified'
+          : data.user.kycStatus === 'PENDING' ? 'pending'
+          : data.user.kycStatus === 'REJECTED' ? 'rejected'
+          : 'not_started',
+        hasBiometricEnabled: false,
+        trustScore: 50,
+        preferredCurrency: 'XAF',
+      } as never);
+      router.replace('/(tabs)');
     } catch {
-      setError(t('auth.otpSendError'));
+      setError(t('auth.loginPinError'));
+      setPin('');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const handleForgotPin = async () => {
+    if (!phoneNumber) return;
+    try {
+      await authApi.requestOtp(phoneNumber);
+      router.push({ pathname: '/(auth)/otp', params: { phoneNumber } });
+    } catch {
+      setError(t('auth.otpSendError'));
+    }
+  };
+
+  const digits = Array.from({ length: PIN_LENGTH }, (_, i) => pin[i]);
 
   return (
     <KeyboardAvoidingView
@@ -78,53 +140,60 @@ export default function LoginScreen() {
         </FadeIn>
 
         <View style={styles.form}>
-          <FadeIn delay={220}>
-            <Text style={styles.label}>{t('auth.phoneNumberLabel')}</Text>
-            <View style={styles.phoneRow}>
-              <CountryDropdown width={84} />
-              <TextInput
-                style={styles.phoneInput}
-                value={phoneNumber}
-                onChangeText={(v) => {
-                  setPhoneNumber(v);
-                  if (error) setError(null);
-                }}
-                placeholder={t('auth.phoneNumberPlaceholder')}
-                placeholderTextColor={colors.navySoft}
-                keyboardType="phone-pad"
-                autoComplete="tel"
-                returnKeyType="done"
-                onSubmitEditing={handleContinue}
-              />
-            </View>
+          <FadeIn delay={200}>
+            <Text style={styles.title}>{t('auth.loginTitle')}</Text>
+            <Text style={styles.subtitle}>{t('auth.loginSubtitle')}</Text>
 
-            {error ? (
-              <Text style={styles.errorText}>{error}</Text>
-            ) : (
-              <Text style={styles.hint}>{t('auth.diasporaHint')}</Text>
+            {phoneNumber && (
+              <Text style={styles.phoneEcho}>{phoneNumber}</Text>
             )}
           </FadeIn>
 
-          <FadeIn delay={300}>
-            <AppButton
-              label={isSubmitting ? t('auth.sendingOtp') : t('common.continue')}
-              onPress={handleContinue}
-              disabled={isSubmitting}
-              style={styles.continueButton}
-            />
-            {isSubmitting && (
-              <ActivityIndicator color={colors.gold} style={styles.spinner} />
-            )}
-
-            <Pressable onPress={() => router.push('/(auth)/create-account')} hitSlop={8}>
-              <Text style={styles.footerText}>
-                {t('auth.noAccountYet')}{' '}
-                <Text style={styles.footerLink}>{t('auth.createAccount.linkLabel')}</Text>
-              </Text>
+          <PopIn delay={280}>
+            <Pressable onPress={() => inputRef.current?.focus()} style={styles.pinRow}>
+              {digits.map((d, i) => (
+                <View key={i} style={[styles.pinDot, d ? styles.pinDotFilled : null]}>
+                  <Text style={styles.pinText}>{d ?? '·'}</Text>
+                </View>
+              ))}
             </Pressable>
-          </FadeIn>
+          </PopIn>
+
+          {isSubmitting ? (
+            <ActivityIndicator color={colors.gold} style={styles.spinner} />
+          ) : (
+            error ? <Text style={styles.errorText}>{error}</Text> : null
+          )}
+
+          {/* Champ réel, invisible mais dimensionné (cf. create-pin). */}
+          <TextInput
+            ref={inputRef}
+            value={pin}
+            onChangeText={handleChange}
+            keyboardType="number-pad"
+            maxLength={PIN_LENGTH}
+            contextMenuHidden
+            style={styles.hiddenInput}
+          />
         </View>
       </ScrollView>
+
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+        <AppButton
+          label={isSubmitting ? t('common.continue') + '…' : t('common.continue')}
+          onPress={() => handleSubmit(pin)}
+          disabled={isSubmitting || pin.length !== PIN_LENGTH}
+        />
+        <View style={styles.linksRow}>
+          <Pressable onPress={handleForgotPin} hitSlop={8}>
+            <Text style={styles.link}>{t('auth.forgotPinLink')}</Text>
+          </Pressable>
+          <Text style={styles.linkSeparator}>·</Text>
+          <Pressable onPress={() => router.push('/(auth)/create-account')} hitSlop={8}>
+            <Text style={styles.link}>{t('auth.createAccount.linkLabel')}</Text>
+          </Pressable>
+        </View>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -149,6 +218,7 @@ const styles = StyleSheet.create({
     color: colors.white,
     marginTop: spacing.md + 2,
     marginBottom: spacing.xs + 2,
+    textAlign: 'center',
   },
   tagline: {
     fontFamily: fonts.inter.regular,
@@ -156,63 +226,97 @@ const styles = StyleSheet.create({
     color: colors.lavender,
     textAlign: 'center',
     lineHeight: 18,
-    marginBottom: spacing.xl + 2,
+    marginBottom: spacing.xl,
   },
   form: {
     width: '100%',
+    alignItems: 'center',
   },
-  label: {
-    fontFamily: fonts.inter.medium,
-    fontSize: 11.5,
-    color: colors.lavender,
+  title: {
+    fontFamily: fonts.fraunces.semiBold,
+    fontSize: 22,
+    color: colors.white,
     marginBottom: spacing.xs + 2,
+    textAlign: 'center',
   },
-  phoneRow: {
+  subtitle: {
+    fontFamily: fonts.inter.regular,
+    fontSize: 12.5,
+    color: colors.lavender,
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: spacing.sm,
+  },
+  phoneEcho: {
+    fontFamily: fonts.mono.medium,
+    fontSize: 13,
+    color: colors.gold,
+    marginBottom: spacing.lg,
+    letterSpacing: 0.5,
+  },
+  pinRow: {
     flexDirection: 'row',
-    gap: spacing.sm,
+    gap: spacing.sm + 2,
+    marginBottom: spacing.md,
   },
-  phoneInput: {
-    flex: 1,
+  pinDot: {
+    width: 46,
+    height: 54,
     borderRadius: radii.sm,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.navyMedium,
     backgroundColor: colors.navyDark,
-    color: colors.white,
-    fontFamily: fonts.mono.medium,
-    fontSize: 14,
-    paddingHorizontal: spacing.sm + 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  hint: {
-    fontFamily: fonts.inter.regular,
-    fontSize: 10.5,
-    color: colors.navySoft,
-    lineHeight: 15,
+  pinDotFilled: {
+    borderColor: colors.gold,
+    backgroundColor: colors.navyDark,
+  },
+  pinText: {
+    fontFamily: fonts.mono.semiBold,
+    fontSize: 20,
+    color: colors.white,
+  },
+  spinner: {
     marginTop: spacing.sm,
-    marginBottom: spacing.md - 2,
   },
   errorText: {
     fontFamily: fonts.inter.medium,
-    fontSize: 10.5,
-    color: colors.danger,
-    lineHeight: 15,
-    marginTop: spacing.sm,
-    marginBottom: spacing.md - 2,
-  },
-  continueButton: {
-    marginBottom: spacing.sm + 2,
-  },
-  spinner: {
-    marginBottom: spacing.sm,
-  },
-  footerText: {
-    textAlign: 'center',
-    fontFamily: fonts.inter.regular,
     fontSize: 11.5,
-    color: colors.navySoft,
-    marginTop: spacing.xs + 2,
+    color: colors.danger,
+    textAlign: 'center',
+    marginTop: spacing.sm,
   },
-  footerLink: {
+  hiddenInput: {
+    // Invisible mais dimensionné : Android refuse d'ouvrir le clavier
+    // sur une vue 1x1 / opacity 0. Couvre la zone de saisie.
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0,
+  },
+  footer: {
+    paddingHorizontal: spacing.md + 2,
+    paddingTop: spacing.sm,
+    backgroundColor: colors.navy,
+  },
+  linksRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.sm + 2,
+  },
+  link: {
     fontFamily: fonts.inter.bold,
+    fontSize: 11.5,
     color: colors.gold,
+  },
+  linkSeparator: {
+    color: colors.navySoft,
+    fontSize: 11.5,
   },
 });
