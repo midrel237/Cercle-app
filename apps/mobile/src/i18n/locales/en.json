@@ -577,6 +577,7 @@
     "loadGroupsError": "Couldn't load your groups right now.",
     "noLoanGroups": "None of your groups allow internal loans.",
     "remainingTitle": "REMAINING TO REPAY",
+    "loanAmountLine": "{{amount}} FCFA over {{months}} months",
     "activeCount_one": "{{count}} active loan · {{installments}} installment left",
     "activeCount_other": "{{count}} active loan · {{installments}} installments left",
     "activeSection_one": "Active ({{count}})",
