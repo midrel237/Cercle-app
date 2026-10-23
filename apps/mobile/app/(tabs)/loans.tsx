@@ -12,6 +12,10 @@ import { colors, fonts, radii, spacing } from '../../src/theme';
  * (prochaine échéance) et prêts soldés. Navigation vers détail (64),
  * vote (59) et demande (58).
  *
+ * Conforme maquette : chaque carte affiche « X FCFA sur N mois » (N =
+ * installmentsTotal, échéances mensuelles), puis « Y / N remboursés — Z
+ * FCFA restants » et la prochaine échéance pour les actifs.
+ *
  * Micro-animations : le montant global compte de 0 à sa valeur ; les
  * cartes de prêts apparaissent en cascade (Stagger).
  */
@@ -62,8 +66,12 @@ export default function LoansScreen() {
       <Text style={styles.loanGroup} numberOfLines={1}>
         {l.groupName}
       </Text>
+      {/* Maquette écran 57 : « 75 000 FCFA sur 3 mois ». */}
       <Text style={styles.loanAmount}>
-        {Number(l.amount).toLocaleString('fr-FR')} FCFA
+        {t('loansScreen.loanAmountLine', {
+          amount: Number(l.amount).toLocaleString('fr-FR'),
+          months: l.installmentsTotal,
+        })}
         {Number(l.interestRate) > 0
           ? ` · ${Number(l.interestRate).toLocaleString('fr-FR')} %`
           : ''}
