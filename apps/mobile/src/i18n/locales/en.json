@@ -37,6 +37,12 @@
     "phoneRequiredError": "Please enter a phone number.",
     "otpSendError": "Couldn't send the code right now. Please try again.",
     "sendingOtp": "Sending…",
+    "loginSubtitle": "Enter your PIN code to open Cercle.",
+    "loginPinError": "Incorrect PIN code. Try again.",
+    "loginNoPinError": "No PIN code is set for this number. Create your account to define one.",
+    "loginError": "Couldn't sign in right now. Please try again.",
+    "forgotPinLink": "Forgot your PIN?",
+    "forgotPinHint": "A verification code will be sent by SMS to set a new PIN.",
     "createAccount": {
       "linkLabel": "Create an account",
       "title": "Create your account",
