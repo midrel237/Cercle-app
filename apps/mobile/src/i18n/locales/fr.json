@@ -398,7 +398,7 @@
     },
     "failed": {
       "title": "Le paiement n'a pas abouti",
-      "subtitle": "Solde insuffisant sur le compte {{provider}} utilisé. Aucun montant n'a été débité.",
+      "subtitle": "Solde insufficient sur le compte {{provider}} utilisé. Aucun montant n'a été débité.",
       "amountLabel": "Montant",
       "refLabel": "Référence",
       "codeLabel": "Code erreur",
@@ -650,7 +650,7 @@
     "dateLabel": "Date",
     "methodLabel": "Moyen de paiement",
     "groupLabel": "Groupe",
-    " "operatorRefLabel": "Référence opérateur",
+    "operatorRefLabel": "Référence opérateur",
     "shareReceiptButton": "Partager le reçu",
     "statementTitle": "RELEVÉ",
     "statementGeneratedOn": "Généré le {{date}}",
