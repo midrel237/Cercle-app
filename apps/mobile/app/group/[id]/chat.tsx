@@ -31,6 +31,10 @@ interface GroupMessage {
  * toutes les 15 s pour rafraîchir sans couche temps réel. Un vrai
  * WebSocket/SSE pourra remplacer le polling plus tard sans changer ce
  * modèle (cf. GroupMessage dans le schéma Prisma).
+ *
+ * En-tête conforme maquette : nom du groupe + « N membres ». Le
+ * « N en ligne » de la maquette exige une couche présence temps réel
+ * (WebSocket) — non affiché plutôt que simule.
  */
 export default function GroupChatScreen() {
   const { t } = useTranslation();
@@ -43,7 +47,23 @@ export default function GroupChatScreen() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [groupName, setGroupName] = useState<string | null>(null);
+  const [memberCount, setMemberCount] = useState<number | null>(null);
   const listRef = useRef<FlatList<GroupMessage>>(null);
+
+  const loadHeader = useCallback(async () => {
+    if (!id) return;
+    try {
+      const [groupRes, membersRes] = await Promise.all([
+        groupsApi.getOne(id),
+        groupsApi.listMembers(id).catch(() => null),
+      ]);
+      setGroupName((groupRes.data as { name?: string })?.name ?? null);
+      setMemberCount(membersRes?.data?.memberCount ?? null);
+    } catch {
+      // En-tête secondaire : ne pas bloquer l'écran si le chargement échoue.
+    }
+  }, [id]);
 
   const loadMessages = useCallback(async () => {
     if (!id) return;
@@ -59,6 +79,10 @@ export default function GroupChatScreen() {
       setLoading(false);
     }
   }, [id, t]);
+
+  useEffect(() => {
+    loadHeader();
+  }, [loadHeader]);
 
   useEffect(() => {
     loadMessages();
@@ -94,6 +118,11 @@ export default function GroupChatScreen() {
     return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
   };
 
+  const headerSub =
+    memberCount !== null
+      ? t('groupChat.memberCount', { count: memberCount })
+      : null;
+
   return (
     <KeyboardAvoidingView
       style={[styles.container, { paddingTop: insets.top }]}
@@ -103,7 +132,12 @@ export default function GroupChatScreen() {
         <Pressable onPress={router.back} hitSlop={12}>
           <Text style={styles.backText}>‹ {t('common.back')}</Text>
         </Pressable>
-        <Text style={styles.headerTitle}>{t('groupChat.title')}</Text>
+        <View style={styles.headerTitleWrap}>
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {groupName ?? t('groupChat.title')}
+          </Text>
+          {headerSub ? <Text style={styles.headerSub}>{headerSub}</Text> : null}
+        </View>
       </View>
 
       {loading ? (
@@ -192,10 +226,19 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.navy,
   },
+  headerTitleWrap: {
+    flex: 1,
+  },
   headerTitle: {
     fontFamily: fonts.fraunces.semiBold,
     fontSize: 16,
     color: colors.navyDark,
+  },
+  headerSub: {
+    fontFamily: fonts.inter.regular,
+    fontSize: 11,
+    color: colors.inkSoft,
+    marginTop: 1,
   },
   center: {
     flex: 1,
