@@ -77,8 +77,11 @@ export default function GroupSettingsScreen() {
 
   const myMember = group?.members.find((m) => m.userId === user?.id);
   const isAdmin = myMember?.role === 'ADMIN';
-  const cashier = group?.members.find((m) => m.id === group.cashierMemberId);
+  const cashier = group?.members.find((m) => m.id === group?.cashierMemberId);
   const hasActiveCycle = (group?.cycles ?? []).some((c) => c.status === 'ACTIVE');
+  // Valeurs pré-extraites : évite tout accès non protégé si group est null
+  // (TS ne « narrow » pas via Number(group?.x ?? 0) > 0).
+  const interestRate = Number(group?.interestRate ?? 0);
 
   const row = (label: string, value: string | null | undefined, last = false) => (
     <View style={[styles.row, !last && styles.rowBorder]}>
@@ -128,8 +131,8 @@ export default function GroupSettingsScreen() {
               )}
               {row(
                 t('groupSettings.interestLabel'),
-                Number(group?.interestRate ?? 0) > 0
-                  ? t('groupSettings.interestValue', { rate: Number(group.interestRate) })
+                interestRate > 0
+                  ? t('groupSettings.interestValue', { rate: interestRate })
                   : t('groupSettings.penaltyNone'),
               )}
               {row(
@@ -161,20 +164,12 @@ export default function GroupSettingsScreen() {
             <Pressable
               style={styles.closeButton}
               onPress={() => {
-                if (hasActiveCycle) {
-                  Alert.alert(
-                    t('groupSettings.closeGroupAlertTitle'),
-                    t('groupSettings.closeGroupHint'),
-                  );
-                } else {
-                  // Aucun cycle actif : la clôture métier passe par le
-                  // démarrage du cycle suivant / décision admin côté serveur —
-                  // informer pour l'instant (pas d'endpoint de clôture).
-                  Alert.alert(
-                    t('groupSettings.closeGroupAlertTitle'),
-                    t('groupSettings.closeGroupHint'),
-                  );
-                }
+                // Informatif dans tous les cas : pas d'endpoint de clôture
+                // dans le backend (logique « fin de cycle » côté serveur).
+                Alert.alert(
+                  t('groupSettings.closeGroupAlertTitle'),
+                  t('groupSettings.closeGroupHint'),
+                );
               }}
             >
               <Text style={styles.closeButtonText}>{t('groupSettings.closeGroupLabel')}</Text>
