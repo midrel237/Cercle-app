@@ -27,6 +27,10 @@ interface MemberProfile {
  * + métriques calculées par le backend depuis le ledger : cotisations
  * payées à temps, prêts remboursés intégralement, tour de rotation reçu.
  *
+ * Conforme maquette : sous le score, la ligne « X retards sur les N
+ * derniers cycles » (retards = cotisations payées − payées à temps,
+ * cycles = totalCycles du groupe).
+ *
  * Micro-animations : le score arrive en ressort (PopIn) et compte de 0 à
  * sa valeur ; les cartes apparaissent en fondu décalé (FadeIn).
  */
@@ -60,6 +64,8 @@ export default function MemberProfileScreen() {
   const scoreColor = (score: number) =>
     score >= 80 ? colors.success : score >= 50 ? colors.goldDark : colors.danger;
 
+  const lateCount = profile ? profile.contributionsPaid - profile.contributionsPaidOnTime : 0;
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.content}>
@@ -85,7 +91,8 @@ export default function MemberProfileScreen() {
               </Text>
             </FadeIn>
 
-            {/* Score de fiabilité — ressort + compteur (motif signature). */}
+            {/* Score de fiabilité — ressort + compteur (motif signature).
+                Ligne maquette : « X retards sur les N derniers cycles ». */}
             <PopIn delay={200}>
               <View style={styles.scoreCard}>
                 <Text style={styles.scoreLabel}>{t('membersScreen.trustScoreLabel')}</Text>
@@ -101,6 +108,14 @@ export default function MemberProfileScreen() {
                     total: profile.contributionsPaid,
                   })}
                 </Text>
+                {lateCount > 0 && profile.totalCycles > 0 ? (
+                  <Text style={[styles.scoreLate, { color: colors.danger }]}>
+                    {t('membersScreen.lateOnCycles', {
+                      count: lateCount,
+                      total: profile.totalCycles,
+                    })}
+                  </Text>
+                ) : null}
               </View>
             </PopIn>
 
@@ -159,12 +174,13 @@ const styles = StyleSheet.create({
   scoreLabel: { fontFamily: fonts.inter.medium, fontSize: 10.5, color: colors.goldDark, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: spacing.xs },
   scoreValue: { fontSize: 28, marginBottom: 2 },
   scoreDetail: { fontFamily: fonts.inter.regular, fontSize: 11.5, color: colors.inkSoft },
+  scoreLate: { fontFamily: fonts.inter.medium, fontSize: 11, marginTop: 3 },
   metricsCard: {
     borderWidth: 1, borderColor: colors.sand, borderRadius: radii.md,
     backgroundColor: colors.creamLight, paddingHorizontal: spacing.md,
   },
   metricRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing.sm + 2 },
-  metricRowBorder: { borderTopWidth: 1, borderTopColor: colors.sand },
+  metricRowBorder: { borderTopWidth: 1, borderTopTopColor: colors.sand, borderTopColor: colors.sand },
   metricLabel: { fontFamily: fonts.inter.regular, fontSize: 12.5, color: colors.inkSoft },
   metricValue: { fontFamily: fonts.mono.medium, fontSize: 12.5, color: colors.navyDark },
 });
