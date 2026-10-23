@@ -17,7 +17,7 @@ import { AppButton } from '../../src/components/AppButton';
 import { RotationMotif } from '../../src/components/RotationMotif';
 import { FadeIn, PopIn } from '../../src/components/motion';
 import { authApi } from '../../src/services/endpoints/auth';
-import { setStoredAccessToken } from '../../src/services/api-client';
+import { setStoredAccessToken, getStoredPhoneNumber } from '../../src/services/api-client';
 import { useAuthStore } from '../../src/store/auth.store';
 import { colors, fonts, radii, spacing } from '../../src/theme';
 
@@ -26,11 +26,12 @@ const PIN_LENGTH = 4;
 // Écran 4 — Connexion.
 // Un compte existant (qui a déjà configuré son PIN à l'inscription, écran
 // 16-17) se connecte UNIQUEMENT avec son code PIN : le numéro de téléphone
-// est rappelé en lecture seule, la saisie se fait sur 4 cases façon
-// maquette (même pattern que l'écran 16, input invisible + projection
-// visuelle). 4 chiffres → POST /auth/login (numéro mémorisé + PIN) →
-// tokens → accueil. Le lien « Code PIN oublié ? » relance le flux OTP
-// (vérification par SMS), « Créer un compte » ouvre l'inscription.
+// est rappelé en lecture seule (restauré depuis SecureStore si le store
+// mémoire est vide — redémarrage de l'app), la saisie se fait sur 4 cases
+// façon maquette (même pattern que l'écran 16). 4 chiffres →
+// POST /auth/login (numéro mémorisé + PIN) → tokens → accueil.
+// Le lien « Code PIN oublié ? » relance le flux OTP (vérification par
+// SMS), « Créer un compte » ouvre l'inscription.
 //
 // Correctif clavier (Android) : même pattern que create-pin — input
 // invisible mais dimensionné (jamais 1x1/opacity 0 seul) + focus différé.
@@ -42,6 +43,7 @@ export default function LoginScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const phoneNumber = useAuthStore((s) => s.phoneNumber);
+  const setPhoneNumber = useAuthStore((s) => s.setPhoneNumber);
   const setUser = useAuthStore((s) => s.setUser);
 
   useEffect(() => {
@@ -49,6 +51,19 @@ export default function LoginScreen() {
     const t1 = setTimeout(() => inputRef.current?.focus(), 120);
     return () => clearTimeout(t1);
   }, []);
+
+  useEffect(() => {
+    // Store mémoire vide (redémarrage de l'app) : restaurer le dernier
+    // numéro utilisé sur cet appareil depuis SecureStore.
+    const restore = async () => {
+      if (phoneNumber) return;
+      const stored = await getStoredPhoneNumber();
+      if (stored) {
+        setPhoneNumber(stored);
+      }
+    };
+    restore();
+  }, [phoneNumber, setPhoneNumber]);
 
   const handleChange = (raw: string) => {
     const digitsOnly = raw.replace(/[^0-9]/g, '').slice(0, PIN_LENGTH);
@@ -88,6 +103,16 @@ export default function LoginScreen() {
       setPin('');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleForgotPin = async () => {
+    if (!phoneNumber) return;
+    try {
+      await authApi.requestOtp(phoneNumber);
+      router.push({ pathname: '/(auth)/otp', params: { phoneNumber } });
+    } catch {
+      setError(t('auth.otpSendError'));
     }
   };
 
@@ -160,18 +185,7 @@ export default function LoginScreen() {
           disabled={isSubmitting || pin.length !== PIN_LENGTH}
         />
         <View style={styles.linksRow}>
-          <Pressable
-            onPress={async () => {
-              if (!phoneNumber) return;
-              try {
-                await authApi.requestOtp(phoneNumber);
-                router.push({ pathname: '/(auth)/otp', params: { phoneNumber } });
-              } catch {
-                setError(t('auth.otpSendError'));
-              }
-            }}
-            hitSlop={8}
-          >
+          <Pressable onPress={handleForgotPin} hitSlop={8}>
             <Text style={styles.link}>{t('auth.forgotPinLink')}</Text>
           </Pressable>
           <Text style={styles.linkSeparator}>·</Text>
