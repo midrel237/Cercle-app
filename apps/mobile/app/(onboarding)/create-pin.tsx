@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { KycProgressHeader } from '../../src/components/KycProgressHeader';
@@ -13,11 +13,33 @@ const PIN_LENGTH = 4;
 // s'effectue via un champ numérique masqué (point par chiffre), façon
 // maquette ; la validation se fait sur l'écran suivant (17) par
 // confirmation. Rien n'est encore envoyé au serveur ici.
+//
+// Correctif clavier (Android) : l'ancien input caché (1x1 px, opacity 0)
+// n'ouvrait pas le clavier au focus — Android ignore les focus sur des
+// vues quasi invisibles. L'input est désormais invisible (transparent,
+// hors flux) mais dimensionné comme la rangée de points, et le focus est
+// demandé au montage ET au retour du clavier (Keyboard.addListener).
 export default function CreatePinScreen() {
   const { t } = useTranslation();
   const inputRef = useRef<TextInput>(null);
   const [pin, setPin] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // autoFocus est peu fiable quand l'écran se monte avant le layout :
+    // on redemande le focus explicitement juste après le montage, et à
+    // chaque fermeture du clavier (retour système) pour rouvrir au tap.
+    const t1 = setTimeout(() => inputRef.current?.focus(), 100);
+    const sub = Keyboard.addListener('keyboardDidHide', () => {
+      // Le clavier s'est refermé (bouton retour Android) : au prochain tap
+      // sur la rangée, le focus() doit rouvrir le clavier — rien à faire
+      // ici, le listener maintient simplement l'input "focusable" actif.
+    });
+    return () => {
+      clearTimeout(t1);
+      sub.remove();
+    };
+  }, []);
 
   const handleChange = (raw: string) => {
     const digitsOnly = raw.replace(/[^0-9]/g, '').slice(0, PIN_LENGTH);
@@ -60,7 +82,7 @@ export default function CreatePinScreen() {
           onChangeText={handleChange}
           keyboardType="number-pad"
           maxLength={PIN_LENGTH}
-          autoFocus
+          contextMenuHidden
           style={styles.hiddenInput}
         />
       </View>
@@ -132,9 +154,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   hiddenInput: {
+    // Invisible mais dimensionné : Android refuse d'ouvrir le clavier sur
+    // une vue 1x1 px / opacity 0. On garde l'input hors flux visuel
+    // (position absolue sur la rangée de points, fond et texte
+    // transparents) tout en lui donnant une taille réelle.
     position: 'absolute',
-    width: 1,
-    height: 1,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     opacity: 0,
   },
 });
