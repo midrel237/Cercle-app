@@ -62,7 +62,8 @@ const TYPE_LABEL: Record<GroupEventType, string> = {
  * (GET /groups/:id/cycle-status) et les cagnottes ouvertes
  * (GET /events/group/:id — Phase 5, maquette : « Évènements — 1 cagnotte
  * ouverte · Deuil, Naissance »). « Payer ma cotisation » mène au flux
- * paiement (écran 32, Phase 3).
+ * paiement (écran 32, Phase 3). Le lien « Règles du groupe » ouvre
+ * l'écran 26 (montant, pénalité, caissier, compte de dépôt, clôture).
  *
  * Micro-animations : le montant du TOUR ACTUEL compte de 0 à sa valeur
  * (CountUp) au sein d'une carte à halo pulsé (GlowPulse — motif roue),
@@ -226,6 +227,12 @@ export default function GroupDetailScreen() {
 
         <Pressable onPress={() => router.push(`/group/${id}/chat`)} style={styles.chatLink}>
           <Text style={styles.chatLinkText}>{t('groupDetail.openChat')} ›</Text>
+        </Pressable>
+
+        {/* Écran 26 — Règles du groupe (montant, pénalité, caissier,
+            compte de dépôt, clôture). */}
+        <Pressable onPress={() => router.push(`/group/${id}/settings`)} style={styles.chatLink}>
+          <Text style={styles.chatLinkText}>{t('groupSettings.title')} ›</Text>
         </Pressable>
       </ScrollView>
 
