@@ -477,6 +477,7 @@
     "trustScoreLabel": "Score de fiabilité",
     "memberSince": "Membre depuis {{date}}",
     "onTimeContributions": "{{onTime}} cotisations payées à temps sur {{total}}",
+    "lateOnCycles": "{{count}} retards sur les {{total}} derniers cycles",
     "metricOnTime": "Cotisations payées à temps",
     "metricLoansRepaid": "Prêts remboursés intégralement",
     "metricRotation": "Tour de rotation reçu",
