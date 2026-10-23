@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,10 @@ const PIN_LENGTH = 4;
 // hash (bcrypt) dans user.pinHash — la session JWT déjà ouverte reste
 // valide, aucun renouvellement de token n'est nécessaire. En cas de
 // non-correspondance : retour à l'écran 16 pour recommencer la saisie.
+//
+// Correctif clavier (Android) : même bug que create-pin — l'input caché
+// 1x1/opacity 0 n'ouvrait pas le clavier. Input invisible mais
+// dimensionné + focus différé au montage.
 export default function PinConfirmScreen() {
   const { t } = useTranslation();
   const { pin: firstPin } = useLocalSearchParams<{ pin?: string }>();
@@ -24,6 +28,12 @@ export default function PinConfirmScreen() {
   const [pin, setPin] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // autoFocus peu fiable au montage : focus explicite différé.
+    const t1 = setTimeout(() => inputRef.current?.focus(), 100);
+    return () => clearTimeout(t1);
+  }, []);
 
   const handleChange = (raw: string) => {
     const digitsOnly = raw.replace(/[^0-9]/g, '').slice(0, PIN_LENGTH);
@@ -93,7 +103,7 @@ export default function PinConfirmScreen() {
           onChangeText={handleChange}
           keyboardType="number-pad"
           maxLength={PIN_LENGTH}
-          autoFocus
+          contextMenuHidden
           style={styles.hiddenInput}
         />
       </View>
@@ -168,9 +178,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   hiddenInput: {
+    // Invisible mais dimensionné : Android refuse d'ouvrir le clavier sur
+    // une vue 1x1 px / opacity 0. L'input couvre la zone de saisie en
+    // transparent : un tap n'importe où ouvre directement le clavier.
     position: 'absolute',
-    width: 1,
-    height: 1,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     opacity: 0,
   },
 });
