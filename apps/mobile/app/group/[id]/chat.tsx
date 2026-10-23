@@ -32,9 +32,10 @@ interface GroupMessage {
  * WebSocket/SSE pourra remplacer le polling plus tard sans changer ce
  * modèle (cf. GroupMessage dans le schéma Prisma).
  *
- * En-tête conforme maquette : nom du groupe + « N membres ». Le
- * « N en ligne » de la maquette exige une couche présence temps réel
- * (WebSocket) — non affiché plutôt que simule.
+ * En-tête conforme maquette : nom du groupe + « N membres » (clé
+ * existante membersScreen.memberCount). Le « N en ligne » de la maquette
+ * exige une couche présence temps réel (WebSocket) — non affiché plutôt
+ * que simule.
  */
 export default function GroupChatScreen() {
   const { t } = useTranslation();
@@ -120,7 +121,7 @@ export default function GroupChatScreen() {
 
   const headerSub =
     memberCount !== null
-      ? t('groupChat.memberCount', { count: memberCount })
+      ? t('membersScreen.memberCount', { count: memberCount })
       : null;
 
   return (
