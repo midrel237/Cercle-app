@@ -19,7 +19,6 @@ import { FadeIn, PopIn } from '../../src/components/motion';
 import { authApi } from '../../src/services/endpoints/auth';
 import { setStoredAccessToken } from '../../src/services/api-client';
 import { useAuthStore } from '../../src/store/auth.store';
-import { usersApi } from '../../src/services/endpoints/account';
 import { colors, fonts, radii, spacing } from '../../src/theme';
 
 const PIN_LENGTH = 4;
