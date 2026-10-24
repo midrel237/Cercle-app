@@ -8,6 +8,8 @@ import { colors, fonts, radii, spacing } from '../../src/theme';
 /**
  * Écran 74 — Paramètres : Général (Langue, Notifications, Sécurité & PIN)
  * et Compte (SMS de secours, Supprimer mon compte, Se déconnecter).
+ * « Sécurité & PIN » ouvre l'écran 20 (modifier le PIN via OTP,
+ * biométrie, appareils connectés).
  */
 export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
@@ -34,7 +36,7 @@ export default function SettingsScreen() {
         <View style={styles.card}>
           {row(t('settingsScreen.languageRow'), i18n.language === 'en' ? 'English' : 'Français', null)}
           {row(t('settingsScreen.notificationsRow'), t('settingsScreen.enabledValue'), null)}
-          {row(t('settingsScreen.securityRow'), null, () => {})}
+          {row(t('settingsScreen.securityRow'), null, () => router.push('/settings/security'))}
         </View>
 
         <Text style={styles.sectionTitle}>{t('settingsScreen.accountSection')}</Text>
