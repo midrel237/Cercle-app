@@ -21,5 +21,43 @@
     "closeGroupHint": "Nécessite que tous les cycles soient terminés. Cette action sera disponible en fin de cycle.",
     "closeGroupAlertTitle": "Clôture indisponible",
     "notAdminHint": "Seul l'administrateur peut modifier ces règles."
+  },
+  "securityScreen": {
+    "title": "Sécurité & PIN",
+    "changePinLabel": "Modifier mon code PIN",
+    "changePinHint": "Un code de vérification SMS vous sera envoyé avant de définir un nouveau code.",
+    "changePinSending": "Envoi du code…",
+    "changePinError": "Impossible d'envoyer le code pour l'instant. Réessayez.",
+    "biometricLabel": "Empreinte / Face ID",
+    "biometricOn": "Activée",
+    "biometricOff": "Non activée",
+    "devicesSection": "Appareils connectés",
+    "thisDevice": "Cet appareil",
+    "active": "Actif",
+    "disconnectAllLabel": "Déconnecter tous les autres appareils",
+    "disconnectAlertTitle": "Aucun autre appareil",
+    "disconnectAlertBody": "Aucune autre session active n'est enregistrée pour l'instant."
+  },
+  "createGroupInvite": {
+    "title": "Inviter",
+    "subtitle": "Partagez le code d'invitation du groupe — les membres rejoindront avec ce code, validés par l'administrateur.",
+    "codeLabel": "Code d'invitation du groupe",
+    "membersLabel": "Membres actifs",
+    "shareLabel": "Partager l'invitation",
+    "shareMessage": "Rejoins mon groupe Cercle avec le code : {{code}}",
+    "continueButton": "Continuer",
+    "loadError": "Impossible de charger le code d'invitation pour l'instant."
+  },
+  "createGroupSummary": {
+    "title": "Récapitulatif",
+    "subtitle": "Votre groupe est prêt. Vérifiez les règles avant de démarrer.",
+    "summaryName": "Nom",
+    "summaryAmount": "Cotisation",
+    "summaryMode": "Mode",
+    "summaryMembers": "Membres invités",
+    "summaryPenalty": "Pénalité de retard",
+    "summaryPenaltyNone": "Aucune définie",
+    "summaryDiaspora": "Ouvert à la diaspora",
+    "startButton": "Découvrir le groupe"
   }
 }

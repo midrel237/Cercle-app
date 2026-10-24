@@ -21,5 +21,43 @@
     "closeGroupHint": "Requires all cycles to be completed. This action will be available at the end of the cycle.",
     "closeGroupAlertTitle": "Closure unavailable",
     "notAdminHint": "Only the admin can edit these rules."
+  },
+  "securityScreen": {
+    "title": "Security & PIN",
+    "changePinLabel": "Change my PIN code",
+    "changePinHint": "An SMS verification code will be sent before you set a new code.",
+    "changePinSending": "Sending code…",
+    "changePinError": "Couldn't send the code right now. Please try again.",
+    "biometricLabel": "Fingerprint / Face ID",
+    "biometricOn": "Enabled",
+    "biometricOff": "Not enabled",
+    "devicesSection": "Connected devices",
+    "thisDevice": "This device",
+    "active": "Active",
+    "disconnectAllLabel": "Disconnect all other devices",
+    "disconnectAlertTitle": "No other device",
+    "disconnectAlertBody": "No other active session is registered for now."
+  },
+  "createGroupInvite": {
+    "title": "Invite",
+    "subtitle": "Share the group's invite code — members join with this code, validated by the admin.",
+    "codeLabel": "Group invite code",
+    "membersLabel": "Active members",
+    "shareLabel": "Share the invitation",
+    "shareMessage": "Join my Cercle group with this code: {{code}}",
+    "continueButton": "Continue",
+    "loadError": "Couldn't load the invite code right now."
+  },
+  "createGroupSummary": {
+    "title": "Summary",
+    "subtitle": "Your group is ready. Check the rules before starting.",
+    "summaryName": "Name",
+    "summaryAmount": "Contribution",
+    "summaryMode": "Mode",
+    "summaryMembers": "Invited members",
+    "summaryPenalty": "Late penalty",
+    "summaryPenaltyNone": "None defined",
+    "summaryDiaspora": "Open to diaspora",
+    "startButton": "Discover the group"
   }
 }
