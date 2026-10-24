@@ -8,10 +8,14 @@ import { groupsApi } from '../../../src/services/endpoints/groups';
 import { colors, fonts, radii, spacing } from '../../../src/theme';
 
 /**
- * Écran 26 — Group Rules (admin) : options avancées du groupe.
+ * Écran 26 (tunnel) — Group Rules (admin) : options avancées du groupe.
  * Étape finale du tunnel de création : reçoit toutes les données des
  * étapes 1-3 et envoie le POST /groups définitif, champs optionnels
  * inclus (interestRate, penaltyRules, openToDiaspora).
+ *
+ * Conforme maquette : après la création, l'utilisateur passe par
+ * l'écran 25 (Récapitulatif) au lieu d'atterrir directement dans le
+ * groupe — le récapitulatif mène ensuite à l'écran 24 (Inviter).
  */
 export default function GroupRulesScreen() {
   const { t } = useTranslation();
@@ -72,7 +76,20 @@ export default function GroupRulesScreen() {
         penaltyRules: penalty.trim() === '' ? undefined : penalty.trim(),
         openToDiaspora,
       });
-      router.replace(`/group/${data.id}`);
+      // Maquette : écran 25 (Récapitulatif) puis 24 (Inviter).
+      router.replace({
+        pathname: '/group/create/summary',
+        params: {
+          groupId: data.id,
+          name,
+          mode,
+          contributionAmount: String(contributionAmount),
+          periodicityDays: String(periodicityDays),
+          penalty: penalty.trim() === '' ? '' : penalty.trim(),
+          interest: interestRaw.trim() === '' ? '' : String(interest),
+          openToDiaspora: openToDiaspora ? '1' : '0',
+        },
+      });
     } catch {
       setError(true);
     } finally {
